@@ -196,3 +196,40 @@ nav a:hover {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
+/* Styles pour la Section Financière */
+.budget-total {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 0.5rem 0 1.5rem 0;
+}
+
+.budget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+.budget-progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.budget-progress-fill {
+    height: 100%;
+    background-color: var(--accent-color);
+    width: 0%; /* Sera mis à jour par JS */
+    transition: width 0.5s ease-out;
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 1.5rem 0;
+}
