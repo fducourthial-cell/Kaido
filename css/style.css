@@ -86,3 +86,27 @@ nav a:hover {
     margin: 2rem auto;
     padding: 0 1rem;
 }
+/* Logo Kaido avec Kanji */
+.logo-kanji {
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    font-weight: normal;
+    vertical-align: middle;
+}
+
+/* Badges pour la timeline (Vol, Hôtel, Route...) */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.badge-flight { background: #ebf8ff; color: #2b6cb0; }
+.badge-hotel { background: #faf5ff; color: #6b46c1; }
+.badge-car { background: #fff5f5; color: #c53030; }
+.badge-visit { background: #f0fff4; color: #2f855a; }
