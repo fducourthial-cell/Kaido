@@ -5,7 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kaido | Mes Voyages</title>
     <link rel="stylesheet" href="css/style.css">
-    
+    <style>
+        /* Styles spécifiques à la page d'accueil optimisée */
+        .hero-section {
+            height: 40vh; /* 👈 Hauteur réduite pour un meilleur confort visuel */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
+                              url('image/hero.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 2rem; /* Plus besoin de gros chevauchement négatif */
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            padding-top: 3rem; /* Compense la barre de navigation absolue */
+        }
+
+        .hero-content h2 {
+            font-size: 2.8rem; /* Un poil plus petit pour matcher la hauteur */
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        /* Grille des voyages */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .trip-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .trip-banner {
+            height: 160px; /* Légèrement réduit pour équilibrer la carte */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .trip-details {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .trip-details h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .trip-meta {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* 👈 Bouton de création minimaliste et mieux intégré */
+        .create-trip-zone {
+            grid-column: 1 / -1; /* Prend toute la largeur de la grille pour faire une séparation propre */
+            margin-top: 1rem;
+        }
+
+        .btn-create-minimal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            background: transparent;
+            border: 2px dashed var(--border-color);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-create-minimal:hover {
+            border-color: var(--accent-color);
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
 </head>
 <body>
 
@@ -17,56 +128,38 @@
         </nav>
     </header>
 
-    <!-- SECTION HERO PLEIN ÉCRAN -->
     <section class="hero-section">
         <div class="hero-content">
             <h2>Chaque route raconte une histoire</h2>
             <p>Bonjour Florian. Prêt à planifier votre prochain itinéraire ?</p>
-            
-            <!-- Barre de recherche intelligente -->
-            <div style="margin: 2rem auto; max-width: 500px; position: relative;">
-                <input type="text" id="search-destination" class="form-control" placeholder="Où voulez-vous aller ? (ex: Écosse, Japon, France...)" style="border-radius: 30px; padding: 1rem 1.5rem; font-size: 1.1rem; border: none; box-shadow: var(--shadow);">
-            </div>
-
-            <a href="creer.html" class="btn">+ Organiser un nouveau voyage</a>
         </div>
     </section>
 
-    <!-- ZONE D'AFFICHAGE DES MONUMENTS DE LA DESTINATION -->
-    <div id="suggestions-container" class="container" style="display: none; margin-top: -50px; margin-bottom: 3rem; position: relative; z-index: 30;">
-        <h3 id="suggestions-title" style="color: var(--primary-color); margin-bottom: 1.5rem; text-align: center;">🏛️ Les incontournables</h3>
-        <div id="monuments-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
-            <!-- Les cartes des monuments seront injectées ici par JavaScript -->
-        </div>
-    </div>
-
     <main class="container">
-        <!-- Grille des voyages -->
         <section class="dashboard-grid">
             
-            <!-- Carte du Road Trip Écosse (Avec Image) -->
             <article class="trip-card">
-                <div class="trip-banner" style="background-image: url('https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=1000&auto=format&fit=crop');">
-                </div>
+                <div class="trip-banner" style="background-image: url('https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=1000&auto=format&fit=crop');"></div>
                 <div class="trip-details">
-                    <h3>Road Trip en Écosse</h3>
-                    <p class="trip-meta">📅 12 au 22 Mai • 10 jours</p>
-                    <p style="margin-bottom: 2rem; color: var(--text-muted);">Explorez les Highlands, l'île de Skye et regroupant vols, hôtels et votre parcours jour par jour.</p>
-                    <a href="voyage.html" class="btn" style="width: 100%; text-align: center;">Ouvrir l'itinéraire</a>
+                    <div>
+                        <h3>Road Trip en Écosse</h3>
+                        <p class="trip-meta">📅 12 au 22 Mai • 10 jours</p>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Explorez les Highlands, l'île de Skye et regroupez vos vols, hôtels et parcours.</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <a href="voyage.html" class="btn" style="flex: 1; text-align: center; padding: 0.6rem 1rem;">Ouvrir</a>
+                    </div>
                 </div>
             </article>
 
-            <!-- Slot de création pour un prochain voyage -->
-            <a href="creer.html" class="trip-card" style="border: 3px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); min-height: 480px; text-decoration: none;">
-    <div>
-        <p style="font-size: 4rem; margin-bottom: 1rem;">🗺️</p>
-        <h3 style="color: var(--text-muted);">Tracer une nouvelle route</h3>
-        <p>Quelle sera votre prochaine destination ?</p>
-    </div>
-</a>
+            <div class="create-trip-zone">
+                <a href="creer.html" class="btn-create-minimal">
+                    <span style="font-size: 1.3rem;">🗺️</span> Tracer une nouvelle route...
+                </a>
+            </div>
 
         </section>
     </main>
-    <script src="js/app.js"></script>
+
 </body>
 </html>
