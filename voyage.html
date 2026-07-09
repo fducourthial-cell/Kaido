@@ -267,6 +267,19 @@
                 document.querySelector('.trip-header-visual').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url('${activeTrip.image}')`;
                 document.querySelector('.trip-header-title h2').innerText = activeTrip.title;
                 document.querySelector('.trip-header-title p').innerText = `${activeTrip.dates} | ${activeTrip.desc}`;
+                // 1.5 Mettre à jour la section financière et le graphique
+                if (activeTrip.budget) {
+                    document.getElementById('budget-global-display').innerText = `${activeTrip.budget.total}€`;
+                    document.getElementById('budget-vols').innerText = `${activeTrip.budget.vols}€`;
+                    document.getElementById('budget-hotels').innerText = `${activeTrip.budget.hotels}€`;
+                    document.getElementById('budget-voiture').innerText = `${activeTrip.budget.voiture}€`;
+
+                    // Animation de la jauge (par exemple, afficher le ratio hébergement/total)
+                    const percentage = (activeTrip.budget.hotels / activeTrip.budget.total) * 100;
+                    setTimeout(() => {
+                        document.getElementById('budget-slider').style.width = `100%`; // Jauge active
+                    }, 200);
+                }
 
                 // 2. Générer la timeline jour par jour si elle existe
                 const timelineContainer = document.querySelector('.timeline-container');
