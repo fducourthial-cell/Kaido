@@ -117,39 +117,24 @@ nav a:hover {
 .badge-car { background: #fee2e2; color: #991b1b; }
 .badge-visit { background: #dcfce7; color: #166534; }
 
-/* ==========================================================================
-   SECTION HERO (PAGE D'ACCUEIL)
-   ========================================================================== */
-.hero-section {
-    height: 70vh; /* 70% de la hauteur de l'écran */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
-                      url('../image/hero.jpg'); /* Chemin corrigé relatif au dossier CSS */
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-bottom: -100px; /* Chevauchement de la grille */
+/* Bouton Supprimer sur les cartes */
+.btn-delete {
+    background: transparent;
+    color: #ef4444; /* Rouge alerte */
+    border: 1px solid #fee2e2;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
 }
 
-.hero-content {
-    text-align: center;
-    color: white;
-    z-index: 10;
-}
-
-.hero-content h2 {
-    font-size: 3.5rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-    letter-spacing: -1px;
-}
-
-.hero-content p {
-    font-size: 1.4rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+.btn-delete:hover {
+    background-color: #fef2f2;
+    border-color: #fca5a5;
 }
 
 /* ==========================================================================
@@ -196,7 +181,10 @@ nav a:hover {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
-/* Styles pour la Section Financière */
+
+/* ==========================================================================
+   SECTION FINANCIÈRE (PAGE VOYAGE)
+   ========================================================================== */
 .budget-total {
     font-size: 1.8rem;
     font-weight: 800;
@@ -224,7 +212,7 @@ nav a:hover {
 .budget-progress-fill {
     height: 100%;
     background-color: var(--accent-color);
-    width: 0%; /* Sera mis à jour par JS */
+    width: 0%; /* Mis à jour dynamiquement par le JS */
     transition: width 0.5s ease-out;
 }
 
@@ -232,23 +220,4 @@ nav a:hover {
     height: 1px;
     background-color: var(--border-color);
     margin: 1.5rem 0;
-}
-/* Bouton Supprimer sur les cartes */
-.btn-delete {
-    background: transparent;
-    color: #ef4444; /* Rouge alerte */
-    border: 1px solid #fee2e2;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-delete:hover {
-    background-color: #fef2f2;
-    border-color: #fca5a5;
 }
