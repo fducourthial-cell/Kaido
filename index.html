@@ -63,7 +63,7 @@
 <body>
 
     <header>
-        <h1>Kaido</span></h1>
+        <h1>Kaido <span class="logo-kanji">街道</span></h1>
         <nav>
             <a href="index.html">Mes Voyages</a>
             <a href="#">Paramètres</a>
@@ -74,27 +74,30 @@
         <section class="welcome-section">
             <div>
                 <h2>Bonjour Florian</h2>
-                <p style="color: var(--text-muted);">Prêt pour votre prochaine aventure ?</p>
+                <p style="color: var(--text-muted);">Prêt à planifier votre prochain itinéraire ?</p>
             </div>
             <button class="btn">+ Organiser un voyage</button>
         </section>
 
+        <!-- Grille des voyages -->
         <section class="dashboard-grid">
             
+            <!-- Carte du Road Trip Écosse -->
             <article class="trip-card">
                 <div class="trip-banner">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
                 <div class="trip-details">
                     <h3>Road Trip en Écosse</h3>
                     <p class="trip-meta">📅 12 au 22 Mai • 10 jours</p>
                     <p style="margin-bottom: 1.5rem;">Vols, Highlands, Île de Skye et réservations d'hôtels regroupés.</p>
-                    <a href="voyage.html" class="btn" style="width: 100%; text-align: center;">Ouvrir le carnet</a>
+                    <a href="voyage.html" class="btn" style="width: 100%; text-align: center;">Ouvrir l'itinéraire</a>
                 </div>
             </article>
 
+            <!-- Slot de création pour un prochain voyage -->
             <article class="trip-card" style="border: 2px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; min-height: 330px;">
                 <div style="text-align: center; color: var(--text-muted);">
-                    <p style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</p>
-                    <p>Ajouter une destination</p>
+                    <p style="font-size: 2rem; margin-bottom: 0.5rem;">🗺️</p>
+                    <p>Tracer une nouvelle route</p>
                 </div>
             </article>
 
