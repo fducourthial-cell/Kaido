@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripStack | Mes Voyages</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Styles spécifiques à la page d'accueil */
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .trip-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .trip-banner {
+            height: 150px;
+            background-color: #2b6cb0;
+            background-image: linear-gradient(135deg, var(--primary-color) 0%, #2b6cb0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .trip-details {
+            padding: 1.5rem;
+        }
+
+        .trip-details h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .trip-meta {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Trip<span>Stack</span></h1>
+        <nav>
+            <a href="index.html">Mes Voyages</a>
+            <a href="#">Paramètres</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="welcome-section">
+            <div>
+                <h2>Bonjour Florian</h2>
+                <p style="color: var(--text-muted);">Prêt pour votre prochaine aventure ?</p>
+            </div>
+            <button class="btn">+ Organiser un voyage</button>
+        </section>
+
+        <section class="dashboard-grid">
+            
+            <article class="trip-card">
+                <div class="trip-banner">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+                <div class="trip-details">
+                    <h3>Road Trip en Écosse</h3>
+                    <p class="trip-meta">📅 12 au 22 Mai • 10 jours</p>
+                    <p style="margin-bottom: 1.5rem;">Vols, Highlands, Île de Skye et réservations d'hôtels regroupés.</p>
+                    <a href="voyage.html" class="btn" style="width: 100%; text-align: center;">Ouvrir le carnet</a>
+                </div>
+            </article>
+
+            <article class="trip-card" style="border: 2px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; min-height: 330px;">
+                <div style="text-align: center; color: var(--text-muted);">
+                    <p style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</p>
+                    <p>Ajouter une destination</p>
+                </div>
+            </article>
+
+        </section>
+    </main>
+
+</body>
+</html>
