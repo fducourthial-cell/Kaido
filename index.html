@@ -99,7 +99,7 @@
         <div class="hero-content">
             <h2>Chaque route raconte une histoire</h2>
             <p>Bonjour Florian. Prêt à planifier votre prochain itinéraire ?</p>
-            <button class="btn">+ Organiser un nouveau voyage</button>
+            <a href="creer.html" class="btn">+ Organiser un nouveau voyage</a>
         </div>
     </section>
 
@@ -120,13 +120,13 @@
             </article>
 
             <!-- Slot de création pour un prochain voyage -->
-            <article class="trip-card" style="border: 3px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); min-height: 480px;">
-                <div>
-                    <p style="font-size: 4rem; margin-bottom: 1rem;">🗺️</p>
-                    <h3>Tracer une nouvelle route</h3>
-                    <p>Quelle sera votre prochaine destination ?</p>
-                </div>
-            </article>
+            <a href="creer.html" class="trip-card" style="border: 3px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); min-height: 480px; text-decoration: none;">
+    <div>
+        <p style="font-size: 4rem; margin-bottom: 1rem;">🗺️</p>
+        <h3 style="color: var(--text-muted);">Tracer une nouvelle route</h3>
+        <p>Quelle sera votre prochaine destination ?</p>
+    </div>
+</a>
 
         </section>
     </main>
