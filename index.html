@@ -22,9 +22,23 @@
         <div class="hero-content">
             <h2>Chaque route raconte une histoire</h2>
             <p>Bonjour Florian. Prêt à planifier votre prochain itinéraire ?</p>
+            
+            <!-- Barre de recherche intelligente -->
+            <div style="margin: 2rem auto; max-width: 500px; position: relative;">
+                <input type="text" id="search-destination" class="form-control" placeholder="Où voulez-vous aller ? (ex: Écosse, Japon, France...)" style="border-radius: 30px; padding: 1rem 1.5rem; font-size: 1.1rem; border: none; box-shadow: var(--shadow);">
+            </div>
+
             <a href="creer.html" class="btn">+ Organiser un nouveau voyage</a>
         </div>
     </section>
+
+    <!-- ZONE D'AFFICHAGE DES MONUMENTS DE LA DESTINATION -->
+    <div id="suggestions-container" class="container" style="display: none; margin-top: -50px; margin-bottom: 3rem; position: relative; z-index: 30;">
+        <h3 id="suggestions-title" style="color: var(--primary-color); margin-bottom: 1.5rem; text-align: center;">🏛️ Les incontournables</h3>
+        <div id="monuments-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+            <!-- Les cartes des monuments seront injectées ici par JavaScript -->
+        </div>
+    </div>
 
     <main class="container">
         <!-- Grille des voyages -->
