@@ -6,9 +6,29 @@
     <title>Kaido | Road Trip Écosse</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
+        /* Styles spécifiques pour l'image d'en-tête */
+        .trip-header-visual {
+            height: 40vh;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), 
+                              url('https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=2000&auto=format&fit=crop'); /* Exemple: Vue spectaculaire de Glencoe */
+            background-size: cover;
+            background-position: center 60%; /* Ajusté pour voir le paysage */
+            position: relative;
+        }
+
+        .trip-header-title {
+            position: absolute;
+            bottom: 2rem;
+            left: 0;
+            width: 100%;
+            color: white;
+            z-index: 10;
+        }
+
+        /* Layout Voyage (Grille 2 colonnes) */
         .layout-voyage {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 380px 1fr;
             gap: 2rem;
             margin-top: 2rem;
         }
@@ -17,53 +37,69 @@
         .sidebar-logistique {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 1.5rem;
+            padding: 2rem;
             box-shadow: var(--shadow);
             height: fit-content;
+            border: 1px solid var(--border-color);
+        }
+
+        .sidebar-logistique h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
         }
 
         .logistique-card {
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem;
-            margin-top: 1rem;
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-top: 1.5rem;
+            background-color: #f8fafc;
         }
 
         .logistique-card h4 {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
         }
 
         /* Colonne Timeline (Droite) */
         .timeline-container {
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
         .day-block {
             background: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            border-left: 5px solid var(--accent-color);
-            padding: 1.5rem;
+            border-left: 6px solid var(--accent-color);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--accent-color);
         }
 
         .day-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.75rem;
-            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .day-header h3 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
         }
 
         .step-item {
             display: flex;
-            gap: 1.5rem;
-            padding: 1rem 0;
-            border-bottom: 1px dashed var(--border-color);
+            gap: 2rem;
+            padding: 1.2rem 0;
+            border-bottom: 1px dashed #e2e8f0;
         }
 
         .step-item:last-child {
@@ -71,18 +107,21 @@
         }
 
         .step-time {
-            font-weight: bold;
+            font-weight: 700;
             color: var(--primary-color);
-            min-width: 60px;
+            font-size: 1.1rem;
+            min-width: 70px;
+            text-align: right;
         }
 
         .step-info h5 {
-            font-size: 1.05rem;
-            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+            color: #0f172a;
         }
 
         .step-meta {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
         }
     </style>
@@ -96,24 +135,26 @@
         </nav>
     </header>
 
-    <main class="container">
-        <!-- En-tête du voyage -->
-        <div style="margin-bottom: 2rem;">
+    <!-- EN-TÊTE VISUEL DU VOYAGE (Avec Image de fond) -->
+    <section class="trip-header-visual">
+        <div class="container trip-header-title">
             <h2>🏴󠁧󠁢󠁳󠁣󠁴󠁿 Road Trip en Écosse</h2>
-            <p style="color: var(--text-muted);">12 au 22 Mai • 10 jours | Itinéraire à travers les Highlands et Skye</p>
+            <p style="opacity: 0.9;">12 au 22 Mai • 10 jours | Itinéraire à travers les Highlands et Skye</p>
         </div>
+    </section>
 
+    <main class="container">
         <div class="layout-voyage">
             
-            <!-- COLOUNE GAUCHE : Centralisation des grosses réservations -->
+            <!-- COLONNE GAUCHE : Centralisation des grosses réservations -->
             <aside class="sidebar-logistique">
-                <h3>🗂️ Documents & Vols</h3>
-                <p class="step-meta">Tes réservations globales regroupées ici.</p>
+                <h3>🗂️ Documents & Réservations</h3>
+                <p class="step-meta">Toutes vos informations logistiques regroupées.</p>
 
                 <!-- Vol Aller -->
                 <div class="logistique-card">
                     <h4><span>✈️ Vol Aller</span> <span class="badge badge-flight">Confirmé</span></h4>
-                    <p class="step-meta">Vol EDI123 • Vol direct</p>
+                    <p class="step-meta">Vol EDI123 • Air France</p>
                     <p><strong>Départ :</strong> 12 Mai - 07:15</p>
                 </div>
 
@@ -139,8 +180,8 @@
                     <div class="step-item">
                         <div class="step-time">09:30</div>
                         <div class="step-info">
-                            <h5><span class="badge badge-flight">Vol</span> Atterrissage à Édimbourg</h5>
-                            <p class="step-meta">Récupération des bagages au terminal principal.</p>
+                            <h5><span class="badge badge-flight">Vol</span> Atterrissage à Édimbourg (EDI)</h5>
+                            <p class="step-meta">Récupération des bagages et passage de l'immigration.</p>
                         </div>
                     </div>
 
@@ -149,7 +190,7 @@
                         <div class="step-time">10:30</div>
                         <div class="step-info">
                             <h5><span class="badge badge-car">Location</span> Agence Arnold Clark</h5>
-                            <p class="step-meta">Récupération de la voiture de location. Check des distances pour la suite.</p>
+                            <p class="step-meta">🚗 Prise en charge de la voiture. Rappel des distances pour les Highlands.</p>
                         </div>
                     </div>
 
@@ -158,7 +199,7 @@
                         <div class="step-time">19:00</div>
                         <div class="step-info">
                             <h5><span class="badge badge-hotel">Hébergement</span> Brooks Hotel Edinburgh</h5>
-                            <p class="step-meta">🔑 Check-in via Booking.com — Adresse : 70-72 Grove St.</p>
+                            <p class="step-meta">🔑 Check-in via Booking.com — Adresse : 70-72 Grove St. Parking à réserver.</p>
                         </div>
                     </div>
                 </div>
@@ -183,14 +224,13 @@
                     <div class="step-item">
                         <div class="step-time">14:30</div>
                         <div class="step-info">
-                            <h5><span class="badge badge-visit">Randonnée</span> Traversée de Glencoe</h5>
-                            <p class="step-meta">📍 Arrêt photo et marche dans la vallée. Attention à la météo.</p>
+                            <h5><span class="badge badge-visit">Randonnée</span> Vallée de Glencoe</h5>
+                            <p class="step-meta">📍 Plusieurs arrêts photo et marche dans la vallée. Attention à la météo.</p>
                         </div>
                     </div>
                 </div>
 
             </section>
-
         </div>
     </main>
 
