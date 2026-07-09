@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const title = document.getElementById('trip-title').value;
+            const origin = document.getElementById('trip-origin').value;
             const destinationQuery = title.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const dateStart = document.getElementById('date-start').value;
             const dateEnd = document.getElementById('date-end').value;
@@ -122,10 +123,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalGlobal = totalFlight + totalHotel + totalCar;
 
             // Création du package complet du voyage avec la section budget
+         // Création du package complet du voyage
             const newTrip = {
                 id: Date.now(),
                 title: title,
+                origin: origin, // 👈 AJOUTÉ ICI
                 dates: `${dispStart} au ${dispEnd} • ${diffDays} jours`,
+                dateStart: dateStart, // Sauvegarde la date brute pour Google Flights
+                dateEnd: dateEnd,     // Sauvegarde la date brute pour Google Flights
                 image: image,
                 desc: desc || `Un magnifique itinéraire automatique tracé par Kaido.`,
                 itinerary: generatedItinerary,
