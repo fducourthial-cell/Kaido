@@ -5,43 +5,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. AFFICHAGE & SUPPRESSION DES VOYAGES
     // ==========================================
     if (grid) {
-        // Fonction pour charger et afficher les voyages
         const renderTrips = () => {
-            // On supprime d'abord toutes les cartes existantes sauf la dernière (le slot pointillé)
-            const cards = grid.querySelectorAll('.trip-card');
-            cards.forEach(card => {
-                if (!card.hasAttribute('style') || !card.style.border.includes('dashed')) {
-                    card.remove();
-                }
-            });
+            // On nettoie les anciennes cartes dynamiques pour éviter les doublons
+            const dynamicCards = grid.querySelectorAll('.dynamic-trip');
+            dynamicCards.forEach(card => card.remove());
 
             const customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
 
+            // On injecte chaque voyage juste AVANT la zone de création minimaliste
+            const createZone = grid.querySelector('.create-trip-zone');
+
             customTrips.forEach(trip => {
                 const card = document.createElement('article');
-                card.className = 'trip-card';
+                card.className = 'trip-card dynamic-trip'; // Ajout d'une classe repère
                 card.innerHTML = `
                     <div class="trip-banner" style="background-image: url('${trip.image}');"></div>
                     <div class="trip-details">
-                        <h3>${trip.title}</h3>
-                        <p class="trip-meta">📅 ${trip.dates}</p>
-                        <p style="margin-bottom: 2rem; color: var(--text-muted);">${trip.desc}</p>
-                        
+                        <div>
+                            <h3>${trip.title}</h3>
+                            <p class="trip-meta">📅 ${trip.dates}</p>
+                            <p style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.95rem;">${trip.desc}</p>
+                        </div>
                         <div style="display: flex; gap: 1rem; align-items: center;">
                             <a href="voyage.html" class="btn" style="flex: 1; text-align: center; padding: 0.6rem 1rem;">Ouvrir</a>
                             <button class="btn-delete" data-id="${trip.id}">Supprimer</button>
                         </div>
                     </div>
                 `;
-                grid.insertBefore(card, grid.lastElementChild);
+                
+                if (createZone) {
+                    grid.insertBefore(card, createZone);
+                } else {
+                    grid.appendChild(card);
+                }
             });
 
-            // Écouter les clics sur les boutons Supprimer
+            // Réactivation des écouteurs de clics pour la suppression
             const deleteButtons = grid.querySelectorAll('.btn-delete');
             deleteButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
                     const tripId = parseInt(e.target.getAttribute('data-id'));
-                    
                     if (confirm("Êtes-vous sûr de vouloir supprimer cet itinéraire de Kaido ?")) {
                         deleteTrip(tripId);
                     }
@@ -49,18 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        // Fonction logique pour retirer le voyage du LocalStorage
         const deleteTrip = (id) => {
             let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-            // On filtre pour garder tous les voyages SAUF celui qu'on veut supprimer
             customTrips = customTrips.filter(trip => trip.id !== id);
             localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
-            
-            // On rafraîchit l'affichage
-            renderTrips();
+            renderTrips(); // Relance le rendu propre
         };
 
-        // Premier lancement de l'affichage
         renderTrips();
     }
 
