@@ -6,18 +6,46 @@
     <title>Kaido | Mes Voyages</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Styles spécifiques à la page d'accueil */
-        .welcome-section {
+        /* Styles HERO pour la page d'accueil */
+        .hero-section {
+            height: 70vh; /* 70% de la hauteur de l'écran */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
+                              url('https://images.unsplash.com/photo-1518005068251-372c4161a096?q=80&w=2600&auto=format&fit=crop'); /* Exemple: Côte sauvage / Paradis d'aventure */
+            background-size: cover;
+            background-position: center;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            justify-content: center;
+            position: relative;
+            margin-bottom: -100px; /* Pour que la grille des voyages chevauche légèrement */
         }
 
+        .hero-content {
+            text-align: center;
+            color: white;
+            z-index: 10;
+        }
+
+        .hero-content h2 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-content p {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Grille des voyages */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 2rem;
+            position: relative; /* Pour le chevauchement */
+            z-index: 20;
         }
 
         .trip-card {
@@ -25,38 +53,34 @@
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             overflow: hidden;
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s;
+            transition: all 0.3s;
         }
 
         .trip-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         .trip-banner {
-            height: 150px;
-            background-color: #2b6cb0;
-            background-image: linear-gradient(135deg, var(--primary-color) 0%, #2b6cb0 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3rem;
+            height: 200px; /* Plus grand pour l'image */
+            background-size: cover;
+            background-position: center;
         }
 
         .trip-details {
-            padding: 1.5rem;
+            padding: 2rem;
         }
 
         .trip-details h3 {
             margin-bottom: 0.5rem;
+            font-size: 1.5rem;
             color: var(--primary-color);
         }
 
         .trip-meta {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
@@ -70,34 +94,37 @@
         </nav>
     </header>
 
-    <main class="container">
-        <section class="welcome-section">
-            <div>
-                <h2>Bonjour Florian</h2>
-                <p style="color: var(--text-muted);">Prêt à planifier votre prochain itinéraire ?</p>
-            </div>
-            <button class="btn">+ Organiser un voyage</button>
-        </section>
+    <!-- SECTION HERO PLEIN ÉCRAN -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h2>Chaque route raconte une histoire</h2>
+            <p>Bonjour Florian. Prêt à planifier votre prochain itinéraire ?</p>
+            <button class="btn">+ Organiser un nouveau voyage</button>
+        </div>
+    </section>
 
+    <main class="container">
         <!-- Grille des voyages -->
         <section class="dashboard-grid">
             
-            <!-- Carte du Road Trip Écosse -->
+            <!-- Carte du Road Trip Écosse (Avec Image) -->
             <article class="trip-card">
-                <div class="trip-banner">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+                <div class="trip-banner" style="background-image: url('https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=1000&auto=format&fit=crop');">
+                </div>
                 <div class="trip-details">
                     <h3>Road Trip en Écosse</h3>
                     <p class="trip-meta">📅 12 au 22 Mai • 10 jours</p>
-                    <p style="margin-bottom: 1.5rem;">Vols, Highlands, Île de Skye et réservations d'hôtels regroupés.</p>
+                    <p style="margin-bottom: 2rem; color: var(--text-muted);">Explorez les Highlands, l'île de Skye et regroupant vols, hôtels et votre parcours jour par jour.</p>
                     <a href="voyage.html" class="btn" style="width: 100%; text-align: center;">Ouvrir l'itinéraire</a>
                 </div>
             </article>
 
             <!-- Slot de création pour un prochain voyage -->
-            <article class="trip-card" style="border: 2px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; min-height: 330px;">
-                <div style="text-align: center; color: var(--text-muted);">
-                    <p style="font-size: 2rem; margin-bottom: 0.5rem;">🗺️</p>
-                    <p>Tracer une nouvelle route</p>
+            <article class="trip-card" style="border: 3px dashed var(--border-color); background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); min-height: 480px;">
+                <div>
+                    <p style="font-size: 4rem; margin-bottom: 1rem;">🗺️</p>
+                    <h3>Tracer une nouvelle route</h3>
+                    <p>Quelle sera votre prochaine destination ?</p>
                 </div>
             </article>
 
