@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaido | Road Trip Écosse</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .layout-voyage {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Colonne Logistique (Gauche) */
+        .sidebar-logistique {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .logistique-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .logistique-card h4 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Colonne Timeline (Droite) */
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .day-block {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--accent-color);
+            padding: 1.5rem;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-time {
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 60px;
+        }
+
+        .step-info h5 {
+            font-size: 1.05rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-meta {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Kaido <span class="logo-kanji">街道</span></h1>
+        <nav>
+            <a href="index.html">← Mes Voyages</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- En-tête du voyage -->
+        <div style="margin-bottom: 2rem;">
+            <h2>🏴󠁧󠁢󠁳󠁣󠁴󠁿 Road Trip en Écosse</h2>
+            <p style="color: var(--text-muted);">12 au 22 Mai • 10 jours | Itinéraire à travers les Highlands et Skye</p>
+        </div>
+
+        <div class="layout-voyage">
+            
+            <!-- COLOUNE GAUCHE : Centralisation des grosses réservations -->
+            <aside class="sidebar-logistique">
+                <h3>🗂️ Documents & Vols</h3>
+                <p class="step-meta">Tes réservations globales regroupées ici.</p>
+
+                <!-- Vol Aller -->
+                <div class="logistique-card">
+                    <h4><span>✈️ Vol Aller</span> <span class="badge badge-flight">Confirmé</span></h4>
+                    <p class="step-meta">Vol EDI123 • Vol direct</p>
+                    <p><strong>Départ :</strong> 12 Mai - 07:15</p>
+                </div>
+
+                <!-- Location Voiture -->
+                <div class="logistique-card">
+                    <h4><span>🚗 Arnold Clark</span> <span class="badge badge-car">À régler</span></h4>
+                    <p class="step-meta">Catégorie : Compacte (Conduite à gauche)</p>
+                    <p><strong>Prise en charge :</strong> Aéroport d'Édimbourg</p>
+                </div>
+            </aside>
+
+            <!-- COLONNE DROITE : La Timeline jour par jour -->
+            <section class="timeline-container">
+                
+                <!-- JOUR 1 -->
+                <div class="day-block">
+                    <div class="day-header">
+                        <h3>Jour 1 — Arrivée & Édimbourg</h3>
+                        <span style="color: var(--text-muted); font-weight: 500;">Mardi 12 Mai</span>
+                    </div>
+
+                    <!-- Étape 1 : Vol -->
+                    <div class="step-item">
+                        <div class="step-time">09:30</div>
+                        <div class="step-info">
+                            <h5><span class="badge badge-flight">Vol</span> Atterrissage à Édimbourg</h5>
+                            <p class="step-meta">Récupération des bagages au terminal principal.</p>
+                        </div>
+                    </div>
+
+                    <!-- Étape 2 : Voiture -->
+                    <div class="step-item">
+                        <div class="step-time">10:30</div>
+                        <div class="step-info">
+                            <h5><span class="badge badge-car">Location</span> Agence Arnold Clark</h5>
+                            <p class="step-meta">Récupération de la voiture de location. Check des distances pour la suite.</p>
+                        </div>
+                    </div>
+
+                    <!-- Étape 3 : Hôtel -->
+                    <div class="step-item">
+                        <div class="step-time">19:00</div>
+                        <div class="step-info">
+                            <h5><span class="badge badge-hotel">Hébergement</span> Brooks Hotel Edinburgh</h5>
+                            <p class="step-meta">🔑 Check-in via Booking.com — Adresse : 70-72 Grove St.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JOUR 2 -->
+                <div class="day-block">
+                    <div class="day-header">
+                        <h3>Jour 2 — En route vers les Highlands</h3>
+                        <span style="color: var(--text-muted); font-weight: 500;">Mercredi 13 Mai</span>
+                    </div>
+
+                    <!-- Étape 1 : Visite -->
+                    <div class="step-item">
+                        <div class="step-time">09:00</div>
+                        <div class="step-info">
+                            <h5><span class="badge badge-visit">Visite</span> Château de Stirling</h5>
+                            <p class="step-meta">🚗 Temps de route : 1h10 depuis Édimbourg (65 km).</p>
+                        </div>
+                    </div>
+
+                    <!-- Étape 2 : Visite -->
+                    <div class="step-item">
+                        <div class="step-time">14:30</div>
+                        <div class="step-info">
+                            <h5><span class="badge badge-visit">Randonnée</span> Traversée de Glencoe</h5>
+                            <p class="step-meta">📍 Arrêt photo et marche dans la vallée. Attention à la météo.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+</body>
+</html>
