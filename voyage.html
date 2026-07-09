@@ -3,167 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaido | Road Trip Écosse</title>
+    <title>Kaido | Mon Itinéraire</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Styles spécifiques pour l'image d'en-tête */
-        .trip-header-visual {
-            height: 40vh;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), 
-                              url('https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=2000&auto=format&fit=crop'); /* Exemple: Vue spectaculaire de Glencoe */
-            background-size: cover;
-            background-position: center 60%; /* Ajusté pour voir le paysage */
-            position: relative;
-        }
-
-        .trip-header-title {
-            position: absolute;
-            bottom: 2rem;
-            left: 0;
-            width: 100%;
-            color: white;
-            z-index: 10;
-        }
-
-        /* Layout Voyage (Grille 2 colonnes) */
-        .layout-voyage {
+        .trip-layout {
             display: grid;
-            grid-template-columns: 380px 1fr;
+            grid-template-columns: 1fr 350px;
             gap: 2rem;
             margin-top: 2rem;
         }
 
-        /* Colonne Logistique (Gauche) */
+        .trip-header-visual {
+            height: 350px;
+            background-size: cover;
+            background-position: center;
+            border-radius: var(--radius);
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 2rem;
+        }
+
+        .trip-header-title {
+            color: white;
+            z-index: 10;
+        }
+
+        .trip-header-title h2 { font-size: 2.5rem; font-weight: 800; }
+
         .sidebar-logistique {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 2rem;
+            padding: 1.5rem;
             box-shadow: var(--shadow);
-            height: fit-content;
             border: 1px solid var(--border-color);
-        }
-
-        .sidebar-logistique h3 {
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        .logistique-card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.2rem;
-            margin-top: 1.5rem;
-            background-color: #f8fafc;
-        }
-
-        .logistique-card h4 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            font-size: 1rem;
-        }
-
-        /* Colonne Timeline (Droite) */
-        .timeline-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2.5rem;
+            align-self: start;
         }
 
         .day-block {
             background: var(--card-bg);
             border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
             box-shadow: var(--shadow);
-            border-left: 6px solid var(--accent-color);
-            padding: 2rem;
             border: 1px solid var(--border-color);
-            border-left: 6px solid var(--accent-color);
-        }
-
-        .day-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
         }
 
         .day-header h3 {
             color: var(--primary-color);
-            font-size: 1.4rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .step-item {
             display: flex;
-            gap: 2rem;
-            padding: 1.2rem 0;
-            border-bottom: 1px dashed #e2e8f0;
-        }
-
-        .step-item:last-child {
-            border-bottom: none;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 1.5rem;
+            margin-left: 0.5rem;
+            position: relative;
         }
 
         .step-time {
             font-weight: 700;
             color: var(--primary-color);
-            font-size: 1.1rem;
-            min-width: 70px;
-            text-align: right;
-        }
-
-        .step-info h5 {
-            font-size: 1.1rem;
-            margin-bottom: 0.4rem;
-            color: #0f172a;
+            min-width: 50px;
         }
 
         .step-meta {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
         }
     </style>
 </head>
 <body>
 
-    <header>
+    <header style="position: relative; background-color: var(--primary-color); padding: 1rem 2rem;">
         <h1>Kaido <span class="logo-kanji">街道</span></h1>
         <nav>
-            <a href="index.html">← Mes Voyages</a>
+            <a href="index.html">Mes Voyages</a>
         </nav>
     </header>
 
-    <!-- EN-TÊTE VISUEL DU VOYAGE (Avec Image de fond) -->
-    <section class="trip-header-visual">
-        <div class="container trip-header-title">
-            <h2>🏴󠁧󠁢󠁳󠁣󠁴Road Trip en Écosse</h2>
-            <p style="opacity: 0.9;">12 au 22 Mai • 10 jours | Itinéraire à travers les Highlands et Skye</p>
-        </div>
-    </section>
-
     <main class="container">
-        <div class="layout-voyage">
+        <div class="trip-header-visual" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.6)), url('image/hero.jpg');">
+            <div class="trip-header-title">
+                <h2>Chargement de l'itinéraire...</h2>
+                <p>Calcul des dates...</p>
+            </div>
+        </div>
+
+        <div class="trip-layout">
             
-            <!-- COLONNE GAUCHE : Centralisation des grosses réservations -->
+            <section class="timeline-container">
+                </section>
+
             <aside class="sidebar-logistique">
-                <h3>🗂️ Documents & Réservations</h3>
-                <p class="step-meta">Toutes vos informations logistiques regroupées.</p>
-
-                <!-- Vol Aller -->
-                <div class="logistique-card">
-                    <h4><span>✈️ Vol Aller</span> <span class="badge badge-flight">Confirmé</span></h4>
-                    <p class="step-meta">Vol EDI123 • Air France</p>
-                    <p><strong>Départ :</strong> 12 Mai - 07:15</p>
-                </div>
-
-                <!-- Location Voiture -->
-                <div class="logistique-card">
-                    <h4><span>🚗 Arnold Clark</span> <span class="badge badge-car">À régler</span></h4>
-                    <p class="step-meta">Catégorie : Compacte (Conduite à gauche)</p>
-                    <p><strong>Prise en charge :</strong> Aéroport d'Édimbourg</p>
-                </div>
+                <h3>📋 Logistique</h3>
+                <p style="margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem; color: var(--text-muted);">Vos informations et réservations centrales.</p>
+                
                 <div class="divider"></div>
                 <h3>📊 Budget Estimé</h3>
                 <div class="budget-total" id="budget-global-display">0€</div>
@@ -172,148 +112,57 @@
                     <div class="budget-progress-fill" id="budget-slider"></div>
                 </div>
 
-                <div class="budget-row">
-                    <span>✈️ Transport / Vols :</span>
-                    <strong id="budget-vols">0€</strong>
-                </div>
-                <div class="budget-row">
-                    <span>🏨 Hébergements :</span>
-                    <strong id="budget-hotels">0€</strong>
-                </div>
-                <div class="budget-row">
-                    <span>🚗 Location Véhicule :</span>
-                    <strong id="budget-voiture">0€</strong>
-                </div>
+                <div class="budget-row"><span>✈️ Vols :</span><strong id="budget-vols">0€</strong></div>
+                <div class="budget-row"><span>🏨 Hôtels :</span><strong id="budget-hotels">0€</strong></div>
+                <div class="budget-row"><span>🚗 Voiture :</span><strong id="budget-voiture">0€</strong></div>
+
                 <div class="divider"></div>
-                <a href="#" id="google-flights-link" target="_blank" class="btn" style="width: 100%; text-align: center; background-color: #4285F4;">
-                    ✈️ Voir les vols sur Google Flights
+                <a href="#" id="google-flights-link" target="_blank" class="btn" style="width: 100%; text-align: center; background-color: #4285F4; padding: 0.6rem 1rem; font-size: 0.95rem;">
+                    ✈️ Ouvrir Google Flights
                 </a>
             </aside>
-
-            <!-- COLONNE DROITE : La Timeline jour par jour -->
-            <section class="timeline-container">
-                
-                <!-- JOUR 1 -->
-                <div class="day-block">
-                    <div class="day-header">
-                        <h3>Jour 1 — Arrivée & Édimbourg</h3>
-                        <span style="color: var(--text-muted); font-weight: 500;">Mardi 12 Mai</span>
-                    </div>
-
-                    <!-- Étape 1 : Vol -->
-                    <div class="step-item">
-                        <div class="step-time">09:30</div>
-                        <div class="step-info">
-                            <h5><span class="badge badge-flight">Vol</span> Atterrissage à Édimbourg (EDI)</h5>
-                            <p class="step-meta">Récupération des bagages et passage de l'immigration.</p>
-                        </div>
-                    </div>
-
-                    <!-- Étape 2 : Voiture -->
-                    <div class="step-item">
-                        <div class="step-time">10:30</div>
-                        <div class="step-info">
-                            <h5><span class="badge badge-car">Location</span> Agence Arnold Clark</h5>
-                            <p class="step-meta">🚗 Prise en charge de la voiture. Rappel des distances pour les Highlands.</p>
-                        </div>
-                    </div>
-
-                    <!-- Étape 3 : Hôtel -->
-                    <div class="step-item">
-                        <div class="step-time">19:00</div>
-                        <div class="step-info">
-                            <h5><span class="badge badge-hotel">Hébergement</span> Brooks Hotel Edinburgh</h5>
-                            <p class="step-meta">🔑 Check-in via Booking.com — Adresse : 70-72 Grove St. Parking à réserver.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- JOUR 2 -->
-                <div class="day-block">
-                    <div class="day-header">
-                        <h3>Jour 2 — En route vers les Highlands</h3>
-                        <span style="color: var(--text-muted); font-weight: 500;">Mercredi 13 Mai</span>
-                    </div>
-
-                    <!-- Étape 1 : Visite -->
-                    <div class="step-item">
-                        <div class="step-time">09:00</div>
-                        <div class="step-info">
-                            <h5><span class="badge badge-visit">Visite</span> Château de Stirling</h5>
-                            <p class="step-meta">🚗 Temps de route : 1h10 depuis Édimbourg (65 km).</p>
-                        </div>
-                    </div>
-
-                    <!-- Étape 2 : Visite -->
-                    <div class="step-item">
-                        <div class="step-time">14:30</div>
-                        <div class="step-info">
-                            <h5><span class="badge badge-visit">Randonnée</span> Vallée de Glencoe</h5>
-                            <p class="step-meta">📍 Plusieurs arrêts photo et marche dans la vallée. Attention à la météo.</p>
-                        </div>
-                    </div>
-                </div>
-
-            </section>
         </div>
     </main>
-<!-- LIEN AVEC LE MOTEUR DE RENDU DYNAMIQUE DU VOYAGE -->
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Dans la version finale, on passera l'ID du voyage dans l'URL. 
-            // Pour ce MVP, on récupère simplement le tout dernier voyage créé dans le localStorage.
             const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
             
             if (trips.length > 0) {
-                const activeTrip = trips[trips.length - 1]; // On prend le dernier créé
+                const activeTrip = trips[trips.length - 1]; // Dernier voyage créé
                 
-                // 1. Mettre à jour l'en-tête visuel avec l'image et le titre
-                document.querySelector('.trip-header-visual').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url('${activeTrip.image}')`;
+                // Rendu En-tête
+                document.querySelector('.trip-header-visual').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)), url('${activeTrip.image}')`;
                 document.querySelector('.trip-header-title h2').innerText = activeTrip.title;
                 document.querySelector('.trip-header-title p').innerText = `${activeTrip.dates} | ${activeTrip.desc}`;
-                // 1.5 Mettre à jour la section financière et le graphique
+
+                // Rendu Financier
                 if (activeTrip.budget) {
                     document.getElementById('budget-global-display').innerText = `${activeTrip.budget.total}€`;
                     document.getElementById('budget-vols').innerText = `${activeTrip.budget.vols}€`;
                     document.getElementById('budget-hotels').innerText = `${activeTrip.budget.hotels}€`;
                     document.getElementById('budget-voiture').innerText = `${activeTrip.budget.voiture}€`;
-
-                    // Animation de la jauge (par exemple, afficher le ratio hébergement/total)
-                    const percentage = (activeTrip.budget.hotels / activeTrip.budget.total) * 100;
-                    setTimeout(() => {
-                        document.getElementById('budget-slider').style.width = `100%`; // Jauge active
-                    }, 200);
+                    setTimeout(() => { document.getElementById('budget-slider').style.width = `100%`; }, 200);
                 }
-                // 1.6 Génération automatique du lien Google Flights
+
+                // Lien Magique Google Flights
                 if (activeTrip.dateStart && activeTrip.dateEnd) {
                     const departure = encodeURIComponent(activeTrip.origin || "Paris");
                     const destination = encodeURIComponent(activeTrip.title || "");
-                    const dateGo = activeTrip.dateStart; // Format AAAA-MM-JJ
-                    const dateBack = activeTrip.dateEnd; // Format AAAA-MM-JJ
-
-                    // Construction de l'URL Google Flights officielle
-                    const googleFlightsUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${destination}%20from%20${departure}%20on%20${dateGo}%20through%20${dateBack}`;
-                    
-                    // On injecte le lien dans le bouton
+                    const googleFlightsUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${destination}%20from%20${departure}%20on%20${activeTrip.dateStart}%20through%20${activeTrip.dateEnd}`;
                     const flightBtn = document.getElementById('google-flights-link');
-                    if (flightBtn) {
-                        flightBtn.href = googleFlightsUrl;
-                    }
+                    if (flightBtn) flightBtn.href = googleFlightsUrl;
                 }
 
-                // 2. Générer la timeline jour par jour si elle existe
+                // Rendu Planning Jour par jour
                 const timelineContainer = document.querySelector('.timeline-container');
-                
                 if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
-                    timelineContainer.innerHTML = ''; // On efface le contenu de démo en dur
-
+                    timelineContainer.innerHTML = '';
                     activeTrip.itinerary.forEach(day => {
                         const dayBlock = document.createElement('div');
                         dayBlock.className = 'day-block';
 
-                        // En-tête du jour
                         let stepsHTML = '';
-                        // Construction des étapes de la journée
                         day.steps.forEach(step => {
                             stepsHTML += `
                                 <div class="step-item">
@@ -326,18 +175,14 @@
                             `;
                         });
 
-                        dayBlock.innerHTML = `
-                            <div class="day-header">
-                                <h3>Jour ${day.dayNum} — ${day.title}</h3>
-                            </div>
-                            ${stepsHTML}
-                        `;
+                        dayBlock.innerHTML = `<div class="day-header"><h3>Jour ${day.dayNum} — ${day.title}</h3></div>${stepsHTML}`;
                         timelineContainer.appendChild(dayBlock);
                     });
+                } else {
+                    timelineContainer.innerHTML = `<div class="day-block"><h3>📍 Itinéraire Personnalisé</h3><p style="color: var(--text-muted);">Aucune étape pré-enregistrée pour cette destination. Utilisez les outils pour planifier vos journées !</p></div>`;
                 }
             }
         });
     </script>
 </body>
 </html>
-
