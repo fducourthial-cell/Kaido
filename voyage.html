@@ -149,8 +149,8 @@
                 if (activeTrip.dateStart && activeTrip.dateEnd) {
                     const departure = encodeURIComponent(activeTrip.origin || "Paris");
                     const destination = encodeURIComponent(activeTrip.title || "");
-                    const googleFlightsUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${destination}%20from%20${departure}%20on%20${activeTrip.dateStart}%20through%20${activeTrip.dateEnd}`;
-                    const flightBtn = document.getElementById('google-flights-link');
+                    // La version 100% propre pour forcer l'ouverture du vrai site Google Flights
+const googleFlightsUrl = `https://www.google.com/travel/flights?q=Vols%20vers%20${destination}%20depuis%20${departure}%20du%20${activeTrip.dateStart}%20au%20${activeTrip.dateEnd}`;
                     if (flightBtn) flightBtn.href = googleFlightsUrl;
                 }
 
