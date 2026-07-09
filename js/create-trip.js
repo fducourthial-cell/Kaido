@@ -94,14 +94,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 generatedItinerary = template.filter(day => day.dayNum <= diffDays);
             }
 
-            // Création du package complet du voyage
+        // CALCUL DES ESTIMATIONS FINANCIÈRES AUTOMATIQUES
+            let costFlight = 0;
+            let costHotelPerNight = 0;
+            let costCarPerDay = 0;
+
+            // Paramétrage des coûts selon la destination détectée
+            if (detectedKey === "ecosse") {
+                costFlight = 150;
+                costHotelPerNight = 110;
+                costCarPerDay = 45;
+            } else if (detectedKey === "japon") {
+                costFlight = 750;
+                costHotelPerNight = 95;
+                costCarPerDay = 60;
+            } else {
+                // Valeurs par défaut pour une autre destination
+                costFlight = 200;
+                costHotelPerNight = 80;
+                costCarPerDay = 40;
+            }
+
+            // Calcul totaux
+            const totalFlight = costFlight;
+            const totalHotel = costHotelPerNight * (diffDays - 1); // Nuits = jours - 1
+            const totalCar = costCarPerDay * diffDays;
+            const totalGlobal = totalFlight + totalHotel + totalCar;
+
+            // Création du package complet du voyage avec la section budget
             const newTrip = {
                 id: Date.now(),
                 title: title,
                 dates: `${dispStart} au ${dispEnd} • ${diffDays} jours`,
                 image: image,
                 desc: desc || `Un magnifique itinéraire automatique tracé par Kaido.`,
-                itinerary: generatedItinerary // On injecte le planning généré !
+                itinerary: generatedItinerary,
+                budget: {
+                    vols: totalFlight,
+                    hotels: totalHotel,
+                    voiture: totalCar,
+                    total: totalGlobal
+                }
             };
 
             // Sauvegarde dans le localStorage
