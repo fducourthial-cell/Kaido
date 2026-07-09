@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaido | Tracer une nouvelle route</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Kaido <span class="logo-kanji">街道</span></h1>
+        <nav>
+            <a href="index.html">← Annuler</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+        <div class="form-box">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <span style="font-size: 3rem;">🗺️</span>
+                <h2 style="color: var(--primary-color); margin-top: 0.5rem;">Tracer une nouvelle route</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Rassemblez vos vols, hébergements et étapes au même endroit.</p>
+            </div>
+
+            <!-- Le Formulaire -->
+            <form action="index.html" method="GET">
+                
+                <!-- Nom du Voyage -->
+                <div class="form-group">
+                    <label for="trip-title">Nom de l'aventure</label>
+                    <input type="text" id="trip-title" class="form-control" placeholder="ex: Road Trip en Écosse, Échappée à Tokyo..." required>
+                </div>
+
+                <!-- Dates -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date-start">Date de départ</label>
+                        <input type="date" id="date-start" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date-end">Date de retour</label>
+                        <input type="date" id="date-end" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Image de couverture (Pour l'aspect visuel/paradisiaque) -->
+                <div class="form-group">
+                    <label for="trip-image">URL de l'image d'illustration (Optionnel)</label>
+                    <input type="url" id="trip-image" class="form-control" placeholder="https://images.unsplash.com/... ou lien d'un paysage">
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;">Permet d'afficher un paysage paradisiaque en fond d'écran de votre voyage.</p>
+                </div>
+
+                <!-- Description courte -->
+                <div class="form-group">
+                    <label for="trip-desc">Notes ou description</label>
+                    <textarea id="trip-desc" class="form-control" rows="3" placeholder="ex: Exploration des Highlands, châteaux médiévaux et îles sauvages..."></textarea>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <a href="index.html" class="btn" style="background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); width: 50%; text-align: center; border-radius: 30px;">Annuler</a>
+                    <button type="submit" class="btn" style="width: 50%;">Créer l'itinéraire</button>
+                </div>
+
+            </form>
+        </div>
+
+    </main>
+
+</body>
+</html>
