@@ -1,4 +1,6 @@
-/* Variables de design */
+/* ==========================================================================
+   VARIABLES & DESIGN SYSTEM
+   ========================================================================== */
 :root {
     --primary-color: #102a43; /* Bleu très profond pour le texte/nav */
     --accent-color: #f7a072;  /* Pêche doux pour les accents */
@@ -11,7 +13,9 @@
     --shadow: 0 10px 15px -3px rgba(16, 42, 67, 0.1), 0 4px 6px -2px rgba(16, 42, 67, 0.05);
 }
 
-/* Reset de base */
+/* ==========================================================================
+   RESET & STYLES GLOBAUX
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
@@ -25,13 +29,22 @@ body {
     line-height: 1.6;
 }
 
-/* Barre de navigation TRANS-PA-RENTE sur l'image hero */
+/* Conteneur principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* ==========================================================================
+   BARRE DE NAVIGATION (HEADER)
+   ========================================================================== */
 header {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.2); /* Fond très léger */
+    background-color: rgba(0, 0, 0, 0.2); /* Fond sombre très léger */
     color: white;
     padding: 1.5rem 2rem;
     display: flex;
@@ -68,13 +81,15 @@ nav a:hover {
     opacity: 0.8;
 }
 
-/* Boutons globaux */
+/* ==========================================================================
+   COMPOSANTS (BOUTONS & BADGES)
+   ========================================================================== */
 .btn {
     display: inline-block;
     background-color: var(--accent-color);
     color: white;
     padding: 0.8rem 1.8rem;
-    border-radius: 30px; /* Boutons "pilule" plus modernes */
+    border-radius: 30px; /* Boutons "pilule" modernes */
     text-decoration: none;
     font-weight: 600;
     border: none;
@@ -85,13 +100,6 @@ nav a:hover {
 .btn:hover {
     background-color: #f58f5a;
     transform: translateY(-2px);
-}
-
-/* Conteneur principal */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
 }
 
 /* Badges pour la timeline */
@@ -108,7 +116,45 @@ nav a:hover {
 .badge-hotel { background: #ede9fe; color: #5b21b6; }
 .badge-car { background: #fee2e2; color: #991b1b; }
 .badge-visit { background: #dcfce7; color: #166534; }
-/* Styles pour les Formulaires */
+
+/* ==========================================================================
+   SECTION HERO (PAGE D'ACCUEIL)
+   ========================================================================== */
+.hero-section {
+    height: 70vh; /* 70% de la hauteur de l'écran */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
+                      url('../image/hero.jpg'); /* Chemin corrigé relatif au dossier CSS */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: -100px; /* Chevauchement de la grille */
+}
+
+.hero-content {
+    text-align: center;
+    color: white;
+    z-index: 10;
+}
+
+.hero-content h2 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+.hero-content p {
+    font-size: 1.4rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* ==========================================================================
+   FORMULAIRES (PAGE CREER)
+   ========================================================================== */
 .form-box {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -116,7 +162,7 @@ nav a:hover {
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
     max-width: 600px;
-    margin: 4rem auto 0 auto; /* Centré sur la page */
+    margin: 4rem auto 0 auto;
 }
 
 .form-group {
