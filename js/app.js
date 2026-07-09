@@ -65,46 +65,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 2. MOTEUR DE RECHERCHE DE MONUMENTS
+    // 2. MOTEUR DE RECHERCHE CONNECTÉ À GOOGLE PLACES
     // ==========================================
-    const searchInput = document.getElementById('search-destination');
-    const suggestionsContainer = document.getElementById('suggestions-container');
-    const suggestionsTitle = document.getElementById('suggestions-title');
-    const monumentsGrid = document.getElementById('monuments-grid');
-
-    const destinationsData = {
-        "ecosse": {
-            name: "l'Écosse",
-            monuments: [
-                { title: "Château d'Édimbourg", desc: "Forteresse historique dominant la skyline de la capitale.", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=600&auto=format&fit=crop" },
-                { title: "L'Île de Skye", desc: "Des paysages volcaniques à couper le souffle et des côtes sauvages.", img: "https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=600&auto=format&fit=crop" },
-                { title: "Le Viaduc de Glenfinnan", desc: "Le célèbre pont ferroviaire emprunté par le Jacobite Train.", img: "https://images.unsplash.com/photo-1505832018828-53a2004e8210?q=80&w=600&auto=format&fit=crop" }
-            ]
-        },
-        "japon": {
-            name: "le Japon 🇯🇵",
-            monuments: [
-                { title: "Le Mont Fuji", desc: "Le volcan majestueux et l'emblème spirituel du pays.", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=600&auto=format&fit=crop" },
-                { title: "Temple Fushimi Inari-taisha", desc: "Le célèbre sanctuaire de Kyoto aux milliers de Torii rouges.", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=600&auto=format&fit=crop" },
-                { title: "Le Pavillon d'Or (Kinkaku-ji)", desc: "Magnifique temple zen entièrement recouvert de feuilles d'or pure.", img: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=600&auto=format&fit=crop" }
-            ]
-        },
-        "france": {
-            name: "la France 🇫🇷",
-            monuments: [
-                { title: "La Tour Eiffel", desc: "La dame de fer incontournable située au cœur de Paris.", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=600&auto=format&fit=crop" },
-                { title: "Le Mont-Saint-Michel", desc: "Une abbaye spectaculaire perchée sur un îlot rocheux au milieu des marées.", img: "https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=600&auto=format&fit=crop" },
-                { title: "Le Château de Versailles", desc: "Le chef-d'œuvre de l'art français et le palais du Roi Soleil.", img: "https://images.unsplash.com/photo-1585642879100-34863f6fbdfc?q=80&w=600&auto=format&fit=crop" }
-            ]
-        }
-    };
-
     if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // On initialise l'autocomplétion Google sur notre input
+        // (types: ['(regions)'] permet de cibler les villes, régions et pays)
+        const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+            types: ['(regions)']
+        });
 
-            if (destinationsData[query]) {
-                const data = destinationsData[query];
+        // On écoute le moment où l'utilisateur clique sur une suggestion Google
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            
+            if (!place.name) return;
+
+            // On extrait le nom de la destination (ex: "Écosse" ou "Paris")
+            const destinationName = place.name.toLowerCase().trim()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            // RECHERCHE DANS NOTRE CATALOGUE DE MONUMENTS
+            // Si la ville/pays sélectionné est dans notre catalogue (ecosse, japon, france...)
+            if (destinationsData[destinationName]) {
+                const data = destinationsData[destinationName];
                 suggestionsTitle.innerHTML = `🏛️ Les 3 plus grands incontournables pour ${data.name}`;
                 monumentsGrid.innerHTML = '';
 
@@ -123,10 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 suggestionsContainer.style.display = 'block';
             } else {
-                if (query.length === 0) {
-                    suggestionsContainer.style.display = 'none';
-                }
+                // Si Google connaît l'endroit mais qu'on n'a pas encore écrit les 3 monuments dans notre code,
+                // on affiche un joli message neutre ou on masque.
+                suggestionsTitle.innerHTML = `🏛️ Cap sur ${place.name} ! (Monuments bientôt disponibles)`;
+                monumentsGrid.innerHTML = '';
+                suggestionsContainer.style.display = 'block';
             }
         });
     }
-});
