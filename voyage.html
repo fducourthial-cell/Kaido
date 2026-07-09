@@ -233,6 +233,59 @@
             </section>
         </div>
     </main>
+<!-- LIEN AVEC LE MOTEUR DE RENDU DYNAMIQUE DU VOYAGE -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dans la version finale, on passera l'ID du voyage dans l'URL. 
+            // Pour ce MVP, on récupère simplement le tout dernier voyage créé dans le localStorage.
+            const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+            
+            if (trips.length > 0) {
+                const activeTrip = trips[trips.length - 1]; // On prend le dernier créé
+                
+                // 1. Mettre à jour l'en-tête visuel avec l'image et le titre
+                document.querySelector('.trip-header-visual').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url('${activeTrip.image}')`;
+                document.querySelector('.trip-header-title h2').innerText = activeTrip.title;
+                document.querySelector('.trip-header-title p').innerText = `${activeTrip.dates} | ${activeTrip.desc}`;
 
+                // 2. Générer la timeline jour par jour si elle existe
+                const timelineContainer = document.querySelector('.timeline-container');
+                
+                if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
+                    timelineContainer.innerHTML = ''; // On efface le contenu de démo en dur
+
+                    activeTrip.itinerary.forEach(day => {
+                        const dayBlock = document.createElement('div');
+                        dayBlock.className = 'day-block';
+
+                        // En-tête du jour
+                        let stepsHTML = '';
+                        // Construction des étapes de la journée
+                        day.steps.forEach(step => {
+                            stepsHTML += `
+                                <div class="step-item">
+                                    <div class="step-time">${step.time}</div>
+                                    <div class="step-info">
+                                        <h5><span class="badge badge-${step.type}">${step.type}</span> ${step.label}</h5>
+                                        <p class="step-meta">${step.meta}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        dayBlock.innerHTML = `
+                            <div class="day-header">
+                                <h3>Jour ${day.dayNum} — ${day.title}</h3>
+                            </div>
+                            ${stepsHTML}
+                        `;
+                        timelineContainer.appendChild(dayBlock);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>
