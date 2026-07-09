@@ -284,6 +284,22 @@
                         document.getElementById('budget-slider').style.width = `100%`; // Jauge active
                     }, 200);
                 }
+                // 1.6 Génération automatique du lien Google Flights
+                if (activeTrip.dateStart && activeTrip.dateEnd) {
+                    const departure = encodeURIComponent(activeTrip.origin || "Paris");
+                    const destination = encodeURIComponent(activeTrip.title || "");
+                    const dateGo = activeTrip.dateStart; // Format AAAA-MM-JJ
+                    const dateBack = activeTrip.dateEnd; // Format AAAA-MM-JJ
+
+                    // Construction de l'URL Google Flights officielle
+                    const googleFlightsUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${destination}%20from%20${departure}%20on%20${dateGo}%20through%20${dateBack}`;
+                    
+                    // On injecte le lien dans le bouton
+                    const flightBtn = document.getElementById('google-flights-link');
+                    if (flightBtn) {
+                        flightBtn.href = googleFlightsUrl;
+                    }
+                }
 
                 // 2. Générer la timeline jour par jour si elle existe
                 const timelineContainer = document.querySelector('.timeline-container');
