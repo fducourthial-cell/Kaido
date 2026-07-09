@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Base de données des monuments incontournables (Tu pourras l'agrandir !)
     const destinationsData = {
         "ecosse": {
-            name: "l'Écosse 🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+            name: "l'Écosse",
             monuments: [
                 { title: "Château d'Édimbourg", desc: "Forteresse historique dominant la skyline de la capitale.", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=600&auto=format&fit=crop" },
                 { title: "L'Île de Skye", desc: "Des paysages volcaniques à couper le souffle et des côtes sauvages.", img: "https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=600&auto=format&fit=crop" },
