@@ -6,9 +6,8 @@
     <title>Kaido | Mes Voyages</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Styles spécifiques à la page d'accueil optimisée */
         .hero-section {
-            height: 40vh; /* 👈 Hauteur réduite pour un meilleur confort visuel */
+            height: 40vh;
             background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
                               url('image/hero.jpg');
             background-size: cover;
@@ -17,18 +16,18 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            margin-bottom: 2rem; /* Plus besoin de gros chevauchement négatif */
+            margin-bottom: 2rem;
         }
 
         .hero-content {
             text-align: center;
             color: white;
             z-index: 10;
-            padding-top: 3rem; /* Compense la barre de navigation absolue */
+            padding-top: 3rem;
         }
 
         .hero-content h2 {
-            font-size: 2.8rem; /* Un poil plus petit pour matcher la hauteur */
+            font-size: 2.8rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
             letter-spacing: -1px;
@@ -40,7 +39,6 @@
             opacity: 0.9;
         }
 
-        /* Grille des voyages */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -65,7 +63,7 @@
         }
 
         .trip-banner {
-            height: 160px; /* Légèrement réduit pour équilibrer la carte */
+            height: 160px;
             background-size: cover;
             background-position: center;
         }
@@ -90,9 +88,8 @@
             margin-bottom: 1rem;
         }
 
-        /* 👈 Bouton de création minimaliste et mieux intégré */
         .create-trip-zone {
-            grid-column: 1 / -1; /* Prend toute la largeur de la grille pour faire une séparation propre */
+            grid-column: 1 / -1;
             margin-top: 1rem;
         }
 
@@ -132,26 +129,21 @@
         <div class="hero-content">
             <h2>Chaque route raconte une histoire</h2>
             <p>Bonjour Florian. Prêt à planifier votre prochain itinéraire ?</p>
+            
+            <div style="margin: 2rem auto; max-width: 500px; position: relative;">
+                <input type="text" id="search-destination" class="form-control" placeholder="Où voulez-vous aller ? (ex: Écosse, Japon, France...)" style="border-radius: 30px; padding: 1rem 1.5rem; font-size: 1.1rem; border: none; box-shadow: var(--shadow);">
+            </div>
         </div>
     </section>
+
+    <div id="suggestions-container" class="container" style="display: none; margin-top: 1rem; margin-bottom: 3rem; position: relative; z-index: 30;">
+        <h3 id="suggestions-title" style="color: var(--primary-color); margin-bottom: 1.5rem; text-align: center;">🏛️ Les incontournables</h3>
+        <div id="monuments-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;"></div>
+    </div>
 
     <main class="container">
         <section class="dashboard-grid">
             
-            <article class="trip-card">
-                <div class="trip-banner" style="background-image: url('https://images.unsplash.com/photo-1529139574466-a3e97f0510f2?q=80&w=1000&auto=format&fit=crop');"></div>
-                <div class="trip-details">
-                    <div>
-                        <h3>Road Trip en Écosse</h3>
-                        <p class="trip-meta">📅 12 au 22 Mai • 10 jours</p>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Explorez les Highlands, l'île de Skye et regroupez vos vols, hôtels et parcours.</p>
-                    </div>
-                    <div style="display: flex; gap: 1rem; align-items: center;">
-                        <a href="voyage.html" class="btn" style="flex: 1; text-align: center; padding: 0.6rem 1rem;">Ouvrir</a>
-                    </div>
-                </div>
-            </article>
-
             <div class="create-trip-zone">
                 <a href="creer.html" class="btn-create-minimal">
                     <span style="font-size: 1.3rem;">🗺️</span> Tracer une nouvelle route...
@@ -160,10 +152,8 @@
 
         </section>
     </main>
-<!-- CHARGEMENT DE L'API GOOGLE PLACES AVEC TA CLÉ -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwicdiGq5hkdk5idPdUQi_A01vT5faegU&libraries=places"></script>
 
-    <!-- TON SCRIPT D'AFFICHAGE -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwicdiGq5hkdk5idPdUQi_A01vT5faegU&libraries=places"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
