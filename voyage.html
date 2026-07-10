@@ -153,8 +153,8 @@
                     const departure = encodeURIComponent(activeTrip.origin || "Paris");
                     const destination = encodeURIComponent(activeTrip.title || "");
                     // La version 100% propre pour forcer l'ouverture du vrai site Google Flights
-const googleFlightsUrl = `https://www.google.com/travel/flights?q=Vols%20vers%20${destination}%20depuis%20${departure}%20du%20${activeTrip.dateStart}%20au%20${activeTrip.dateEnd}`;
-                    if (flightBtn) flightBtn.href = googleFlightsUrl;
+// La version absolue et sécurisée pour forcer la sortie vers le vrai Google Flights
+const googleFlightsUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}%20on%20${activeTrip.dateStart}%20through%20${activeTrip.dateEnd}`;
                 }
 
                 // Rendu Planning Jour par jour
