@@ -230,12 +230,12 @@ nav a:hover {
     }
 
     /* 2. En-tête (Header) : Empilement vertical propre */
-    header {
-        position: relative; /* Repasse dans le flux normal pour ne pas écraser l'accueil */
-        background-color: var(--primary-color);
-        padding: 1rem;
+   header {
+        position: absolute; /* Reste au-dessus de l'image sur portable aussi */
+        background-color: rgba(0, 0, 0, 0.3); /* Un poil plus sombre sur mobile pour la lisibilité */
+        padding: 0.8rem 1rem;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
         text-align: center;
     }
 
