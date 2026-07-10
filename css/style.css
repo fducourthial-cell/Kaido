@@ -221,3 +221,96 @@ nav a:hover {
     background-color: var(--border-color);
     margin: 1.5rem 0;
 }
+/* ==========================================================================
+   OPTIMISATIONS MOBILES (RESPONSIVE DESIGN)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Espacements généraux réduits pour maximiser la place */
+    .container {
+        padding: 1rem 0.75rem;
+    }
+
+    /* 2. En-tête (Header) : Empilement vertical propre */
+    header {
+        position: relative; /* Repasse dans le flux normal pour ne pas écraser l'accueil */
+        background-color: var(--primary-color);
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+
+    nav a {
+        margin: 0 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    /* 3. Section d'accueil (Hero) adaptée aux petits écrans */
+    .hero-section {
+        height: 35vh; /* Hauteur réduite sur mobile */
+        margin-bottom: 1rem;
+    }
+
+    .hero-content h2 {
+        font-size: 1.7rem; /* Titre plus compact pour éviter les coupures */
+        padding: 0 0.5rem;
+        line-height: 1.2;
+    }
+
+    .hero-content p {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+
+    /* 4. Tableau de bord : Les cartes de voyage s'empilent sur 1 seule colonne */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .trip-banner {
+        height: 140px; /* Bannière un peu moins haute */
+    }
+
+    /* 5. Page Voyage (Itinéraire d'un voyage spécifique) */
+    .trip-layout {
+        display: flex;
+        flex-direction: column-reverse; /* 💡 TRÈS PRATIQUE : Place le budget et les vols EN HAUT sur mobile, puis l'itinéraire dessous */
+        gap: 1.5rem;
+    }
+
+    .trip-header-visual {
+        height: 180px;
+        padding: 1rem;
+    }
+
+    .trip-header-title h2 {
+        font-size: 1.5rem;
+    }
+
+    .sidebar-logistique {
+        width: 100%; /* Prend toute la largeur */
+    }
+
+    /* Ajustement de la timeline du planning */
+    .day-block {
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .step-item {
+        gap: 1rem;
+        padding-left: 1rem;
+    }
+
+    /* 6. Formulaire "Créer un voyage" */
+    .form-box {
+        padding: 1.5rem;
+        margin: 1.5rem auto 0 auto;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr; /* Les deux champs de date s'empilent au lieu d'être côte à côte */
+        gap: 0;
+    }
+}
