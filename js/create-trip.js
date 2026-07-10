@@ -72,7 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const destinationQuery = title.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const dateStart = document.getElementById('date-start').value;
             const dateEnd = document.getElementById('date-end').value;
-            const image = document.getElementById('trip-image').value || 'image/hero.jpg';
+            // Génération automatique d'une image de couverture basée sur la destination
+const autoImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+
+// Si l'utilisateur a tapé une destination, on l'utilise comme mot-clé pour Unsplash
+const image = title ? `https://source.unsplash.com/featured/1200x600/?${encodeURIComponent(title)}` : autoImage;
             const desc = document.getElementById('trip-desc').value;
 
             // Calcul de la durée exacte du voyage
