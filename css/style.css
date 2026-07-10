@@ -39,18 +39,21 @@ body {
 /* ==========================================================================
    BARRE DE NAVIGATION (HEADER)
    ========================================================================== */
+/* ==========================================================================
+   BARRE DE NAVIGATION (HEADER)
+   ========================================================================== */
 header {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.2); /* Fond sombre très léger */
-    color: white;
-    padding: 1.5rem 2rem;
+    background-color: rgba(16, 42, 67, 0.95); /* Bleu profond du design system légèrement transparent */
+    padding: 0.8rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
