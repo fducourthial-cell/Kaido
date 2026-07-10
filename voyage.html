@@ -3,187 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaido | Mon Itinéraire</title>
+    <title>Mon Itinéraire - Kaido</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .trip-layout {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .trip-header-visual {
-            height: 350px;
-            background-size: cover;
-            background-position: center;
-            border-radius: var(--radius);
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            padding: 2rem;
-        }
-
-        .trip-header-title {
-            color: white;
-            z-index: 10;
-        }
-
-        .trip-header-title h2 { font-size: 2.5rem; font-weight: 800; }
-
-        .sidebar-logistique {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            align-self: start;
-        }
-
-        .day-block {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        .day-header h3 {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .step-item {
-            display: flex;
-            gap: 1.5rem;
-            padding: 1rem 0;
-            border-left: 3px solid var(--accent-color);
-            padding-left: 1.5rem;
-            margin-left: 0.5rem;
-            position: relative;
-        }
-
-        .step-time {
-            font-weight: 700;
-            color: var(--primary-color);
-            min-width: 50px;
-        }
-
-        .step-meta {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <header>
         <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 40px; width: auto; object-fit: contain;">
+            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 60px; width: auto; object-fit: contain;">
         </a>
-        
         <nav>
             <a href="index.html">Mes Voyages</a>
         </nav>
     </header>
 
-    <main class="container">
-        <div class="trip-header-visual" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.6)), url('image/hero.jpg');">
-            <div class="trip-header-title">
-                <h2>Chargement de l'itinéraire...</h2>
-                <p>Calcul des dates...</p>
-            </div>
+    <section class="trip-header-visual" id="trip-cover">
+        <div class="trip-header-title">
+            <h2 id="trip-main-title">Chargement du voyage...</h2>
+            <p id="trip-main-dates">📅 --/--/---- au --/--/----</p>
         </div>
+    </section>
 
+    <main class="container">
         <div class="trip-layout">
             
-            <section class="timeline-container">
-                </section>
-
-            <aside class="sidebar-logistique">
-                <h3>📋 Logistique</h3>
-                <p style="margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem; color: var(--text-muted);">Vos informations et réservations centrales.</p>
-                
-                <div class="divider"></div>
-                <h3>📊 Budget Estimé</h3>
-                <div class="budget-total" id="budget-global-display">0€</div>
-                
-                <div class="budget-progress-bar">
-                    <div class="budget-progress-fill" id="budget-slider"></div>
+            <section class="timeline-itinerary" style="flex: 1;">
+                <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3>Description & Notes</h3>
+                    <p id="trip-main-desc" style="color: var(--text-muted); line-height: 1.6;"></p>
                 </div>
 
-                <div class="budget-row"><span>✈️ Vols :</span><strong id="budget-vols">0€</strong></div>
-                <div class="budget-row"><span>🏨 Hôtels :</span><strong id="budget-hotels">0€</strong></div>
-                <div class="budget-row"><span>🚗 Voiture :</span><strong id="budget-voiture">0€</strong></div>
+                <div id="itinerary-days-container">
+                    </div>
+            </section>
 
-                <div class="divider"></div>
-                <a href="#" id="google-flights-link" target="_blank" class="btn" style="width: 100%; text-align: center; background-color: #4285F4; padding: 0.6rem 1rem; font-size: 0.95rem;">
-                    ✈️ Ouvrir Google Flights
-                </a>
+            <aside class="sidebar-logistique">
+                <div class="card-box budget-card">
+                    <h3>Logistique & Budget</h3>
+                    <div class="budget-stat">
+                        <span class="budget-amount" id="trip-budget">0 €</span>
+                        <span class="budget-label">Estimation Total</span>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                    
+                    <a id="btn-google-flights" href="#" target="_blank" class="btn" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white;">
+                        ✈️ Voir les vols sur Google Flights
+                    </a>
+                </div>
             </aside>
+
         </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-            
-            if (trips.length > 0) {
-                const activeTrip = trips[trips.length - 1]; // Dernier voyage créé
-                
-                // Rendu En-tête
-                document.querySelector('.trip-header-visual').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)), url('${activeTrip.image}')`;
-                document.querySelector('.trip-header-title h2').innerText = activeTrip.title;
-                document.querySelector('.trip-header-title p').innerText = `${activeTrip.dates} | ${activeTrip.desc}`;
+            // 1.1 Récupération du voyage actif en mémoire
+            const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
 
-                // Rendu Financier
-                if (activeTrip.budget) {
-                    document.getElementById('budget-global-display').innerText = `${activeTrip.budget.total}€`;
-                    document.getElementById('budget-vols').innerText = `${activeTrip.budget.vols}€`;
-                    document.getElementById('budget-hotels').innerText = `${activeTrip.budget.hotels}€`;
-                    document.getElementById('budget-voiture').innerText = `${activeTrip.budget.voiture}€`;
-                    setTimeout(() => { document.getElementById('budget-slider').style.width = `100%`; }, 200);
-                }
-
-                // Lien Magique Google Flights
-                if (activeTrip.dateStart && activeTrip.dateEnd) {
-                    const departure = encodeURIComponent(activeTrip.origin || "Paris");
-                    const destination = encodeURIComponent(activeTrip.title || "");
-                    const googleFlightsUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}%20on%20${activeTrip.dateStart}%20through%20${activeTrip.dateEnd}`;
-                }
-
-                // Rendu Planning Jour par jour
-                const timelineContainer = document.querySelector('.timeline-container');
-                if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
-                    timelineContainer.innerHTML = '';
-                    activeTrip.itinerary.forEach(day => {
-                        const dayBlock = document.createElement('div');
-                        dayBlock.className = 'day-block';
-
-                        let stepsHTML = '';
-                        day.steps.forEach(step => {
-                            stepsHTML += `
-                                <div class="step-item">
-                                    <div class="step-time">${step.time}</div>
-                                    <div class="step-info">
-                                        <h5><span class="badge badge-${step.type}">${step.type}</span> ${step.label}</h5>
-                                        <p class="step-meta">${step.meta}</p>
-                                    </div>
-                                </div>
-                            `;
-                        });
-
-                        dayBlock.innerHTML = `<div class="day-header"><h3>Jour ${day.dayNum} — ${day.title}</h3></div>${stepsHTML}`;
-                        timelineContainer.appendChild(dayBlock);
-                    });
-                } else {
-                    timelineContainer.innerHTML = `<div class="day-block"><h3>📍 Itinéraire Personnalisé</h3><p style="color: var(--text-muted);">Aucune étape pré-enregistrée pour cette destination. Utilisez les outils pour planifier vos journées !</p></div>`;
-                }
+            if (!activeTrip) {
+                alert("Aucun voyage sélectionné. Retour au tableau de bord.");
+                window.location.href = "index.html";
+                return;
             }
-        });
-    </script>
-</body>
-</html>
+
+            // 1.2 Injection des données textuelles de base
+            document.getElementById('trip-main-title').textContent = activeTrip.title;
+            document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates}`;
+            document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
+            document.getElementById('trip-budget').textContent = `${activeTrip.budget || 0} €`;
+
+            //
