@@ -258,9 +258,30 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
    <!-- LOGIQUE DE CRÉATION CORRIGÉE, SÉCURISÉE ET INTEGRÉE AVEC LOCALSTORAGE -->
-    <script>
+  <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('create-trip-form');
+            const modernField = document.getElementById('trip-destination-modern');
+            const backupInput = document.getElementById('trip-destination');
+
+            // 💡 Astuce de secours : On écoute ce que l'utilisateur tape au clavier dans le champ Google
+            if (modernField && backupInput) {
+                modernField.addEventListener('input', (e) => {
+                    // On essaie de chasser l'input réel pour copier le texte en continu
+                    const inputElement = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input');
+                    if (inputElement) {
+                        backupInput.value = inputElement.value;
+                    }
+                });
+
+                // On écoute aussi l'événement officiel de sélection Google Places
+                modernField.addEventListener('gmp-placeselect', (e) => {
+                    if (e.placeholder || e.detail?.place) {
+                        const place = e.detail.place;
+                        backupInput.value = place.displayName || place.formattedAddress || place.name || "";
+                    }
+                });
+            }
 
             if (form) {
                 form.addEventListener('submit', async (e) => {
@@ -272,31 +293,33 @@
 
                     try {
                         let destination = "";
-                        const modernField = document.getElementById('trip-destination-modern');
                         
-                        // 1. Récupération robuste de l'objet Place officiel (Ligne 267 fixée)
+                        // 1. On tente d'abord de lire la valeur officielle du composant
                         if (modernField && modernField.value) {
                             const place = modernField.value;
                             destination = place?.displayName || place?.formattedAddress || place?.name || "";
                         }
                         
-                        // 2. Si l'objet de sélection Google est vide, on extrait le texte brut saisi à l'écran
+                        // 2. Si c'est vide, on va lire notre champ de secours textuel en continu
+                        if (!destination && backupInput && backupInput.value) {
+                            destination = backupInput.value;
+                        }
+
+                        // 3. Si c'est TOUJOURS vide, on tente une dernière extraction brute du texte affiché à l'écran
                         if (!destination && modernField) {
-                            const innerInput = modernField.querySelector('input') || 
-                                                (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
-                                                modernField.renderRoot?.querySelector('input');
+                            const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input');
                             if (innerInput && innerInput.value) {
                                 destination = innerInput.value;
                             }
                         }
-
-                        // 3. Repli de secours ultime pour éviter une valeur vide et l'alerte bloquante
-                        if (!destination) {
-                            const backupInput = document.getElementById('trip-destination');
-                            destination = (backupInput && backupInput.value) ? backupInput.value : "Destination Inconnue";
-                        }
                         
                         console.log("📍 Destination détectée :", destination);
+
+                        // Sécurité finale : Si vraiment rien n'est trouvé, on demande gentiment via un prompt pour éviter le blocage
+                        if (!destination || destination === "Destination Inconnue") {
+                            destination = prompt("Quelle est la destination de votre voyage ?", "Tokyo");
+                            if (!destination) return; // Si l'utilisateur annule le prompt
+                        }
 
                         // Récupération des autres données du formulaire
                         const departureInput = document.getElementById('trip-departure');
@@ -307,12 +330,6 @@
                         const budget = budgetInput ? budgetInput.value : 0;
                         const notesInput = document.getElementById('trip-notes');
                         const desc = notesInput ? notesInput.value : '';
-
-                        // Sécurités de validation de surface
-                        if (destination === "Destination Inconnue") {
-                            alert("Veuillez sélectionner ou saisir une destination de voyage valide.");
-                            return;
-                        }
 
                         if (!dateStart || !dateEnd) {
                             alert("Veuillez renseigner les dates aller et retour.");
@@ -343,7 +360,7 @@
                             return;
                         }
 
-                        // Génération automatique de l'itinéraire temporaire Kaido
+                        // Génération automatique de l'itinéraire de secours
                         const spots = [
                             "Le centre historique et ses monuments incontournables",
                             "Le grand parc de la ville et ses espaces de détente",
@@ -369,7 +386,7 @@
                             });
                         }
 
-                        // --- SAUVEGARDE ET REDIRECTION ÉPURÉE (Ligne 298 fixée) ---
+                        // Construction du pack de données pour le LocalStorage
                         const tripData = {
                             id: Date.now(),
                             departure: departure,
@@ -383,23 +400,20 @@
                             itinerary: itinerary
                         };
 
-                        // Sauvegarde croisée dans le localStorage pour être lue par toutes tes pages
+                        // Sauvegardes croisées
                         localStorage.setItem('currentTrip', JSON.stringify(tripData));
                         localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
 
-                        // Ajout à la base de données globale historique
                         const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
                         currentTrips.push(tripData);
                         localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-                        console.log("✈️ Voyage sauvegardé avec succès dans le localStorage ! Redirection...");
-                        
-                        // Redirection finale et fluide vers ta page principale
+                        console.log("✈️ Voyage sauvegardé ! Redirection...");
                         window.location.href = 'index.html';
 
                     } catch (error) {
-                        console.error("Erreur critique stoppée :", error);
-                        alert("Une erreur est survenue lors de la création : " + error.message);
+                        console.error("Erreur critique :", error);
+                        alert("Une erreur est survenue : " + error.message);
                         if (submitBtn) {
                             submitBtn.textContent = originalBtnText;
                             submitBtn.disabled = false;
