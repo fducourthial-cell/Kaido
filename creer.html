@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracer une nouvelle route - Kaido</title>
-    <!-- Google Fonts -->
+    <link rel="icon" type="image/png" href="image/kaido logo.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -15,7 +16,7 @@
             --bg-dark: #0D0B09;        /* Noir d'encre profond */
             --bg-card: #14110E;        /* Brun/noir pour le bloc formulaire */
             --color-gold: #D4AF37;      /* Or chaud */
-            --color-torii: #FDFBD4;     /* Rouge Torii traditionnel */
+            --color-torii: #A63A2B;     /* Rouge Torii traditionnel */
             --text-main: #F4EFEA;       /* Blanc ivoire doux */
             --text-muted: #8E847A;      /* Gris chaud secondaire */
             --border-color: rgba(212, 175, 55, 0.08);
@@ -23,7 +24,7 @@
             --font-serif: 'Playfair Display', serif;
         }
 
-        /* 2. RESET TOTAL DE SÉCURITÉ (Pas de conflit possible) */
+        /* 2. RESET TOTAL DE SÉCURITÉ */
         * {
             margin: 0;
             padding: 0;
@@ -40,12 +41,12 @@
         }
 
         .container {
-            max-width: 800px; /* Plus serré pour un formulaire élégant et centré */
+            max-width: 800px;
             margin: 0 auto;
             padding: 0 2rem;
         }
 
-        /* 3. EN-TÊTE ISOLE */
+        /* 3. EN-TÊTE PREMIUM */
         .kaido-header {
             padding: 2rem 0;
             display: flex;
@@ -77,7 +78,7 @@
             color: var(--color-gold);
         }
 
-        /* 4. HERO SECTION DE CRÉATION */
+        /* 4. HERO SECTION */
         .create-hero {
             padding: 4rem 0 3rem 0;
             text-align: center;
@@ -99,7 +100,7 @@
             margin: 0 auto;
         }
 
-        /* 5. FORMULAIRE ÉPURÉ LOOK JAPONAIS MODERNE */
+        /* 5. FORMULAIRE JAPONAIS MODERNE */
         .kaido-form-box {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -123,7 +124,6 @@
             margin-bottom: 0.6rem;
         }
 
-        /* Inputs ultra épurés (Ligne du bas lumineuse, fond sombre texturé) */
         .form-control {
             width: 100%;
             background-color: rgba(255, 255, 255, 0.02);
@@ -144,14 +144,12 @@
             border-bottom-color: var(--color-gold);
         }
 
-        /* Alignement des dates sur une ligne */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
         }
 
-        /* Le gros bouton d'action rouge Torii */
         .kaido-submit-btn {
             width: 100%;
             background: linear-gradient(135deg, var(--color-torii), #82271B);
@@ -175,12 +173,11 @@
             border-color: var(--color-gold);
         }
 
-        /* Surcharge de style pour forcer le Web Component de Google à s'intégrer proprement */
+        /* SURCHARGE DE STYLE POUR LE COMPOSANT GOOGLE MAPS */
         gmp-place-autocomplete {
             width: 100%;
         }
         
-        /* Ajustement interne cosmétique pour la barre Google */
         gmp-place-autocomplete::part(input) {
             width: 100%;
             background-color: rgba(255, 255, 255, 0.02) !important;
@@ -193,7 +190,6 @@
             border-radius: 4px !important;
         }
 
-        /* RESPONSIVE */
         @media (max-width: 600px) {
             .form-row { grid-template-columns: 1fr; gap: 0; }
             .kaido-form-box { padding: 1.5rem; }
@@ -204,7 +200,6 @@
 <body>
 
     <div class="container">
-        <!-- BARRE DE NAVIGATION ÉPURÉE -->
         <header class="kaido-header">
             <a href="index.html" class="brand-name">KAIDO</a>
             <nav>
@@ -212,30 +207,25 @@
             </nav>
         </header>
 
-        <!-- INTRO TEXTUELLE SANS CONFLIT -->
         <section class="create-hero">
             <h1>Tracer une nouvelle route</h1>
             <p>Renseignez vos dates et laissez l'univers de Kaido concevoir votre carnet de voyage.</p>
         </section>
 
-        <!-- FORMULAIRE SÉCURISÉ -->
         <main class="kaido-form-box">
             <form id="create-trip-form">
                 
-                <!-- DEPART -->
                 <div class="form-group">
-                    <label for="trip-departure">Ville de départ</label>
+                    <label for="trip-departure">🛫 Ville de départ</label>
                     <input type="text" id="trip-departure" class="form-control" placeholder="Ex: Paris, Lyon, Marseille..." required>
                 </div>
 
-                <!-- DESTINATION (GOOGLE COMPONENT MODERNISÉ VISUELLEMENT) -->
                 <div class="form-group">
-                    <label for="trip-destination-modern">Destination de vos rêves</label>
+                    <label for="trip-destination-modern">📍 Destination de vos rêves</label>
                     <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Tokyo, Islande, Barcelone..."></gmp-place-autocomplete>
                     <input type="hidden" id="trip-destination" required>
                 </div>
 
-                <!-- DATES -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="trip-date-start">📅 Date Aller</label>
@@ -247,318 +237,7 @@
                     </div>
                 </div>
 
-                <!-- BUDGET -->
                 <div class="form-group">
-                    <label for="trip-budget-input">Budget Max estimé (Optionnel)</label>
+                    <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
                     <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1500" min="0">
                 </div>
-
-                <!-- NOTES -->
-                <div class="form-group">
-                    <label for="trip-notes">Notes & envies de voyage (Optionnel)</label>
-                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Randonnées, visites de temples, spécialités culinaires..."></textarea>
-                </div>
-
-                <!-- VALIDATION -->
-                <button type="submit" class="kaido-submit-btn">
-                    Concevoir mon itinéraire
-                </button>
-
-            </form>
-        </main>
-    </div>
-
-    <!-- SCRIPT DE LIAISON COMPATIBLE INTERCEPTIONS GOOGLE -->
-   <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('create-trip-form');
-
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    console.log("Formulaire intercepté, début de la génération...");
-
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
-
-                    try {
-                        let destination = "";
-                        const modernField = document.getElementById('trip-destination-modern');
-                        
-                        if (modernField) {
-                            if (modernField.value) {
-                                destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
-                            }
-                            
-                            if (!destination) {
-                                // Détection textuelle forcée et compatible multi-architectures Google
-                                const googleInput = modernField.querySelector('input') || 
-                                                    (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
-                                                    modernField.renderRoot?.querySelector('input');
-                                                    
-                                if (googleInput && googleInput.value) {
-                                    destination = googleInput.value;
-                                }
-                            }
-                        }
-
-                        if (!destination) {
-                            const backupInput = document.getElementById('trip-destination');
-                            if (backupInput) destination = backupInput.value;
-                        }
-                        
-                        console.log("📍 Destination détectée :", destination);
-
-                        const departureInput = document.getElementById('trip-departure');
-                        const departure = departureInput ? departureInput.value : 'Paris';
-                        const dateStart = document.getElementById('trip-date-start').value;
-                        const dateEnd = document.getElementById('trip-date-end').value;
-                        const budgetInput = document.getElementById('trip-budget-input');
-                        const budget = budgetInput ? budgetInput.value : 0;
-                        const notesInput = document.getElementById('trip-notes');
-                        const desc = notesInput ? notesInput.value : '';
-
-                        if (!destination) {
-                            alert("Veuillez sélectionner ou saisir une destination de voyage.");
-                            return;
-                        }
-
-                        if (!dateStart || !dateEnd) {
-                            alert("Veuillez renseigner les dates aller et retour.");
-                            return;
-                        }
-
-                        if (submitBtn) {
-                            submitBtn.textContent = "Calcul de l'itinéraire...";
-                            submitBtn.disabled = true;
-                        }
-
-                        const start = new Date(dateStart);
-                        const end = new Date(dateEnd);
-
-                        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                            throw new Error("Le format des dates n'est pas valide.");
-                        }
-
-                        const timeDiff = end.getTime() - start.getTime();
-                        const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-                        if (totalDays <= 0) {
-                            alert("La date de retour doit être après la date de départ !");
-                            if (submitBtn) {
-                                submitBtn.textContent = originalBtnText;
-                                submitBtn.disabled = false;
-                            }
-                            return;
-                        }
-
-                        // Génération de l'itinéraire de voyage Kaido
-                        const spots = [
-                            "Le centre historique et ses monuments incontournables",
-                            "Le grand parc de la ville et ses espaces de détente",
-                            "Le musée d'art et d'histoire locale",
-                            "Le quartier animé et ses ruelles commerçantes",
-                            "Le belvédère principal pour une vue panoramique"
-                        ];
-
-                        const itinerary = [];
-                        for (let i = 0; i < totalDays; i++) {
-                            const currentDate = new Date(start);
-                            currentDate.setDate(start.getDate() + i);
-                            
-                            const dayText = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
-                            
-                            itinerary.push({
-                                day: `Jour ${i + 1}`,
-                                dateText: dayText,
-                                steps: [
-                                    { time: "10:00", activity: `Exploration : ${spots[i % spots.length]}`, location: destination },
-                                    { time: "15:00", activity: "Balade libre et découverte de la culture locale", location: destination }
-                                ]
-                            });
-                        }
-
-                        const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
-
-                        const newTrip = {
-                            id: Date.now(),
-                            title: destination,
-                            departure: departure,
-                            dates: `${itinerary[0].dateText} au ${itinerary[itinerary.length - 1].dateText}`,
-                            dateStart: dateStart,
-                            dateEnd: dateEnd,
-                            budget: budget,
-                            desc: desc,
-                            image: finalImage,
-                            itinerary: itinerary
-                        };
-
-                        const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                        currentTrips.push(newTrip);
-                        localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
-                        localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
-
-                        console.log("Voyage créé ! Redirection...");
-                        window.location.href = 'voyage.html';
-
-                    } catch (error) {
-                        console.error("Erreur critique :", error);
-                        alert("Une erreur est survenue : " + error.message);
-                        if (submitBtn) {
-                            submitBtn.textContent = originalBtnText;
-                            submitBtn.disabled = false;
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-    <!-- CHARGEMENT SÉCURISÉ DE L'API GOOGLE MAPS -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
-    
-    <!-- TON JAVASCRIPT LOGIQUE -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('create-trip-form');
-
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    console.log("Formulaire intercepté, début de la génération...");
-
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
-
-                    try {
-                        let destination = "";
-                        const modernField = document.getElementById('trip-destination-modern');
-                        
-                        if (modernField) {
-                            if (modernField.value) {
-                                destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
-                            }
-                           if (!destination) {
-    // Force la recherche de l'input de texte masqué par Google
-    const googleInput = modernField.querySelector('input') || 
-                        (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
-                        modernField.renderRoot?.querySelector('input');
-                        
-    if (googleInput && googleInput.value) {
-        destination = googleInput.value;
-    }
-}
-
-                        if (!destination) {
-                            const backupInput = document.getElementById('trip-destination');
-                            if (backupInput) destination = backupInput.value;
-                        }
-                        
-                        console.log("📍 Destination détectée :", destination);
-
-                        const departureInput = document.getElementById('trip-departure');
-                        const departure = departureInput ? departureInput.value : 'Paris';
-                        const dateStart = document.getElementById('trip-date-start').value;
-                        const dateEnd = document.getElementById('trip-date-end').value;
-                        const budgetInput = document.getElementById('trip-budget-input');
-                        const budget = budgetInput ? budgetInput.value : 0;
-                        const notesInput = document.getElementById('trip-notes');
-                        const desc = notesInput ? notesInput.value : '';
-
-                        if (!destination) {
-                            alert("Veuillez sélectionner ou saisir une destination de voyage.");
-                            return;
-                        }
-
-                        if (!dateStart || !dateEnd) {
-                            alert("Veuillez renseigner les dates aller et retour.");
-                            return;
-                        }
-
-                        if (submitBtn) {
-                            submitBtn.textContent = "Calcul de l'itinéraire...";
-                            submitBtn.disabled = true;
-                        }
-
-                        const start = new Date(dateStart);
-                        const end = new Date(dateEnd);
-
-                        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                            throw new Error("Le format des dates n'est pas valide.");
-                        }
-
-                        const timeDiff = end.getTime() - start.getTime();
-                        const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-                        if (totalDays <= 0) {
-                            alert("La date de retour doit être après la date de départ !");
-                            if (submitBtn) {
-                                submitBtn.textContent = originalBtnText;
-                                submitBtn.disabled = false;
-                            }
-                            return;
-                        }
-
-                        // Génération d'un itinéraire fixe sécurisé
-                        const spots = [
-                            "Le centre historique et ses monuments incontournables",
-                            "Le grand parc de la ville et ses espaces de détente",
-                            "Le musée d'art et d'histoire locale",
-                            "Le quartier animé et ses ruelles commerçantes",
-                            "Le belvédère principal pour une vue panoramique"
-                        ];
-
-                        const itinerary = [];
-                        for (let i = 0; i < totalDays; i++) {
-                            const currentDate = new Date(start);
-                            currentDate.setDate(start.getDate() + i);
-                            
-                            const dayText = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
-                            
-                            itinerary.push({
-                                day: `Jour ${i + 1}`,
-                                dateText: dayText,
-                                steps: [
-                                    { time: "10:00", activity: `Exploration : ${spots[i % spots.length]}`, location: destination },
-                                    { time: "15:00", activity: "Balade libre et découverte de la culture locale", location: destination }
-                                ]
-                            });
-                        }
-
-                        const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
-
-                        const newTrip = {
-                            id: Date.now(),
-                            title: destination,
-                            departure: departure,
-                            dates: `${itinerary[0].dateText} au ${itinerary[itinerary.length - 1].dateText}`,
-                            dateStart: dateStart,
-                            dateEnd: dateEnd,
-                            budget: budget,
-                            desc: desc,
-                            image: finalImage,
-                            itinerary: itinerary
-                        };
-
-                        const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                        currentTrips.push(newTrip);
-                        localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
-                        localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
-
-                        console.log("Voyage créé ! Redirection...");
-                        window.location.href = 'voyage.html';
-
-                    } catch (error) {
-                        console.error("Erreur critique :", error);
-                        alert("Une erreur est survenue : " + error.message);
-                        if (submitBtn) {
-                            submitBtn.textContent = originalBtnText;
-                            submitBtn.disabled = false;
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-
-</body>
-</html>
