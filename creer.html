@@ -269,33 +269,35 @@
                     const submitBtn = form.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
-                    try {
+try {
                         let destination = "";
                         const modernField = document.getElementById('trip-destination-modern');
                         
-                        if (modernField) {
-                            if (modernField.value) {
-                                destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
-                            }
-                            
-                            if (!destination) {
-                                // Détection textuelle forcée et robuste de l'input de Google
-                                const googleInput = modernField.querySelector('input') || 
-                                                    (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
-                                                    modernField.renderRoot?.querySelector('input');
-                                                    
-                                if (googleInput && googleInput.value) {
-                                    destination = googleInput.value;
-                                }
-                            }
-                        }
-
-                        if (!destination) {
-                            const backupInput = document.getElementById('trip-destination');
-                            if (backupInput) destination = backupInput.value;
+                        // 1. Version officielle Google : On récupère l'objet Place sélectionné
+                        if (modernField && modernField.value) {
+                            const place = modernField.value;
+                            destination = place.displayName || place.formattedAddress || place.name || "";
                         }
                         
-                        console.log("📍 Destination détectée :", destination);
+                        // 2. PARS DU PRINCIPE QUE SI GOOGLE COMPLÉMENTE EN TEXTE, ON LE RÉCUPÈRE SANS PASSER PAR LE SHADOW DOM
+                        if (!destination && modernField) {
+                            // On extrait directement l'attribut textuel ou la valeur de surface du composant
+                            destination = modernField.getAttribute('value') || "";
+                        }
+
+                        // 3. LE PLAN DE SECOURS INFAILLIBLE : Si Google bloque tout, on demande à l'utilisateur de valider son texte via une petite invite rapide
+                        if (!destination) {
+                            // On regarde si un texte est visible dans le composant
+                            const inputPlein = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input');
+                            if (inputPlein && inputPlein.value) {
+                                destination = inputPlein.value;
+                            } else {
+                                // Fenêtre de secours : évite le blocage complet
+                                destination = prompt("Quelle est votre destination de voyage ? (Google a bloqué la détection automatique)");
+                            }
+                        }
+                        
+                        console.log("📍 Destination détectée :", destination);                   
 
                         const departureInput = document.getElementById('trip-departure');
                         const departure = departureInput ? departureInput.value : 'Paris';
