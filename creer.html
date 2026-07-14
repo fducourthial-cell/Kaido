@@ -77,23 +77,20 @@
             const hiddenDestinationInput = document.getElementById('trip-destination');
 
             if (autocompleteComponent) {
-                // Fonction de mise à jour sécurisée du champ caché
-                const updateDestination = () => {
-                    const place = autocompleteComponent.value;
+                // On écoute UNIQUEMENT l'événement officiel et supporté par Google
+                autocompleteComponent.addEventListener('gmp-placeselect', (event) => {
+                    // Avec 'gmp-placeselect', l'objet sélectionné est directement accessible dans event.detail.place
+                    const place = event.detail.place;
+                    
                     if (place) {
-                        // Récupère le nom lisible (displayName, formattedAddress, ou le nom simple)
+                        // Récupération du nom lisible de la destination
                         const name = place.displayName || place.formattedAddress || place.name;
                         if (name) {
                             hiddenDestinationInput.value = name;
                             console.log("📍 Destination enregistrée avec succès :", name);
                         }
                     }
-                };
-
-                // Écoute TOUS les types d'événements possibles de Google pour être sûr à 100%
-                autocompleteComponent.addEventListener('gmp-placeselect', updateDestination);
-                autocompleteComponent.addEventListener('gmpx-placechange', updateDestination);
-                autocompleteComponent.addEventListener('change', updateDestination);
+                });
             }
         });
     </script>
