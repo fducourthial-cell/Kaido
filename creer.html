@@ -3,68 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaido | Créer un Voyage</title>
+    <title>Tracer une nouvelle route - Kaido</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <header>
         <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 40px; width: auto; object-fit: contain;">
+            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 60px; width: auto; object-fit: contain;">
         </a>
-        
         <nav>
             <a href="index.html">Mes Voyages</a>
         </nav>
     </header>
 
-    <main class="container">
-        <div class="form-box">
-            <h2 style="margin-bottom: 1.5rem; color: var(--primary-color);">🗺️ Nouveau Voyage</h2>
-            
-            <form>
-                <div class="form-group">
-                    <label for="trip-title">🎯 Destination (Pays ou Ville)</label>
-                    <input type="text" id="trip-title" class="form-control" placeholder="Ex: Écosse, Japon, Paris..." required>
-                </div>
-
-                <div class="form-group">
-                    <label for="trip-origin">🛫 Ville de départ</label>
-                    <input type="text" id="trip-origin" class="form-control" placeholder="Ex: Lyon, Paris, Marseille..." required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="date-start">📅 Date Aller</label>
-                        <input type="date" id="date-start" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="date-end">📅 Date Retour</label>
-                        <input type="date" id="date-end" class="form-control" required>
-                    </div>
-                </div>
-
-
-                <div class="form-group">
-                    <label for="trip-desc">📝 Notes de voyage</label>
-                    <textarea id="trip-desc" class="form-control" rows="3" placeholder="Description, objectifs, envies..."></textarea>
-                </div>
-
-                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Générer l'itinéraire automatique</button>
-            </form>
+    <section class="hero-section" style="height: 25vh; min-height: 180px;">
+        <div class="hero-content">
+            <h2>Tracer une nouvelle route</h2>
+            <p>Renseignez vos dates et laissez Kaido concevoir votre itinéraire sur-mesure.</p>
         </div>
+    </section>
+
+    <main class="container">
+        <section class="form-box card-box">
+            <form id="create-trip-form">
+                
+                <div class="form-group">
+                    <label for="trip-departure">🛫 Ville de départ</label>
+                    <input type="text" id="trip-departure" class="form-control" placeholder="Ex: Paris, Lyon, Marseille..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trip-destination-modern">📍 Destination de vos rêves</label>
+                    <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Tokyo, Islande, Rome..." style="width: 100%;"></gmp-place-autocomplete>
+                    <input type="hidden" id="trip-destination" required>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label for="trip-date-start">📅 Date Aller</label>
+                        <input type="date" id="trip-date-start" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="trip-date-end">📅 Date Retour</label>
+                        <input type="date" id="trip-date-end" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
+                    <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1200" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="trip-notes">📝 Notes & envies de voyage (Optionnel)</label>
+                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Je veux absolument voir des temples, faire de la randonnée et manger local..."></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem; border: none; cursor: pointer;">
+                    🚀 Concevoir mon itinéraire
+                </button>
+
+            </form>
+        </section>
     </main>
 
-   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
-    <script src="js/create-trip.js"></script>
     <script>
-        // Optionnel : Ajoute l'autocomplétion Google sur les inputs de création de voyage
         document.addEventListener('DOMContentLoaded', () => {
-            const titleInput = document.getElementById('trip-title');
-            const originInput = document.getElementById('trip-origin');
-            if(titleInput) new google.maps.places.Autocomplete(titleInput, { types: ['(regions)'] });
-            if(originInput) new google.maps.places.Autocomplete(originInput, { types: ['(cities)'] });
+            const autocompleteComponent = document.getElementById('trip-destination-modern');
+            const hiddenDestinationInput = document.getElementById('trip-destination');
+
+            if (autocompleteComponent) {
+                // Dès que l'utilisateur sélectionne un lieu dans la nouvelle liste Google moderne
+                autocompleteComponent.addEventListener('gmpx-placechange', () => {
+                    const place = autocompleteComponent.value;
+                    if (place && place.displayName) {
+                        // On stocke le nom propre sélectionné dans l'input masqué
+                        hiddenDestinationInput.value = place.displayName;
+                        console.log("Destination enregistrée :", place.displayName);
+                    }
+                });
+            }
         });
     </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwicdiGq5hkdk5idPdUQi_A01vT5faegU&libraries=places&v=weekly&loading=async" defer></script>
+    
+    <script src="js/create-trip.js"></script>
+
 </body>
 </html>
