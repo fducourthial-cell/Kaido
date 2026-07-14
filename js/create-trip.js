@@ -98,48 +98,36 @@ document.addEventListener('DOMContentLoaded', () => {
 // FONCTIONS UTILES (PLACES API AVEC SÉCURITÉS)
 // ==========================================================================
 
-/**
- * Recherche des points d'intérêt de manière sécurisée en évitant les crashs
- */
-function fetchTopPlacesSafe(destinationName) {
-    return new Promise((resolve, reject) => {
-        // Sécurité 1 : Vérifie si la bibliothèque Google Maps est bien chargée en mémoire
-        if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
-            reject("Google Maps API n'est pas complètement chargée.");
-            return;
-        }
 
+function initAutocomplete() {
+    const input = document.getElementById('trip-destination');
+    if (!input) return;
+
+    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+        // Initialisation de l'autocomplétion classique (avec repli sécurisé)
         try {
-            // Création d'un élément temporaire en dehors du DOM pour l'API
-            const tempDiv = document.createElement('div');
-            const service = new google.maps.places.PlacesService(tempDiv);
+            const autocomplete = new google.maps.places.Autocomplete(input, {
+                types: ['(regions)'] // Permet de chercher des pays ou des villes
+            });
 
-            const request = {
-                query: `attractions touristiques à ${destinationName}`,
-                fields: ['name']
-            };
-
-            service.textSearch(request, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                    const topSpots = results
-                        .filter(place => place.name)
-                        .slice(0, 10)
-                        .map(place => place.name);
-                    
-                    if (topSpots.length > 0) {
-                        resolve(topSpots);
-                    } else {
-                        reject("Aucun lieu trouvé pour cette destination.");
-                    }
-                } else {
-                    reject(`Erreur Google Places status : ${status}`);
+            // Quand l'utilisateur sélectionne une destination dans la liste
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (place && place.name) {
+                    input.value = place.name; // On valide proprement le choix
                 }
             });
         } catch (e) {
-            reject(e);
+            console.warn("Échec de l'initialisation Autocomplete classique, passage en mode saisie libre.", e);
         }
-    });
+    }
 }
+
+// Lance l'initialisation dès que la page est prête
+document.addEventListener('DOMContentLoaded', () => {
+    // Laisse une petite seconde à Google Maps pour charger avant d'activer l'autocomplétion
+    setTimeout(initAutocomplete, 1000);
+});
 
 /**
  * Répartit les points d'intérêts sur le nombre de jours
