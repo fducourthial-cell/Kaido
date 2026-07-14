@@ -3,157 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaido | Mes Voyages</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Kaido — Planificateur de Voyage Épuré</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        .hero-section {
-            height: 40vh;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), 
-                              url('image/hero.jpg');
-            background-size: cover;
-            background-position: center;
+        /* 1. CONFIGURATION DU CODE COULEUR DE KAIDO */
+        :root {
+            --bg-dark: #0B0F19;        /* Bleu nuit très profond (fond principal) */
+            --bg-card: #131A2C;        /* Bleu nuit secondaire pour les cartes */
+            --color-primary: #6366F1;   /* Indigo (tiré du logo) */
+            --color-accent: #A855F7;    /* Violet néon (tiré du logo) */
+            --color-cyan: #10B981;      /* Touche de turquoise/cyan pour les détails */
+            --text-main: #F3F4F6;       /* Blanc cassé pour une lecture douce */
+            --text-muted: #9CA3AF;      /* Gris texturé pour les éléments secondaires */
+            --border-glow: rgba(99, 102, 241, 0.15);
+            --font-kaido: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* 2. STYLES GÉNÉRAUX & ASSAINISSEMENT */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-kaido);
+            min-height: 100vh;
+            overflow-x: hidden;
+            letter-spacing: -0.01em;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Effet d'ambiance en arrière-plan (Halo de lumière très subtil) */
+        body::before {
+            content: "";
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, rgba(99, 102, 241, 0.03) 50%, transparent 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 3. EN-TÊTE MINIMALISTE */
+        header {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-link img {
+            height: 55px;
+            width: auto;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+
+        .logo-link:hover img {
+            transform: scale(1.02);
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        nav a:hover {
+            color: var(--text-main);
+        }
+
+        /* 4. SECTION HERO ÉPURÉE */
+        .hero {
+            padding: 6rem 0 4rem 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #FFF 40%, var(--color-primary) 70%, var(--color-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 540px;
+            margin: 0 auto 2.5rem auto;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* 5. BOUTON ACTION DESIGN AVEC LÉGER GLOW */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            color: white;
+            text-decoration: none;
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(168, 85, 247, 0.4);
+        }
+
+        /* 6. GRILLE DES VOYAGES (MOINS CHARGÉE) */
+        .trips-section {
+            padding: 2rem 0 6rem 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text-main);
             display: flex;
             align-items: center;
-            justify-content: center;
-            position: relative;
-            margin-bottom: 2rem;
+            gap: 0.5rem;
         }
 
-        .hero-content {
-            text-align: center;
-            color: white;
-            z-index: 10;
-            padding-top: 3rem;
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .hero-content h2 {
-            font-size: 2.8rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            letter-spacing: -1px;
-        }
-
-        .hero-content p {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            opacity: 0.9;
-        }
-
-        .dashboard-grid {
+        .trips-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 2rem;
         }
 
+        /* CARTES LOOK PREMIUM/ÉPURÉ */
         .trip-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            background-color: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
             overflow: hidden;
+            text-decoration: none;
+            color: inherit;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
         .trip-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
         }
 
-        .trip-banner {
-            height: 160px;
+        .trip-card-image {
+            height: 180px;
             background-size: cover;
             background-position: center;
+            position: relative;
         }
 
-        .trip-details {
+        /* Dégradé sombre doux sur l'image pour l'intégrer au design noir */
+        .trip-card-image::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to top, var(--bg-card), transparent);
+        }
+
+        .trip-card-body {
             padding: 1.5rem;
-            flex-grow: 1;
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
-        .trip-details h3 {
+        .trip-card-body h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
-            font-size: 1.3rem;
-            color: var(--primary-color);
+            color: #FFF;
         }
 
-        .trip-meta {
-            font-size: 0.9rem;
+        .trip-card-dates {
+            font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 1rem;
         }
 
-        .create-trip-zone {
-            grid-column: 1 / -1;
-            margin-top: 1rem;
-        }
-
-        .btn-create-minimal {
+        .trip-card-footer {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            background: transparent;
-            border: 2px dashed var(--border-color);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.2s;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.9rem;
         }
 
-        .btn-create-minimal:hover {
-            border-color: var(--accent-color);
-            color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.5);
+        .trip-budget {
+            color: #10B981; /* Vert/Cyan subtil pour le budget */
+            font-weight: 600;
+        }
+
+        .trip-arrow {
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .trip-card:hover .trip-arrow {
+            transform: translateX(4px);
+            color: var(--color-accent);
+        }
+
+        /* 7. RESPONSIVE SIMPLE (MOBILE) */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero { padding: 4rem 0 2rem 0; }
+            .trips-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 60px; width: auto; object-fit: contain;">
-        </a>
-        
-        <nav>
-            <a href="index.html">Mes Voyages</a>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo-link">
+                <img src="image/kaido logo.png" alt="Kaido Logo">
+            </a>
+            <nav>
+                <a href="creer.html">+ Nouveau projet</a>
+            </nav>
+        </div>
     </header>
 
-    <section class="hero-section">
-        <div class="hero-content">
-            <h2>Chaque route raconte une histoire</h2>
-            <p>Bonjour Florian. Prêt à planifier votre prochain itinéraire ?</p>
-            
-            </div>
+    <section class="hero">
+        <div class="container">
+            <h1>Vos destinations devienent claires.</h1>
+            <p>Planifiez vos itinéraires, calculez la logistique et pilotez vos budgets sur une interface pensée pour l'essentiel.</p>
+            <a href="creer.html" class="btn-primary">Tracer une nouvelle route</a>
         </div>
     </section>
 
-    <div id="suggestions-container" class="container" style="display: none; margin-top: 1rem; margin-bottom: 3rem; position: relative; z-index: 30;">
-        <h3 id="suggestions-title" style="color: var(--primary-color); margin-bottom: 1.5rem; text-align: center;">🏛️ Les incontournables</h3>
-        <div id="monuments-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;"></div>
-    </div>
-
-    <main class="container">
-        <section class="dashboard-grid">
-            
-            <div class="create-trip-zone">
-                <a href="creer.html" class="btn-create-minimal">
-                    <span style="font-size: 1.3rem;">🗺️</span> Tracer une nouvelle route...
-                </a>
-            </div>
-
-        </section>
+    <main class="container trips-section">
+        <h2 class="section-title">Mes carnets de route</h2>
+        
+        <div class="trips-grid" id="trips-display-container">
+            <a href="voyage.html" class="trip-card">
+                <div class="trip-card-image" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80');"></div>
+                <div class="trip-card-body">
+                    <div>
+                        <h3>Barcelone, Espagne</h3>
+                        <div class="trip-card-dates">📅 18/07/2026 au 22/07/2026</div>
+                    </div>
+                    <div class="trip-card-footer">
+                        <span class="trip-budget">850 €</span>
+                        <span class="trip-arrow">Voir l'itinéraire →</span>
+                    </div>
+                </div>
+            </a>
+        </div>
     </main>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwicdiGq5hkdk5idPdUQi_A01vT5faegU&libraries=places"></script>
-    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('trips-display-container');
+            const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+
+            if (trips.length > 0) {
+                container.innerHTML = ''; // Vide le bloc de démo
+                
+                trips.forEach(trip => {
+                    const card = document.createElement('a');
+                    card.href = 'voyage.html';
+                    card.className = 'trip-card';
+                    
+                    // Clic enregistre le voyage actif
+                    card.addEventListener('click', () => {
+                        localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
+                    });
+
+                    card.innerHTML = `
+                        <div class="trip-card-image" style="background-image: url('${trip.image || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'}');"></div>
+                        <div class="trip-card-body">
+                            <div>
+                                <h3>${trip.title}</h3>
+                                <div class="trip-card-dates">📅 ${trip.dates}</div>
+                            </div>
+                            <div class="trip-card-footer">
+                                <span class="trip-budget">${trip.budget || 0} €</span>
+                                <span class="trip-arrow">Voir l'itinéraire →</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
