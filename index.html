@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaido — Planificateur de Voyage Épuré</title>
+    <title>Kaido — Planificateur de Voyage</title>
+    <!-- Google Fonts avec une typographie moderne, aérée et premium -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     
     <style>
-        /* 1. CONFIGURATION DU CODE COULEUR DE KAIDO */
+        /* 1. PALETTE DE COULEURS INSPIRÉE DE L'ESTAMPE KAIDO */
         :root {
-            --bg-dark: #0B0F19;        /* Bleu nuit très profond (fond principal) */
-            --bg-card: #131A2C;        /* Bleu nuit secondaire pour les cartes */
-            --color-primary: #6366F1;   /* Indigo (tiré du logo) */
-            --color-accent: #A855F7;    /* Violet néon (tiré du logo) */
-            --color-cyan: #10B981;      /* Touche de turquoise/cyan pour les détails */
-            --text-main: #F3F4F6;       /* Blanc cassé pour une lecture douce */
-            --text-muted: #9CA3AF;      /* Gris texturé pour les éléments secondaires */
-            --border-glow: rgba(99, 102, 241, 0.15);
+            --bg-dark: #0D0B09;        /* Noir d'encre très profond et légèrement chaud */
+            --bg-card: #14110E;        /* Brun/noir texturé pour les cartes */
+            --color-gold: #D4AF37;      /* Or chaud (tiré du soleil et du texte de ton logo) */
+            --color-gold-muted: #A38550;/* Or vieilli pour les textes secondaires */
+            --color-torii: #A63A2B;     /* Rouge Torii traditionnel (tiré du portail de ton logo) */
+            --text-main: #F4EFEA;       /* Blanc ivoire doux pour une lecture reposante */
+            --text-muted: #8E847A;      /* Gris chaud pour les éléments secondaires */
+            --border-color: rgba(212, 175, 55, 0.08);
             --font-kaido: 'Plus Jakarta Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
         }
 
-        /* 2. STYLES GÉNÉRAUX & ASSAINISSEMENT */
+        /* 2. STYLES GÉNÉRAUX */
         * {
             margin: 0;
             padding: 0;
@@ -44,24 +46,23 @@
             padding: 0 2rem;
         }
 
-        /* Effet d'ambiance en arrière-plan (Halo de lumière très subtil) */
-        body::before {
-            content: "";
+        /* Halo de lumière doré très subtil derrière le logo principal */
+        .hero-bg-glow {
             position: absolute;
-            top: -10%;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 600px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, rgba(99, 102, 241, 0.03) 50%, transparent 100%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(214, 175, 55, 0.06) 0%, rgba(166, 58, 43, 0.02) 50%, transparent 100%);
             z-index: -1;
             pointer-events: none;
         }
 
-        /* 3. EN-TÊTE MINIMALISTE */
+        /* 3. EN-TÊTE MINIMALISTE DISCRET */
         header {
             padding: 1.5rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
         }
 
         header .container {
@@ -70,132 +71,173 @@
             align-items: center;
         }
 
-        .logo-link img {
-            height: 55px;
-            width: auto;
-            display: block;
-            transition: transform 0.2s ease;
+        .brand-name {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: color 0.2s ease;
         }
 
-        .logo-link:hover img {
-            transform: scale(1.02);
+        .brand-name:hover {
+            color: var(--color-gold);
         }
 
         nav a {
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             transition: color 0.2s ease;
         }
 
         nav a:hover {
-            color: var(--text-main);
+            color: var(--color-gold);
         }
 
-        /* 4. SECTION HERO ÉPURÉE */
+        /* 4. SECTION HERO AVEC LE LOGO V4 EN MAJESTÉ */
         .hero {
-            padding: 6rem 0 4rem 0;
+            padding: 4rem 0 3rem 0;
             text-align: center;
+            position: relative;
+        }
+
+        /* Le conteneur du logo pour le sublimer */
+        .hero-logo-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .hero-logo-wrapper img {
+            height: 280px; /* Taille généreuse pour l'apprécier */
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 40px rgba(214, 175, 55, 0.1));
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Léger effet de lévitation au survol du logo */
+        .hero-logo-wrapper:hover img {
+            transform: translateY(-5px) scale(1.02);
         }
 
         .hero h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            line-height: 1.2;
+            font-family: var(--font-serif);
+            font-size: 2.8rem;
+            font-weight: 400;
+            line-height: 1.3;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #FFF 40%, var(--color-primary) 70%, var(--color-accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 span {
+            display: block;
+            font-size: 1.1rem;
+            font-family: var(--font-kaido);
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--color-gold);
+            margin-bottom: 0.5rem;
         }
 
         .hero p {
             color: var(--text-muted);
-            font-size: 1.15rem;
-            max-width: 540px;
+            font-size: 1.1rem;
+            max-width: 500px;
             margin: 0 auto 2.5rem auto;
             line-height: 1.6;
             font-weight: 300;
         }
 
-        /* 5. BOUTON ACTION DESIGN AVEC LÉGER GLOW */
+        /* 5. BOUTON ACTION INSPIRÉ DU ROUGE TORII */
         .btn-primary {
             display: inline-flex;
             align-items: center;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            background: linear-gradient(135deg, var(--color-torii), #82271B);
             color: white;
             text-decoration: none;
-            padding: 0.9rem 2rem;
-            border-radius: 50px;
+            padding: 0.9rem 2.2rem;
+            border-radius: 4px; /* Un angle légèrement plus droit fait plus traditionnel et épuré */
             font-weight: 600;
-            font-size: 1rem;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1px solid rgba(214, 175, 55, 0.2);
+            box-shadow: 0 4px 20px rgba(166, 58, 43, 0.2);
+            transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(168, 85, 247, 0.4);
+            box-shadow: 0 6px 25px rgba(166, 58, 43, 0.4);
+            border-color: var(--color-gold);
         }
 
-        /* 6. GRILLE DES VOYAGES (MOINS CHARGÉE) */
+        /* 6. GRILLE DES VOYAGES PREMIUM & SAGE */
         .trips-section {
             padding: 2rem 0 6rem 0;
         }
 
         .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 400;
             margin-bottom: 2rem;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
         }
 
         .section-title::after {
             content: "";
             flex: 1;
             height: 1px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--border-color);
         }
 
         .trips-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
-        /* CARTES LOOK PREMIUM/ÉPURÉ */
+        /* CARTES LOOK JAPONAIS MODERNE */
         .trip-card {
             background-color: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             overflow: hidden;
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .trip-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.3);
+            border-color: rgba(214, 175, 55, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .trip-card-image {
-            height: 180px;
+            height: 190px;
             background-size: cover;
             background-position: center;
             position: relative;
         }
 
-        /* Dégradé sombre doux sur l'image pour l'intégrer au design noir */
         .trip-card-image::after {
             content: "";
             position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 60%;
+            bottom: 0; left: 0; width: 100%; height: 50%;
             background: linear-gradient(to top, var(--bg-card), transparent);
         }
 
@@ -208,16 +250,18 @@
         }
 
         .trip-card-body h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            font-weight: 400;
             margin-bottom: 0.5rem;
-            color: #FFF;
+            color: var(--text-main);
         }
 
         .trip-card-dates {
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 1rem;
+            letter-spacing: 0.05em;
         }
 
         .trip-card-footer {
@@ -225,67 +269,84 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
             font-size: 0.9rem;
         }
 
         .trip-budget {
-            color: #10B981; /* Vert/Cyan subtil pour le budget */
+            color: var(--color-gold);
             font-weight: 600;
+            font-size: 0.95rem;
         }
 
         .trip-arrow {
             color: var(--text-muted);
-            transition: transform 0.2s ease;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.2s ease;
         }
 
         .trip-card:hover .trip-arrow {
-            transform: translateX(4px);
-            color: var(--color-accent);
+            color: var(--color-gold);
         }
 
-        /* 7. RESPONSIVE SIMPLE (MOBILE) */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.2rem; }
-            .hero { padding: 4rem 0 2rem 0; }
+            .hero-logo-wrapper img { height: 200px; }
+            .hero h1 { font-size: 2rem; }
+            .hero { padding: 2rem 0; }
             .trips-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
+    <!-- HALO LUMINEUX D'ARRIÈRE-PLAN -->
+    <div class="hero-bg-glow"></div>
+
+    <!-- BARRE DE NAVIGATION MINIMALISTE -->
     <header>
         <div class="container">
-            <a href="index.html" class="logo-link">
-                <img src="image/logo kaido V4.png" alt="Kaido Logo">
-            </a>
+            <a href="index.html" class="brand-name">KAIDO</a>
             <nav>
-                <a href="creer.html">+ Nouveau projet</a>
+                <a href="creer.html">+ Nouveau Voyage</a>
             </nav>
         </div>
     </header>
 
+    <!-- ZONE HERO AVEC LOGO V4 EN MAJESTÉ -->
     <section class="hero">
         <div class="container">
-            <h1>Vos destinations devienent claires.</h1>
-            <p>Planifiez vos itinéraires, calculez la logistique et pilotez vos budgets sur une interface pensée pour l'essentiel.</p>
+            <!-- LE LOGO EST AU CENTRE DE L'ATTENTION -->
+            <div class="hero-logo-wrapper">
+                <img src="image/logo kaido V4.png" alt="Kaido Logo V4">
+            </div>
+            
+            <h1>
+                <span>Planificateur d'itinéraires</span>
+                Vos destinations deviennent claires.
+            </h1>
+            <p>Concevez vos carnets de route, calculez la logistique et pilotez vos budgets sur une interface épurée et authentique.</p>
             <a href="creer.html" class="btn-primary">Tracer une nouvelle route</a>
         </div>
     </section>
 
+    <!-- CARNETS DE ROUTE -->
     <main class="container trips-section">
         <h2 class="section-title">Mes carnets de route</h2>
         
         <div class="trips-grid" id="trips-display-container">
+            <!-- Exemple par défaut si vide (Remplacé par le JS) -->
             <a href="voyage.html" class="trip-card">
                 <div class="trip-card-image" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80');"></div>
                 <div class="trip-card-body">
                     <div>
-                        <h3>Barcelone, Espagne</h3>
-                        <div class="trip-card-dates">📅 18/07/2026 au 22/07/2026</div>
+                        <h3>Kyoto, Japon</h3>
+                        <div class="trip-card-dates">📅 12/10/2026 au 22/10/2026</div>
                     </div>
                     <div class="trip-card-footer">
-                        <span class="trip-budget">850 €</span>
+                        <span class="trip-budget">1 450 €</span>
                         <span class="trip-arrow">Voir l'itinéraire →</span>
                     </div>
                 </div>
@@ -293,20 +354,20 @@
         </div>
     </main>
 
+    <!-- CODE SCRIPT DE CHARGEMENT DYNAMIQUE -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('trips-display-container');
             const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
 
             if (trips.length > 0) {
-                container.innerHTML = ''; // Vide le bloc de démo
+                container.innerHTML = ''; // Vide l'exemple
                 
                 trips.forEach(trip => {
                     const card = document.createElement('a');
                     card.href = 'voyage.html';
                     card.className = 'trip-card';
                     
-                    // Clic enregistre le voyage actif
                     card.addEventListener('click', () => {
                         localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
                     });
