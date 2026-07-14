@@ -257,6 +257,7 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
+   <!-- LOGIQUE DE CRÉATION CORRIGÉE, SÉCURISÉE ET INTEGRÉE AVEC LOCALSTORAGE -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('create-trip-form');
@@ -269,7 +270,7 @@
                     const submitBtn = form.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
-try {
+                    try {
                         let destination = "";
                         const modernField = document.getElementById('trip-destination-modern');
                         
@@ -295,8 +296,9 @@ try {
                             destination = (backupInput && backupInput.value) ? backupInput.value : "Destination Inconnue";
                         }
                         
-                        console.log("📍 Destination détectée :", destination);                 
+                        console.log("📍 Destination détectée :", destination);
 
+                        // Récupération des autres données du formulaire
                         const departureInput = document.getElementById('trip-departure');
                         const departure = departureInput ? departureInput.value : 'Paris';
                         const dateStart = document.getElementById('trip-date-start').value;
@@ -306,8 +308,9 @@ try {
                         const notesInput = document.getElementById('trip-notes');
                         const desc = notesInput ? notesInput.value : '';
 
-                        if (!destination) {
-                            alert("Veuillez sélectionner ou saisir une destination de voyage.");
+                        // Sécurités de validation de surface
+                        if (destination === "Destination Inconnue") {
+                            alert("Veuillez sélectionner ou saisir une destination de voyage valide.");
                             return;
                         }
 
@@ -340,7 +343,7 @@ try {
                             return;
                         }
 
-                        // Itinéraire par défaut de secours
+                        // Génération automatique de l'itinéraire temporaire Kaido
                         const spots = [
                             "Le centre historique et ses monuments incontournables",
                             "Le grand parc de la ville et ses espaces de détente",
@@ -366,32 +369,37 @@ try {
                             });
                         }
 
-                        const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
-
-                        const newTrip = {
+                        // --- SAUVEGARDE ET REDIRECTION ÉPURÉE (Ligne 298 fixée) ---
+                        const tripData = {
                             id: Date.now(),
-                            title: destination,
                             departure: departure,
+                            destination: destination,
+                            start: dateStart,
+                            end: dateEnd,
                             dates: `${itinerary[0].dateText} au ${itinerary[itinerary.length - 1].dateText}`,
-                            dateStart: dateStart,
-                            dateEnd: dateEnd,
                             budget: budget,
                             desc: desc,
-                            image: finalImage,
+                            image: `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`,
                             itinerary: itinerary
                         };
 
-                        const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                        currentTrips.push(newTrip);
-                        localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
-                        localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
+                        // Sauvegarde croisée dans le localStorage pour être lue par toutes tes pages
+                        localStorage.setItem('currentTrip', JSON.stringify(tripData));
+                        localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
 
-                        console.log("Voyage créé ! Redirection...");
-                        window.location.href = 'voyage.html';
+                        // Ajout à la base de données globale historique
+                        const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                        currentTrips.push(tripData);
+                        localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
+
+                        console.log("✈️ Voyage sauvegardé avec succès dans le localStorage ! Redirection...");
+                        
+                        // Redirection finale et fluide vers ta page principale
+                        window.location.href = 'index.html';
 
                     } catch (error) {
-                        console.error("Erreur critique :", error);
-                        alert("Une erreur est survenue : " + error.message);
+                        console.error("Erreur critique stoppée :", error);
+                        alert("Une erreur est survenue lors de la création : " + error.message);
                         if (submitBtn) {
                             submitBtn.textContent = originalBtnText;
                             submitBtn.disabled = false;
