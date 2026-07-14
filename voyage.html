@@ -7,7 +7,26 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Petit style rapide pour la zone d'édition masquée */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .edit-modal-content {
+            background: #102a43; /* Pied dans le design system de Kaido */
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%; max-width: 500px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+    </style>
 </head>
 <body>
 
@@ -32,7 +51,10 @@
             
             <section class="timeline-itinerary" style="flex: 1;">
                 <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem;">
-                    <h3>Description & Notes</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">Description & Notes</h3>
+                        <button id="btn-open-edit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background-color: #486581;">⚙️ Modifier le voyage</button>
+                    </div>
                     <p id="trip-main-desc" style="color: var(--text-muted); line-height: 1.6;"></p>
                 </div>
 
@@ -54,14 +76,41 @@
                     </a>
                 </div>
             </aside>
-
         </div>
     </main>
 
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Modifier les détails du voyage</h3>
+            <form id="edit-trip-form">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">📅 Date Aller</label>
+                    <input type="date" id="edit-date-start" class="form-control" style="width:100%; padding:0.5rem;" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">📅 Date Retour</label>
+                    <input type="date" id="edit-date-end" class="form-control" style="width:100%; padding:0.5rem;" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">💶 Budget (€)</label>
+                    <input type="number" id="edit-budget" class="form-control" style="width:100%; padding:0.5rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem;">📝 Notes & Description</label>
+                    <textarea id="edit-desc" class="form-control" rows="3" style="width:100%; padding:0.5rem;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" id="btn-close-edit" class="btn" style="background: #486581; border:none;">Annuler</button>
+                    <button type="submit" class="btn" style="background: #243b53; border:none;">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1.1 Récupération du voyage actif en mémoire
-            const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
+            let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
+            const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
 
             if (!activeTrip) {
                 alert("Aucun voyage sélectionné. Retour au tableau de bord.");
@@ -69,10 +118,131 @@
                 return;
             }
 
-            // 1.2 Injection des données textuelles de base
-            document.getElementById('trip-main-title').textContent = activeTrip.title;
-            document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates}`;
-            document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
-            document.getElementById('trip-budget').textContent = `${activeTrip.budget || 0} €`;
+            // --- FONCTION DE RENDU DE LA PAGE ---
+            function renderPage() {
+                document.getElementById('trip-main-title').textContent = activeTrip.title;
+                document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates}`;
+                document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
+                document.getElementById('trip-budget').textContent = `${activeTrip.budget || 0} €`;
 
-            //
+                if (activeTrip.image) {
+                    document.getElementById('trip-cover').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${activeTrip.image}')`;
+                }
+
+                // Lien Google Flights
+                const destination = activeTrip.title ? activeTrip.title.split(',')[0].trim() : '';
+                const departure = activeTrip.departure ? activeTrip.departure.split(',')[0].trim() : 'Paris';
+                const flightBtn = document.getElementById('btn-google-flights');
+                if (destination) {
+                    flightBtn.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}%20on%20${activeTrip.dateStart}%20through%20${activeTrip.dateEnd}`;
+                }
+
+                // Rendu des jours
+                const daysContainer = document.getElementById('itinerary-days-container');
+                daysContainer.innerHTML = ''; // Nettoyer
+                
+                if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
+                    activeTrip.itinerary.forEach(day => {
+                        const dayBlock = document.createElement('div');
+                        dayBlock.className = 'day-block card-box';
+                        let stepsHTML = '';
+                        day.steps.forEach(step => {
+                            stepsHTML += `
+                                <div class="step-item">
+                                    <div class="step-time">${step.time || '--:--'}</div>
+                                    <div class="step-details">
+                                        <h4>${step.activity}</h4>
+                                        ${step.location ? `<p style="font-size:0.85rem; color:var(--text-muted);">📍 ${step.location}</p>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        dayBlock.innerHTML = `
+                            <div class="day-title-box"><span class="day-number">${day.day}</span><h4>${day.dateText || ''}</h4></div>
+                            <div class="steps-timeline" style="margin-top: 1.5rem;">${stepsHTML}</div>
+                        `;
+                        daysContainer.appendChild(dayBlock);
+                    });
+                }
+            }
+
+            renderPage();
+
+            // --- LOGIQUE DE LA FENÊTRE DE MODIFICATION ---
+            const modal = document.getElementById('editModal');
+            const btnOpen = document.getElementById('btn-open-edit');
+            const btnClose = document.getElementById('btn-close-edit');
+            const editForm = document.getElementById('edit-trip-form');
+
+            // Ouvrir et pré-remplir les champs avec les données existantes
+            btnOpen.addEventListener('click', () => {
+                document.getElementById('edit-date-start').value = activeTrip.dateStart || '';
+                document.getElementById('edit-date-end').value = activeTrip.dateEnd || '';
+                document.getElementById('edit-budget').value = activeTrip.budget || 0;
+                document.getElementById('edit-desc').value = activeTrip.desc || '';
+                modal.style.display = 'flex';
+            });
+
+            // Fermer sans enregistrer
+            btnClose.addEventListener('click', () => { modal.style.display = 'none'; });
+
+            // Soumettre les modifications
+            editForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const newStart = document.getElementById('edit-date-start').value;
+                const newEnd = document.getElementById('edit-date-end').value;
+                const newBudget = document.getElementById('edit-budget').value;
+                const newDesc = document.getElementById('edit-desc').value;
+
+                // 1. Calcul du nouveau nombre de jours si les dates ont bougé
+                const start = new Date(newStart);
+                const end = new Date(newEnd);
+                const timeDiff = end.getTime() - start.getTime();
+                const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+                if (totalDays <= 0) {
+                    alert("La date de retour doit être après la date de départ !");
+                    return;
+                }
+
+                // 2. Mettre à jour l'objet du voyage actif
+                activeTrip.dateStart = newStart;
+                activeTrip.dateEnd = newEnd;
+                activeTrip.budget = newBudget;
+                activeTrip.desc = newDesc;
+                
+                // Formatage lisible des dates (JJ/MM/AAAA)
+                const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                activeTrip.dates = `${formatDate(start)} au ${formatDate(end)}`;
+
+                // Optionnel : On réadapte les dates écrites sur les blocs de jours existants
+                if (activeTrip.itinerary) {
+                    // On ajuste les dates des jours existants par rapport à la nouvelle date de début
+                    activeTrip.itinerary.forEach((day, index) => {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + index);
+                        day.dateText = formatDate(currentDate);
+                    });
+                    
+                    // Si on a rallongé le voyage, on peut couper ou laisser l'utilisateur voir
+                    // Pour rester simple, on garde la structure actuelle mais synchronisée sur le calendrier.
+                }
+
+                // 3. Enregistrer les modifications dans le LocalStorage global
+                const tripIndex = allTrips.findIndex(t => t.id === activeTrip.id);
+                if (tripIndex !== -1) {
+                    allTrips[tripIndex] = activeTrip;
+                    localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
+                }
+                localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
+
+                // 4. Fermer la fenêtre et actualiser le visuel
+                modal.style.display = 'none';
+                renderPage();
+                console.log("Voyage mis à jour avec succès !");
+            });
+        });
+    </script>
+</body>
+</html>
