@@ -1,158 +1,161 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form');
-
-    // CATALOGUE DES ITINÉRAIRES TYPES (Le moteur piochera dedans)
-    const itineraryTemplates = {
-        "ecosse": [
-            {
-                dayNum: 1,
-                title: "Arrivée & Découverte d'Édimbourg",
-                steps: [
-                    { time: "09:30", type: "flight", label: "Atterrissage à Édimbourg (EDI)", meta: "Vol direct. Récupération des bagages." },
-                    { time: "10:30", type: "car", label: "Prise en charge véhicule — Arnold Clark", meta: "Briefing conduite à gauche et vérification des distances." },
-                    { time: "14:00", type: "visit", label: "Visite du Château d'Édimbourg", meta: "Forteresse médiévale dominant la skyline de la vieille ville." },
-                    { time: "19:00", type: "hotel", label: "Check-in : Apex Grassmarket Hotel", meta: "🔑 Réservation Booking validée. Vue sur le château." }
-                ]
-            },
-            {
-                dayNum: 2,
-                title: "En route vers les Highlands via Glencoe",
-                steps: [
-                    { time: "08:30", type: "car", label: "Départ d'Édimbourg", meta: "🚗 2h30 de route magique vers le grand nord." },
-                    { time: "11:00", type: "visit", label: "Arrêt Randonnée dans la Vallée de Glencoe", meta: "📍 Arrêt photo et marche au milieu des montagnes volcaniques." },
-                    { time: "15:30", type: "visit", label: "Château d'Eilean Donan", meta: "Le château le plus célèbre d'Écosse, entouré par les lochs." },
-                    { time: "18:30", type: "hotel", label: "Arrivée à Portree (Île de Skye)", meta: "🔑 Nuit en cottage Airbnb traditionnel." }
-                ]
-            },
-            {
-                dayNum: 3,
-                title: "Exploration sauvage de l'Île de Skye",
-                steps: [
-                    { time: "09:00", type: "visit", label: "Randonnée du Old Man of Storr", meta: "🥾 Prévoir des vêtements imperméables. Durée : 2h." },
-                    { time: "14:00", type: "visit", label: "Points de vue de Quiraing & Kilt Rock", meta: "Falaises spectaculaires plongeant dans l'océan." },
-                    { time: "18:00", type: "visit", label: "Dégustation à la Distillerie Talisker", meta: "Découverte de la fabrication du whisky insulaire." }
-                ]
-            }
-        ],
-        "japon": [
-            {
-                dayNum: 1,
-                title: "Immersion dans le Tokyo Moderne",
-                steps: [
-                    { time: "10:00", type: "flight", label: "Arrivée à l'Aéroport de Tokyo Haneda (HND)", meta: "Passage de l'immigration et récupération du Pocket Wi-Fi." },
-                    { time: "14:00", type: "visit", label: "Exploration de Shibuya & Shibuya Sky", meta: "Vue panoramique sur le carrefour le plus célèbre du monde." },
-                    { time: "19:30", type: "hotel", label: "Check-in : Hotel Gracery Shinjuku", meta: "🔑 Quartier animé. Proche de la gare." }
-                ]
-            },
-            {
-                dayNum: 2,
-                title: "Tradition et Spiritualité à Asakusa",
-                steps: [
-                    { time: "09:30", type: "visit", label: "Temple Senso-ji", meta: "Le plus vieux temple bouddhiste de Tokyo, entrée par la porte Kaminarimon." },
-                    { time: "14:00", type: "visit", label: "Ascension de la Tokyo Skytree", meta: "Plus haute tour du Japon pour une vue imprenable sur le Mont Fuji par temps clair." }
-                ]
-            },
-            {
-                dayNum: 3,
-                title: "Excursion à Kyoto en Shinkansen",
-                steps: [
-                    { time: "08:00", type: "car", label: "Départ en Train à Grande Vitesse Shinkansen", meta: "🚄 Voyage d'environ 2h15 avec le JR Pass." },
-                    { time: "11:00", type: "visit", label: "Sanctuaire Fushimi Inari-Taisha", meta: "Marche sous les milliers de Torii rouges grimpant dans la montagne." }
-                ]
-            }
-        ]
-    };
+    const form = document.getElementById('create-trip-form');
 
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const title = document.getElementById('trip-title').value;
-            const origin = document.getElementById('trip-origin').value;
-            const destinationQuery = title.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const dateStart = document.getElementById('date-start').value;
-            const dateEnd = document.getElementById('date-end').value;
-            // Génération automatique d'une image de couverture basée sur la destination
-const autoImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+            // 1. Récupération des données saisies dans le formulaire
+            const destination = document.getElementById('trip-destination').value;
+            const departure = document.getElementById('trip-departure').value || 'Paris';
+            const dateStart = document.getElementById('trip-date-start').value;
+            const dateEnd = document.getElementById('trip-date-end').value;
+            const budget = document.getElementById('trip-budget-input').value || 0;
+            const desc = document.getElementById('trip-notes').value || '';
 
-// Si l'utilisateur a tapé une destination, on l'utilise comme mot-clé pour Unsplash
-const image = title ? `https://source.unsplash.com/featured/1200x600/?${encodeURIComponent(title)}` : autoImage;
-            const desc = document.getElementById('trip-desc').value;
+            if (!destination || !dateStart || !dateEnd) {
+                alert("Veuillez remplir au moins la destination et les dates de voyage.");
+                return;
+            }
 
-            // Calcul de la durée exacte du voyage
+            // 2. Calcul du nombre de jours exact
             const start = new Date(dateStart);
             const end = new Date(dateEnd);
-            const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+            const timeDiff = end.getTime() - start.getTime();
+            const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 pour inclure le jour de départ
 
-            const options = { day: 'numeric', month: 'short' };
-            const dispStart = start.toLocaleDateString('fr-FR', options);
-            const dispEnd = end.toLocaleDateString('fr-FR', options);
-
-            // ANALYSE DE LA DESTINATION POUR LE MOTEUR
-            let generatedItinerary = [];
-            // On cherche si un mot-clé correspond à notre catalogue (ex: si le titre contient "Écosse")
-            let detectedKey = Object.keys(itineraryTemplates).find(key => destinationQuery.includes(key));
-
-            if (detectedKey) {
-                // On récupère le modèle, et on l'adapte à la durée choisie par l'utilisateur
-                const template = itineraryTemplates[detectedKey];
-                generatedItinerary = template.filter(day => day.dayNum <= diffDays);
+            if (totalDays <= 0) {
+                alert("La date de retour doit être après la date de départ !");
+                return;
             }
 
-        // CALCUL DES ESTIMATIONS FINANCIÈRES AUTOMATIQUES
-            let costFlight = 0;
-            let costHotelPerNight = 0;
-            let costCarPerDay = 0;
-
-            // Paramétrage des coûts selon la destination détectée
-            if (detectedKey === "ecosse") {
-                costFlight = 150;
-                costHotelPerNight = 110;
-                costCarPerDay = 45;
-            } else if (detectedKey === "japon") {
-                costFlight = 750;
-                costHotelPerNight = 95;
-                costCarPerDay = 60;
-            } else {
-                // Valeurs par défaut pour une autre destination
-                costFlight = 200;
-                costHotelPerNight = 80;
-                costCarPerDay = 40;
+            // 3. Appel à Google Places pour récupérer les lieux incontournables
+            let spots = [];
+            try {
+                spots = await fetchTopPlaces(destination);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des lieux Google Places:", error);
+                // Lieux de secours génériques si l'API échoue
+                spots = ["Centre-ville historique", "Grand Parc de la ville", "Musée local", "Quartier typique", "Point de vue panoramique"];
             }
 
-            // Calcul totaux
-            const totalFlight = costFlight;
-            const totalHotel = costHotelPerNight * (diffDays - 1); // Nuits = jours - 1
-            const totalCar = costCarPerDay * diffDays;
-            const totalGlobal = totalFlight + totalHotel + totalCar;
+            // 4. Distribution des lieux dans l'itinéraire jour par jour
+            const itinerary = generateItinerary(start, totalDays, spots);
 
-            // Création du package complet du voyage avec la section budget
-         // Création du package complet du voyage
+            // 5. Génération de l'image de couverture automatique (Unsplash)
+            const autoImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+            const image = `https://source.unsplash.com/featured/1200x600/?${encodeURIComponent(destination)}`;
+
+            // 6. Création de l'objet Voyage final
             const newTrip = {
                 id: Date.now(),
-                title: title,
-                origin: origin, // 👈 AJOUTÉ ICI
-                dates: `${dispStart} au ${dispEnd} • ${diffDays} jours`,
-                dateStart: dateStart, // Sauvegarde la date brute pour Google Flights
-                dateEnd: dateEnd,     // Sauvegarde la date brute pour Google Flights
+                title: destination,
+                departure: departure,
+                dates: `${formatDate(start)} au ${formatDate(end)}`,
+                dateStart: dateStart,
+                dateEnd: dateEnd,
+                budget: budget,
+                desc: desc,
                 image: image,
-                desc: desc || `Un magnifique itinéraire automatique tracé par Kaido.`,
-                itinerary: generatedItinerary,
-                budget: {
-                    vols: totalFlight,
-                    hotels: totalHotel,
-                    voiture: totalCar,
-                    total: totalGlobal
-                }
+                itinerary: itinerary
             };
 
-            // Sauvegarde dans le localStorage
-            const existingTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-            existingTrips.push(newTrip);
-            localStorage.setItem('kaido_trips', JSON.stringify(existingTrips));
+            // 7. Enregistrement dans le LocalStorage
+            const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+            currentTrips.push(newTrip);
+            localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-            // Redirection immédiate vers la page d'accueil
-            window.location.href = 'index.html';
+            // Définir comme voyage actif pour redirection directe
+            localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
+
+            // Redirection vers la page du voyage généré !
+            window.location.href = 'voyage.html';
         });
     }
 });
+
+// ==========================================================================
+// FONCTIONS UTILES (PLACES API & CALCULS)
+// ==========================================================================
+
+/**
+ * Interroge Google Places pour trouver des points d'intérêt à destination
+ */
+function fetchTopPlaces(destinationName) {
+    return new Promise((resolve, reject) => {
+        // On crée un élément div temporaire requis par Google pour instancier le service
+        const tempDiv = document.createElement('div');
+        const service = new google.maps.places.PlacesService(tempDiv);
+
+        // Requête de recherche textuelle axée sur le tourisme
+        const request = {
+            query: `attractions touristiques à ${destinationName}`,
+            fields: ['name', 'rating', 'formatted_address'],
+        };
+
+        service.textSearch(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                // On garde les 10 meilleurs résultats triés par note
+                const topSpots = results
+                    .filter(place => place.name)
+                    .slice(0, 10)
+                    .map(place => place.name);
+                resolve(topSpots);
+            } else {
+                reject(status);
+            }
+        });
+    });
+}
+
+/**
+ * Répartit de manière équilibrée les points d'intérêts sur le nombre de jours
+ */
+function generateItinerary(startDate, totalDays, spots) {
+    const itinerary = [];
+    let spotIndex = 0;
+
+    for (let i = 0; i < totalDays; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+
+        // Définition des activités du jour (Matin et Après-midi)
+        const daySteps = [];
+        
+        // Activité 1 (Matin)
+        const spotMatin = spots[spotIndex % spots.length] || "Exploration libre des environs";
+        daySteps.push({
+            time: "10:00",
+            activity: `Découverte de : ${spotMatin}`,
+            location: spotMatin
+        });
+        spotIndex++;
+
+        // Activité 2 (Après-midi)
+        const spotAprem = spots[spotIndex % spots.length] || "Balade dans les ruelles typiques";
+        daySteps.push({
+            time: "15:00",
+            activity: `Visite guidée ou randonnée : ${spotAprem}`,
+            location: spotAprem
+        });
+        spotIndex++;
+
+        itinerary.push({
+            day: `Jour ${i + 1}`,
+            dateText: formatDate(currentDate),
+            steps: daySteps
+        });
+    }
+
+    return itinerary;
+}
+
+/**
+ * Formatage rapide des dates au format FR (JJ/MM/AAAA)
+ */
+function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
