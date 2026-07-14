@@ -4,45 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracer une nouvelle route - Kaido</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 1. CODE COULEUR UNIVERSEL KAIDO (ESTAMPE) */
+        :root {
+            --bg-dark: #0D0B09;        /* Noir d'encre profond */
+            --bg-card: #14110E;        /* Brun/noir pour le bloc formulaire */
+            --color-gold: #D4AF37;      /* Or chaud */
+            --color-torii: #A63A2B;     /* Rouge Torii traditionnel */
+            --text-main: #F4EFEA;       /* Blanc ivoire doux */
+            --text-muted: #8E847A;      /* Gris chaud secondaire */
+            --border-color: rgba(212, 175, 55, 0.08);
+            --font-kaido: 'Plus Jakarta Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+
+        /* 2. RESET TOTAL DE SÉCURITÉ (Pas de conflit possible) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-kaido);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px; /* Plus serré pour un formulaire élégant et centré */
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* 3. EN-TÊTE ISOLE */
+        .kaido-header {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .kaido-header .brand-name {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .kaido-header nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .kaido-header nav a:hover {
+            color: var(--color-gold);
+        }
+
+        /* 4. HERO SECTION DE CRÉATION */
+        .create-hero {
+            padding: 4rem 0 3rem 0;
+            text-align: center;
+        }
+
+        .create-hero h1 {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 0.8rem;
+            color: var(--text-main);
+        }
+
+        .create-hero p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* 5. FORMULAIRE ÉPURÉ LOOK JAPONAIS MODERNE */
+        .kaido-form-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 4px;
+            margin-bottom: 5rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-gold);
+            margin-bottom: 0.6rem;
+        }
+
+        /* Inputs ultra épurés (Ligne du bas lumineuse, fond sombre texturé) */
+        .form-control {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 2px solid rgba(214, 175, 55, 0.2);
+            padding: 0.9rem 1rem;
+            color: var(--text-main);
+            font-family: var(--font-kaido);
+            font-size: 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.04);
+            border-color: rgba(214, 175, 55, 0.4);
+            border-bottom-color: var(--color-gold);
+        }
+
+        /* Alignement des dates sur une ligne */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Le gros bouton d'action rouge Torii */
+        .kaido-submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--color-torii), #82271B);
+            color: white;
+            border: 1px solid rgba(214, 175, 55, 0.15);
+            padding: 1.1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(166, 58, 43, 0.15);
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .kaido-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(166, 58, 43, 0.35);
+            border-color: var(--color-gold);
+        }
+
+        /* Surcharge de style pour forcer le Web Component de Google à s'intégrer proprement */
+        gmp-place-autocomplete {
+            width: 100%;
+        }
+        
+        /* Ajustement interne cosmétique pour la barre Google */
+        gmp-place-autocomplete::part(input) {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-bottom: 2px solid rgba(214, 175, 55, 0.2) !important;
+            padding: 0.9rem 1rem !important;
+            color: var(--text-main) !important;
+            font-family: var(--font-kaido) !important;
+            font-size: 1rem !important;
+            border-radius: 4px !important;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .kaido-form-box { padding: 1.5rem; }
+            .create-hero h1 { font-size: 2rem; }
+        }
+    </style>
 </head>
 <body>
 
-    <header>
-        <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/logo kaido V4.png" alt="Kaido Logo" style="height: 60px; width: auto; object-fit: contain;">
-        </a>
-        <nav>
-            <a href="index.html">Mes Voyages</a>
-        </nav>
-    </header>
+    <div class="container">
+        <!-- BARRE DE NAVIGATION ÉPURÉE -->
+        <header class="kaido-header">
+            <a href="index.html" class="brand-name">KAIDO</a>
+            <nav>
+                <a href="index.html">Mes Voyages</a>
+            </nav>
+        </header>
 
-    <section class="hero-section" style="height: 25vh; min-height: 180px;">
-        <div class="hero-content">
-            <h2>Tracer une nouvelle route</h2>
-            <p>Renseignez vos dates et laissez Kaido concevoir votre itinéraire sur-mesure.</p>
-        </div>
-    </section>
+        <!-- INTRO TEXTUELLE SANS CONFLIT -->
+        <section class="create-hero">
+            <h1>Tracer une nouvelle route</h1>
+            <p>Renseignez vos dates et laissez l'univers de Kaido concevoir votre carnet de voyage.</p>
+        </section>
 
-    <main class="container">
-        <section class="form-box card-box">
+        <!-- FORMULAIRE SÉCURISÉ -->
+        <main class="kaido-form-box">
             <form id="create-trip-form">
                 
+                <!-- DEPART -->
                 <div class="form-group">
                     <label for="trip-departure">🛫 Ville de départ</label>
                     <input type="text" id="trip-departure" class="form-control" placeholder="Ex: Paris, Lyon, Marseille..." required>
                 </div>
 
+                <!-- DESTINATION (GOOGLE COMPONENT MODERNISÉ VISUELLEMENT) -->
                 <div class="form-group">
                     <label for="trip-destination-modern">📍 Destination de vos rêves</label>
-                    <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Tokyo, Islande, Rome..." style="width: 100%;"></gmp-place-autocomplete>
+                    <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Tokyo, Islande, Barcelone..."></gmp-place-autocomplete>
                     <input type="hidden" id="trip-destination" required>
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- DATES -->
+                <div class="form-row">
                     <div class="form-group">
                         <label for="trip-date-start">📅 Date Aller</label>
                         <input type="date" id="trip-date-start" class="form-control" required>
@@ -53,41 +247,42 @@
                     </div>
                 </div>
 
+                <!-- BUDGET -->
                 <div class="form-group">
                     <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
-                    <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1200" min="0">
+                    <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1500" min="0">
                 </div>
 
+                <!-- NOTES -->
                 <div class="form-group">
                     <label for="trip-notes">📝 Notes & envies de voyage (Optionnel)</label>
-                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Je veux absolument voir des temples, faire de la randonnée et manger local..."></textarea>
+                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Randonnées, visites de temples, spécialités culinaires..."></textarea>
                 </div>
 
-                <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem; border: none; cursor: pointer;">
+                <!-- VALIDATION -->
+                <button type="submit" class="kaido-submit-btn">
                     🚀 Concevoir mon itinéraire
                 </button>
 
             </form>
-        </section>
-    </main>
+        </main>
+    </div>
 
-   <script>
+    <!-- SCRIPT DE LIAISON COMPATIBLE INTERCEPTIONS GOOGLE -->
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const autocompleteComponent = document.getElementById('trip-destination-modern');
             const hiddenDestinationInput = document.getElementById('trip-destination');
 
             if (autocompleteComponent) {
-                // On écoute UNIQUEMENT l'événement officiel et supporté par Google
+                // Écoute stricte de l'événement officiel recommandé
                 autocompleteComponent.addEventListener('gmp-placeselect', (event) => {
-                    // Avec 'gmp-placeselect', l'objet sélectionné est directement accessible dans event.detail.place
                     const place = event.detail.place;
-                    
                     if (place) {
-                        // Récupération du nom lisible de la destination
                         const name = place.displayName || place.formattedAddress || place.name;
                         if (name) {
                             hiddenDestinationInput.value = name;
-                            console.log("📍 Destination enregistrée avec succès :", name);
+                            console.log("📍 Destination capturée :", name);
                         }
                     }
                 });
@@ -95,8 +290,10 @@
         });
     </script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
+    <!-- CHARGEMENT SÉCURISÉ DE L'API GOOGLE MAPS -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwicdiGq5hkdk5idPdUQi_A01vT5faegU&libraries=places&v=weekly&loading=async" defer></script>
     
+    <!-- TON JAVASCRIPT LOGIQUE -->
     <script src="js/create-trip.js"></script>
 
 </body>
