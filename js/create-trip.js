@@ -3,20 +3,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (form) {
         form.addEventListener('submit', async (e) => {
-            // 💡 Bloque immédiatement le rechargement automatique de la page
             e.preventDefault();
             console.log("Formulaire intercepté, début de la génération...");
 
-            // 1. Récupération sécurisée de la destination (champ masqué ou direct depuis le Web Component)
-            let destination = document.getElementById('trip-destination').value;
+            // --- DEBUT DE LA RECUPERATION BLINDEE ---
+            let destination = "";
+
+            // 1. On cherche le composant moderne de Google
+            const modernField = document.getElementById('trip-destination-modern');
             
-            if (!destination) {
-                const modernField = document.getElementById('trip-destination-modern');
-                if (modernField && modernField.value) {
-                    const placeValue = modernField.value;
-                    destination = placeValue.displayName || placeValue.formattedAddress || placeValue.name || "";
+            if (modernField) {
+                // Option A : On tente de lire l'objet "value" officiel de Google si l'événement a fonctionné
+                if (modernField.value) {
+                    destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
+                }
+                
+                // Option B (Infaillible) : Si l'objet de Google est vide, on va extraire DIRECTEMENT le texte tapé dans l'input physique
+                if (!destination) {
+                    const innerInput = modernField.shadowRoot ? modernField.shadowRoot.querySelector('input') : modernField.querySelector('input');
+                    if (innerInput && innerInput.value) {
+                        destination = innerInput.value;
+                    }
                 }
             }
+
+            // Option C : Repli historique sur le champ caché
+            if (!destination) {
+                destination = document.getElementById('trip-destination').value;
+            }
+            
+            console.log("📍 Destination détectée pour la soumission :", destination);
+            // --- FIN DE LA RECUPERATION BLINDEE ---
 
             // Récupération des autres données du formulaire
             const departure = document.getElementById('trip-departure').value || 'Paris';
@@ -31,17 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Changement d'état visuel du bouton de soumission pendant les calculs
+            // Changement d'état visuel du bouton de soumission
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.textContent;
             submitBtn.textContent = "Calcul de l'itinéraire en cours...";
             submitBtn.disabled = true;
 
-            // 2. Calcul du nombre de jours exact
+            // Calcul du nombre de jours exact
             const start = new Date(dateStart);
             const end = new Date(dateEnd);
             const timeDiff = end.getTime() - start.getTime();
-            const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 pour inclure le jour de départ
+            const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
             if (totalDays <= 0) {
                 alert("La date de retour doit être après la date de départ !");
@@ -50,33 +67,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 3. Récupération des lieux emblématiques via Google Places API
+            // Récupération des lieux emblématiques (avec secours automatique)
             let spots = [];
             try {
                 console.log(`Recherche des attractions majeures pour : ${destination}`);
                 spots = await fetchTopPlacesSafe(destination);
             } catch (error) {
-                console.warn("Google Places textSearch indisponible ou bloqué. Utilisation du plan de secours.", error);
-                // Notre catalogue de secours pour que l'application fonctionne même hors-ligne
+                console.warn("Google Places indisponible. Utilisation du plan de secours.", error);
                 spots = [
                     "Le centre historique et ses monuments incontournables",
                     "Le grand parc de la ville et ses espaces de détente",
                     "Le musée d'art et d'histoire locale",
                     "Le quartier animé et ses ruelles commerçantes",
                     "Le belvédère principal pour une vue panoramique",
-                    "Le grand marché traditionnel local",
-                    "Découverte de l'architecture typique du quartier historique"
+                    "Le grand marché traditionnel local"
                 ];
             }
 
-            // 4. Distribution des points d'intérêt dans l'itinéraire jour par jour
+            // Distribution dans l'itinéraire jour par jour
             const itinerary = generateItinerary(start, totalDays, spots);
 
-            // 5. Génération de l'image de couverture automatique basée sur la destination (Unsplash)
-            const image = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
-            const finalImage = destination ? `https://source.unsplash.com/featured/1200x600/?${encodeURIComponent(destination)}` : image;
+            // Génération de l'image de couverture automatique
+            const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
 
-            // 6. Création de l'objet Voyage final
+            // Création de l'objet Voyage final
             const newTrip = {
                 id: Date.now(),
                 title: destination,
@@ -90,17 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 itinerary: itinerary
             };
 
-            // 7. Sauvegarde dans le LocalStorage de l'ordinateur
+            // Sauvegarde dans le LocalStorage
             const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
             currentTrips.push(newTrip);
             localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-            // Définition comme voyage actif pour l'affichage immédiat sur voyage.html
+            // Définition comme voyage actif
             localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
 
-            console.log("Voyage créé avec succès ! Redirection vers voyage.html...");
-            
-            // Redirection directe vers la page de l'itinéraire détaillé
+            console.log("Voyage créé avec succès ! Redirection...");
             window.location.href = 'voyage.html';
         });
     }
@@ -110,19 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // FONCTIONS STRATÉGIQUES (PLACES API & AGENCEMENT)
 // ==========================================================================
 
-/**
- * Interroge l'API Google Places pour extraire les lieux les plus populaires d'une ville
- */
 function fetchTopPlacesSafe(destinationName) {
     return new Promise((resolve, reject) => {
-        // Sécurité : Est-ce que l'API Google Maps est chargée en mémoire ?
         if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
             reject("Google Maps JavaScript API n'est pas chargée.");
             return;
         }
 
         try {
-            // On crée un nœud HTML temporaire requis pour instancier le service de recherche
             const tempDiv = document.createElement('div');
             const service = new google.maps.places.PlacesService(tempDiv);
 
@@ -133,7 +140,6 @@ function fetchTopPlacesSafe(destinationName) {
 
             service.textSearch(request, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                    // On filtre et extrait les noms des 10 premiers résultats officiels de Google
                     const topSpots = results
                         .filter(place => place.name)
                         .slice(0, 10)
@@ -154,9 +160,6 @@ function fetchTopPlacesSafe(destinationName) {
     });
 }
 
-/**
- * Organise et distribue la liste de lieux de façon harmonieuse (Matin / Après-midi)
- */
 function generateItinerary(startDate, totalDays, spots) {
     const itinerary = [];
     let spotIndex = 0;
@@ -167,7 +170,6 @@ function generateItinerary(startDate, totalDays, spots) {
 
         const daySteps = [];
         
-        // Activité 1 : Le Matin (10h00)
         const spotMatin = spots[spotIndex % spots.length];
         daySteps.push({
             time: "10:00",
@@ -176,7 +178,6 @@ function generateItinerary(startDate, totalDays, spots) {
         });
         spotIndex++;
 
-        // Activité 2 : L'Après-midi (15h00)
         const spotAprem = spots[spotIndex % spots.length];
         daySteps.push({
             time: "15:00",
@@ -195,9 +196,6 @@ function generateItinerary(startDate, totalDays, spots) {
     return itinerary;
 }
 
-/**
- * Formate rapidement les dates JS au format de lecture européen (JJ/MM/AAAA)
- */
 function formatDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
