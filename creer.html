@@ -314,13 +314,16 @@
                             if (modernField.value) {
                                 destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
                             }
-                            if (!destination) {
-                                const innerInput = modernField.shadowRoot ? modernField.shadowRoot.querySelector('input') : modernField.querySelector('input');
-                                if (innerInput && innerInput.value) {
-                                    destination = innerInput.value;
-                                }
-                            }
-                        }
+                           if (!destination) {
+    // Force la recherche de l'input de texte masqué par Google
+    const googleInput = modernField.querySelector('input') || 
+                        (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
+                        modernField.renderRoot?.querySelector('input');
+                        
+    if (googleInput && googleInput.value) {
+        destination = googleInput.value;
+    }
+}
 
                         if (!destination) {
                             const backupInput = document.getElementById('trip-destination');
