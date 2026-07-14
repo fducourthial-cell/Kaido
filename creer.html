@@ -273,31 +273,29 @@ try {
                         let destination = "";
                         const modernField = document.getElementById('trip-destination-modern');
                         
-                        // 1. Version officielle Google : On récupère l'objet Place sélectionné
+                        // 1. Récupération robuste de l'objet Place officiel (Ligne 267 fixée)
                         if (modernField && modernField.value) {
                             const place = modernField.value;
-                            destination = place.displayName || place.formattedAddress || place.name || "";
+                            destination = place?.displayName || place?.formattedAddress || place?.name || "";
                         }
                         
-                        // 2. PARS DU PRINCIPE QUE SI GOOGLE COMPLÉMENTE EN TEXTE, ON LE RÉCUPÈRE SANS PASSER PAR LE SHADOW DOM
+                        // 2. Si l'objet de sélection Google est vide, on extrait le texte brut saisi à l'écran
                         if (!destination && modernField) {
-                            // On extrait directement l'attribut textuel ou la valeur de surface du composant
-                            destination = modernField.getAttribute('value') || "";
-                        }
-
-                        // 3. LE PLAN DE SECOURS INFAILLIBLE : Si Google bloque tout, on demande à l'utilisateur de valider son texte via une petite invite rapide
-                        if (!destination) {
-                            // On regarde si un texte est visible dans le composant
-                            const inputPlein = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input');
-                            if (inputPlein && inputPlein.value) {
-                                destination = inputPlein.value;
-                            } else {
-                                // Fenêtre de secours : évite le blocage complet
-                                destination = prompt("Quelle est votre destination de voyage ? (Google a bloqué la détection automatique)");
+                            const innerInput = modernField.querySelector('input') || 
+                                                (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
+                                                modernField.renderRoot?.querySelector('input');
+                            if (innerInput && innerInput.value) {
+                                destination = innerInput.value;
                             }
                         }
+
+                        // 3. Repli de secours ultime pour éviter une valeur vide et l'alerte bloquante
+                        if (!destination) {
+                            const backupInput = document.getElementById('trip-destination');
+                            destination = (backupInput && backupInput.value) ? backupInput.value : "Destination Inconnue";
+                        }
                         
-                        console.log("📍 Destination détectée :", destination);                   
+                        console.log("📍 Destination détectée :", destination);                 
 
                         const departureInput = document.getElementById('trip-departure');
                         const departure = departureInput ? departureInput.value : 'Paris';
