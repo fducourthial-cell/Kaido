@@ -241,3 +241,166 @@
                     <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
                     <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1500" min="0">
                 </div>
+
+                <div class="form-group">
+                    <label for="trip-notes">📝 Notes & envies de voyage (Optionnel)</label>
+                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Randonnées, visites de temples, spécialités culinaires..."></textarea>
+                </div>
+
+                <button type="submit" class="kaido-submit-btn">
+                    🚀 Concevoir mon itinéraire
+                </button>
+
+            </form>
+        </main>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwicdiGq5hkdk5idPdUQi_A01vT5faegU&libraries=places&v=weekly&loading=async" defer></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('create-trip-form');
+
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    console.log("Formulaire intercepté, début de la génération...");
+
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
+
+                    try {
+                        let destination = "";
+                        const modernField = document.getElementById('trip-destination-modern');
+                        
+                        if (modernField) {
+                            if (modernField.value) {
+                                destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
+                            }
+                            
+                            if (!destination) {
+                                // Détection textuelle forcée et robuste de l'input de Google
+                                const googleInput = modernField.querySelector('input') || 
+                                                    (modernField.shadowRoot && modernField.shadowRoot.querySelector('input')) ||
+                                                    modernField.renderRoot?.querySelector('input');
+                                                    
+                                if (googleInput && googleInput.value) {
+                                    destination = googleInput.value;
+                                }
+                            }
+                        }
+
+                        if (!destination) {
+                            const backupInput = document.getElementById('trip-destination');
+                            if (backupInput) destination = backupInput.value;
+                        }
+                        
+                        console.log("📍 Destination détectée :", destination);
+
+                        const departureInput = document.getElementById('trip-departure');
+                        const departure = departureInput ? departureInput.value : 'Paris';
+                        const dateStart = document.getElementById('trip-date-start').value;
+                        const dateEnd = document.getElementById('trip-date-end').value;
+                        const budgetInput = document.getElementById('trip-budget-input');
+                        const budget = budgetInput ? budgetInput.value : 0;
+                        const notesInput = document.getElementById('trip-notes');
+                        const desc = notesInput ? notesInput.value : '';
+
+                        if (!destination) {
+                            alert("Veuillez sélectionner ou saisir une destination de voyage.");
+                            return;
+                        }
+
+                        if (!dateStart || !dateEnd) {
+                            alert("Veuillez renseigner les dates aller et retour.");
+                            return;
+                        }
+
+                        if (submitBtn) {
+                            submitBtn.textContent = "Calcul de l'itinéraire...";
+                            submitBtn.disabled = true;
+                        }
+
+                        const start = new Date(dateStart);
+                        const end = new Date(dateEnd);
+
+                        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                            throw new Error("Le format des dates n'est pas valide.");
+                        }
+
+                        const timeDiff = end.getTime() - start.getTime();
+                        const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+                        if (totalDays <= 0) {
+                            alert("La date de retour doit être après la date de départ !");
+                            if (submitBtn) {
+                                submitBtn.textContent = originalBtnText;
+                                submitBtn.disabled = false;
+                            }
+                            return;
+                        }
+
+                        // Itinéraire par défaut de secours
+                        const spots = [
+                            "Le centre historique et ses monuments incontournables",
+                            "Le grand parc de la ville et ses espaces de détente",
+                            "Le musée d'art et d'histoire locale",
+                            "Le quartier animé et ses ruelles commerçantes",
+                            "Le belvédère principal pour une vue panoramique"
+                        ];
+
+                        const itinerary = [];
+                        for (let i = 0; i < totalDays; i++) {
+                            const currentDate = new Date(start);
+                            currentDate.setDate(start.getDate() + i);
+                            
+                            const dayText = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+                            
+                            itinerary.push({
+                                day: `Jour ${i + 1}`,
+                                dateText: dayText,
+                                steps: [
+                                    { time: "10:00", activity: `Exploration : ${spots[i % spots.length]}`, location: destination },
+                                    { time: "15:00", activity: "Balade libre et découverte de la culture locale", location: destination }
+                                ]
+                            });
+                        }
+
+                        const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+
+                        const newTrip = {
+                            id: Date.now(),
+                            title: destination,
+                            departure: departure,
+                            dates: `${itinerary[0].dateText} au ${itinerary[itinerary.length - 1].dateText}`,
+                            dateStart: dateStart,
+                            dateEnd: dateEnd,
+                            budget: budget,
+                            desc: desc,
+                            image: finalImage,
+                            itinerary: itinerary
+                        };
+
+                        const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                        currentTrips.push(newTrip);
+                        localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
+                        localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
+
+                        console.log("Voyage créé ! Redirection...");
+                        window.location.href = 'voyage.html';
+
+                    } catch (error) {
+                        console.error("Erreur critique :", error);
+                        alert("Une erreur est survenue : " + error.message);
+                        if (submitBtn) {
+                            submitBtn.textContent = originalBtnText;
+                            submitBtn.disabled = false;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
