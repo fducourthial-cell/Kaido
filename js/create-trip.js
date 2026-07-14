@@ -3,17 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (form) {
         form.addEventListener('submit', async (e) => {
+            // 💡 Bloque immédiatement le rechargement automatique de la page
             e.preventDefault();
             console.log("Formulaire intercepté, début de la génération...");
 
-            // --- DEBUT DE LA RECUPERATION BLINDEE ---
+            // 1. RÉCUPÉRATION SÉCURISÉE DE LA DESTINATION (INFAILLIBLE)
             let destination = "";
-
-            // 1. On cherche le composant moderne de Google
             const modernField = document.getElementById('trip-destination-modern');
             
             if (modernField) {
-                // Option A : On tente de lire l'objet "value" officiel de Google si l'événement a fonctionné
+                // Option A : Lecture de l'objet "value" officiel de Google si l'événement de sélection a fonctionné
                 if (modernField.value) {
                     destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
                 }
@@ -33,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             console.log("📍 Destination détectée pour la soumission :", destination);
-            // --- FIN DE LA RECUPERATION BLINDEE ---
 
             // Récupération des autres données du formulaire
             const departure = document.getElementById('trip-departure').value || 'Paris';
@@ -42,55 +40,83 @@ document.addEventListener('DOMContentLoaded', () => {
             const budget = document.getElementById('trip-budget-input').value || 0;
             const desc = document.getElementById('trip-notes').value || '';
 
-            // Validation de sécurité
-            if (!destination || !dateStart || !dateEnd) {
-                alert("Veuillez remplir au moins la destination et les dates de voyage.");
+            // --- VÉRIFICATION GLOBALE DE SÉCURITÉ ---
+            if (!destination) {
+                alert("Veuillez sélectionner ou saisir une destination de voyage.");
+                return;
+            }
+
+            if (!dateStart || !dateEnd) {
+                alert("Veuillez renseigner les dates aller et retour.");
                 return;
             }
 
             // Changement d'état visuel du bouton de soumission
             const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.textContent = "Calcul de l'itinéraire en cours...";
-            submitBtn.disabled = true;
+            const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
+            if (submitBtn) {
+                submitBtn.textContent = "Calcul de l'itinéraire en cours...";
+                submitBtn.disabled = true;
+            }
 
-            // Calcul du nombre de jours exact
+            // --- CONVERSION ET CALCUL SÉCURISÉ DES DATES ---
+            console.log("Dates brutes reçues du formulaire :", { dateStart, dateEnd });
+
             const start = new Date(dateStart);
             const end = new Date(dateEnd);
-            const timeDiff = end.getTime() - start.getTime();
-            const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
-            if (totalDays <= 0) {
-                alert("La date de retour doit être après la date de départ !");
-                submitBtn.textContent = originalBtnText;
-                submitBtn.disabled = false;
+            // Vérification si les dates sont valides en mémoire
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                alert("Le format des dates sélectionnées n'est pas reconnu par le système.");
+                if (submitBtn) {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                }
                 return;
             }
 
-            // Récupération des lieux emblématiques (avec secours automatique)
+            // Calcul du nombre de jours exact (ex: du 27 au 30 Juillet = 4 jours)
+            const timeDiff = end.getTime() - start.getTime();
+            const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+            console.log("Calcul de la durée de voyage effectué :", { totalDays });
+
+            if (totalDays <= 0) {
+                alert("La date de retour doit être égale ou postérieure à la date de départ !");
+                if (submitBtn) {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+                return;
+            }
+
+            // 2. RÉCUPÉRATION DES LIEUX EMBLÉMATIQUES VIA GOOGLE PLACES API
             let spots = [];
             try {
                 console.log(`Recherche des attractions majeures pour : ${destination}`);
                 spots = await fetchTopPlacesSafe(destination);
             } catch (error) {
-                console.warn("Google Places indisponible. Utilisation du plan de secours.", error);
+                console.warn("Google Places indisponible ou bloqué. Utilisation du plan de secours.", error);
+                // Notre catalogue de secours pour que l'application fonctionne toujours
                 spots = [
                     "Le centre historique et ses monuments incontournables",
                     "Le grand parc de la ville et ses espaces de détente",
                     "Le musée d'art et d'histoire locale",
                     "Le quartier animé et ses ruelles commerçantes",
                     "Le belvédère principal pour une vue panoramique",
-                    "Le grand marché traditionnel local"
+                    "Le grand marché traditionnel local",
+                    "Découverte de l'architecture typique de la région"
                 ];
             }
 
-            // Distribution dans l'itinéraire jour par jour
+            // 3. DISTRIBUTION DES POINTS D'INTÉRÊT DANS L'ITINÉRAIRE JOUR PAR JOUR
             const itinerary = generateItinerary(start, totalDays, spots);
 
-            // Génération de l'image de couverture automatique
-            const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+            // 4. GÉNÉRATION DE L'IMAGE DE COUVERTURE AUTOMATIQUE (UNSPLASH)
+            const defaultImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+            const finalImage = destination ? `https://source.unsplash.com/featured/1200x600/?${encodeURIComponent(destination)}` : defaultImage;
 
-            // Création de l'objet Voyage final
+            // 5. CRÉATION DE L'OBJET VOYAGE FINAL
             const newTrip = {
                 id: Date.now(),
                 title: destination,
@@ -104,101 +130,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 itinerary: itinerary
             };
 
-            // Sauvegarde dans le LocalStorage
+            // 6. SAUVEGARDE DANS LE LOCALSTORAGE DE L'ORDINATEUR
             const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
             currentTrips.push(newTrip);
             localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-            // Définition comme voyage actif
+            // Définition comme voyage actif pour l'affichage immédiat sur voyage.html
             localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
 
-            console.log("Voyage créé avec succès ! Redirection...");
+            console.log("Voyage créé avec succès ! Redirection vers voyage.html...");
+            
+            // Redirection directe vers la page de l'itinéraire détaillé
             window.location.href = 'voyage.html';
         });
     }
 });
 
 // ==========================================================================
-// FONCTIONS STRATÉGIQUES (PLACES API & AGENCEMENT)
+// FONCTIONS SECONDAIRES (PLACES API & CALCULS)
 // ==========================================================================
 
+/**
+ * Interroge l'API Google Places pour extraire les lieux les plus populaires d'une ville
+ */
 function fetchTopPlacesSafe(destinationName) {
     return new Promise((resolve, reject) => {
+        // Sécurité : Est-ce que l'API Google Maps est chargée en mémoire ?
         if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
             reject("Google Maps JavaScript API n'est pas chargée.");
             return;
-        }
-
-        try {
-            const tempDiv = document.createElement('div');
-            const service = new google.maps.places.PlacesService(tempDiv);
-
-            const request = {
-                query: `attractions touristiques à ${destinationName}`,
-                fields: ['name']
-            };
-
-            service.textSearch(request, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                    const topSpots = results
-                        .filter(place => place.name)
-                        .slice(0, 10)
-                        .map(place => place.name);
-                    
-                    if (topSpots.length > 0) {
-                        resolve(topSpots);
-                    } else {
-                        reject("Aucun point d'intérêt trouvé par Google.");
-                    }
-                } else {
-                    reject(`Statut de réponse invalide : ${status}`);
-                }
-            });
-        } catch (e) {
-            reject(e);
-        }
-    });
-}
-
-function generateItinerary(startDate, totalDays, spots) {
-    const itinerary = [];
-    let spotIndex = 0;
-
-    for (let i = 0; i < totalDays; i++) {
-        const currentDate = new Date(startDate);
-        currentDate.setDate(startDate.getDate() + i);
-
-        const daySteps = [];
-        
-        const spotMatin = spots[spotIndex % spots.length];
-        daySteps.push({
-            time: "10:00",
-            activity: `Visite et exploration : ${spotMatin}`,
-            location: spotMatin
-        });
-        spotIndex++;
-
-        const spotAprem = spots[spotIndex % spots.length];
-        daySteps.push({
-            time: "15:00",
-            activity: `Découverte incontournable : ${spotAprem}`,
-            location: spotAprem
-        });
-        spotIndex++;
-
-        itinerary.push({
-            day: `Jour ${i + 1}`,
-            dateText: formatDate(currentDate),
-            steps: daySteps
-        });
-    }
-
-    return itinerary;
-}
-
-function formatDate(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-}
