@@ -20,27 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('article');
                 card.className = 'trip-card dynamic-trip'; // Classe repère pour le nettoyage
                 
-                // Agencement fidèle à tes cartes avec intégration du bouton de suppression discret
+                // Reprise stricte de ton HTML fonctionnel + ajout du bouton poubelle inline
                 card.innerHTML = `
                     <div class="trip-banner" style="background-image: url('${trip.image || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'}');"></div>
                     <div class="trip-details">
                         <div>
                             <h3>${trip.title || 'Mon Voyage'}</h3>
                             <p class="trip-meta">📅 ${trip.dates}</p>
-                            ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
+                            ${trip.desc ? `<p style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.95rem;">${trip.desc}</p>` : ''}
                         </div>
-                        
-                        <div class="trip-footer">
-                            <span class="trip-budget">${trip.budget ? trip.budget : '0'} €</span>
-                            <div class="trip-actions">
-                                <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
-                                <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+                            <span style="color: #D4AF37; font-weight: bold; font-size: 1.1rem;">${trip.budget ? trip.budget : '0'} €</span>
+                            
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button class="btn-delete" data-id="${trip.id}" style="background: none; border: none; color: #A63A2B; cursor: pointer; font-size: 1.1rem; padding: 5px; transition: transform 0.2s;" title="Supprimer">🗑️</button>
+                                <a href="voyage.html" class="btn-view" data-id="${trip.id}" style="color: #8E847A; text-decoration: none; font-size: 0.85rem; font-weight: bold; letter-spacing: 0.05em; text-transform: uppercase;">VOIR L'ITINÉRAIRE →</a>
                             </div>
                         </div>
                     </div>
                 `;
 
-                // Gestionnaire de clic spécifique pour définir le voyage actif quand on clique sur "Voir l'itinéraire"
+                // Écouteur pour définir le voyage actif au clic sur le lien "Voir l'itinéraire"
                 const viewLink = card.querySelector('.btn-view');
                 if (viewLink) {
                     viewLink.addEventListener('click', () => {
@@ -56,16 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Réactivation des écouteurs de clics sur les nouveaux boutons Supprimer
+            // Réactivation des écouteurs de clics sur les boutons Supprimer
             const deleteButtons = grid.querySelectorAll('.btn-delete');
             deleteButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Évite de déclencher d'autres liens
+                    e.preventDefault();
+                    e.stopPropagation();
                     const tripId = parseInt(button.getAttribute('data-id'));
                     if (confirm("Êtes-vous sûr de vouloir supprimer cet itinéraire de Kaido ?")) {
                         deleteTrip(tripId);
                     }
                 });
+                
+                // Petit effet au survol de la corbeille
+                button.addEventListener('mouseenter', () => button.style.transform = 'scale(1.2)');
+                button.addEventListener('mouseleave', () => button.style.transform = 'scale(1)');
             });
         };
 
@@ -75,17 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
             customTrips = customTrips.filter(trip => trip.id !== id);
             localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
             
-            // Nettoyage optionnel du voyage actif s'il vient d'être supprimé
             const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
             if (activeTrip && activeTrip.id === id) {
                 localStorage.removeItem('kaido_active_trip');
                 localStorage.removeItem('currentTrip');
             }
             
-            renderTrips(); // Relance instantanément le rendu propre de l'écran
+            renderTrips();
         };
 
-        // Premier appel pour afficher les voyages existants au chargement de la page
         renderTrips();
     }
 });
