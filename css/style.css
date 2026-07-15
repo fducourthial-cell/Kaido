@@ -313,3 +313,60 @@ nav a:hover {
         gap: 0;
     }
 }
+/* Alignement du footer de la carte */
+.trip-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+/* Le budget en gros et doré à gauche */
+.trip-budget {
+    color: #D4AF37; /* Or chaud Kaido */
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Conteneur des actions à droite */
+.trip-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* Lien Voir l'itinéraire */
+.btn-view {
+    color: #8E847A;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;
+}
+
+.btn-view:hover {
+    color: #D4AF37;
+}
+
+/* Bouton Supprimer discret (Poubelle rouge/sombre) */
+.btn-delete {
+    background: rgba(166, 58, 43, 0.1);
+    border: 1px solid rgba(166, 58, 43, 0.2);
+    color: #A63A2B; /* Rouge Torii */
+    cursor: pointer;
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete:hover {
+    background: #A63A2B;
+    color: #FFFFFF;
+    transform: scale(1.05);
+}
