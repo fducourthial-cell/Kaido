@@ -30,7 +30,6 @@
             line-height: 1.5;
         }
 
-        /* HEADER */
         header {
             padding: 1.5rem 2rem;
             display: flex;
@@ -52,7 +51,6 @@
             color: var(--color-gold);
         }
 
-        /* BANNIÈRE EN-TÊTE */
         .trip-header-visual {
             height: 260px;
             background-size: cover;
@@ -83,7 +81,6 @@
             padding: 0 1.5rem 4rem 1.5rem;
         }
 
-        /* MODALE D'ÉDITION */
         .edit-modal {
             display: none;
             position: fixed;
@@ -103,7 +100,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* BARRE LATÉRALE - CHECKLIST */
         .checklist-card {
             margin-top: 1.5rem;
             padding: 1.2rem;
@@ -200,7 +196,6 @@
             background: #e6c247;
         }
 
-        /* BARRE LATÉRALE - CARTE MAPS */
         .map-card {
             margin-top: 1.5rem;
             padding: 1rem;
@@ -338,27 +333,26 @@
     <!-- CHARGEMENT GOOGLE MAPS -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly" defer></script>
 
-    <!-- LOGIQUE JS COMPLÈTE -->
     <script>
         let map;
         let currentMarkers = [];
 
-        // Initialisation de la carte sombre Kaido
+        // Initialisation de la carte Google Maps
         function initMap(destinationName) {
             const mapElement = document.getElementById('map');
             if (!mapElement || typeof google === 'undefined') return;
 
             const geocoder = new google.maps.Geocoder();
 
-            geocoder.geocode({ address: destinationName || "Tokyo, Japon" }, (results, status) => {
-                let location = { lat: 35.6762, lng: 139.6503 };
+            geocoder.geocode({ address: destinationName }, (results, status) => {
+                let location = { lat: 56.4907, lng: -4.2026 }; // Coordonnées Écosse par défaut
 
                 if (status === 'OK' && results[0]) {
                     location = results[0].geometry.location;
                 }
 
                 map = new google.maps.Map(mapElement, {
-                    zoom: 11,
+                    zoom: 7,
                     center: location,
                     disableDefaultUI: true,
                     zoomControl: true,
@@ -374,7 +368,7 @@
                     ],
                 });
 
-                focusMapOnLocation(destinationName, "Destination principale");
+                focusMapOnLocation(destinationName, "Destination");
             });
         }
 
@@ -388,13 +382,11 @@
                     const location = results[0].geometry.location;
 
                     map.panTo(location);
-                    map.setZoom(12);
+                    map.setZoom(8);
 
-                    // Nettoyer l'ancien marqueur
                     currentMarkers.forEach(m => m.setMap(null));
                     currentMarkers = [];
 
-                    // Nouveau marqueur animé doré et rouge
                     const marker = new google.maps.Marker({
                         position: location,
                         map: map,
@@ -402,7 +394,7 @@
                         animation: google.maps.Animation.BOUNCE,
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
-                            scale: 8,
+                            scale: 9,
                             fillColor: "#D4AF37",
                             fillOpacity: 1,
                             strokeWeight: 2,
@@ -496,9 +488,8 @@
                 }
             });
 
-            // --- RENDU GÉNÉRAL DE LA PAGE ---
             function renderPage() {
-                const destination = activeTrip.title || activeTrip.destination || "Destination";
+                const destination = activeTrip.destination || activeTrip.title || "Destination";
 
                 document.getElementById('trip-main-title').textContent = destination;
                 document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates}`;
@@ -515,12 +506,11 @@
                     flightBtn.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}`;
                 }
 
-                // --- RENDU INTERACTIF DES JOURS DE L'ITINÉRAIRE ---
                 const daysContainer = document.getElementById('itinerary-days-container');
                 daysContainer.innerHTML = ''; 
                 
                 if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
-                    activeTrip.itinerary.forEach((day, index) => {
+                    activeTrip.itinerary.forEach((day) => {
                         const dayBlock = document.createElement('div');
                         dayBlock.className = 'day-block-card';
                         
@@ -557,7 +547,7 @@
 
                                     <div style="flex: 1; background: rgba(255, 255, 255, 0.02); padding: 0.8rem 1rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.03);">
                                         <h4 style="margin: 0; color: #F4EFEA; font-size: 1rem; font-weight: 600;">${step.activity}</h4>
-                                        ${step.location ? `<p style="font-size:0.85rem; color:#8E847A; margin: 0.4rem 0 0 0; display: flex; align-items: center; gap: 5px;">📍 ${step.location}</p>` : ''}
+                                        <p style="font-size:0.85rem; color:#8E847A; margin: 0.4rem 0 0 0; display: flex; align-items: center; gap: 5px;">📍 ${step.location || destination}</p>
                                     </div>
                                 </div>
                             `;
@@ -595,15 +585,14 @@
                             </div>
                         `;
 
-                        // Événement de clic : Zoom et centrage de la carte Google Maps sur le jour sélectionné
+                        // Événement Clic : Recentrage de la carte sur la destination exacte
                         dayBlock.addEventListener('click', () => {
                             document.querySelectorAll('.day-block-card').forEach(card => {
                                 card.style.borderColor = 'rgba(212, 175, 55, 0.15)';
                             });
                             dayBlock.style.borderColor = '#D4AF37';
 
-                            const targetLoc = day.steps[0]?.location || destination;
-                            focusMapOnLocation(targetLoc, day.day);
+                            focusMapOnLocation(destination, day.day);
                         });
 
                         daysContainer.appendChild(dayBlock);
