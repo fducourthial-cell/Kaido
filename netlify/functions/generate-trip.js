@@ -26,8 +26,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // URL nettoyée sans aucun lien Markdown parasite
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Utilisation du modèle gemini-2.5-flash
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
