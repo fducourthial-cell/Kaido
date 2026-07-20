@@ -56,11 +56,8 @@
         }
 
         .kaido-header .brand-name {
-            font-family: var(--font-serif);
-            font-size: 1.5rem;
-            font-weight: 500;
-            letter-spacing: 0.15em;
-            color: var(--text-main);
+            display: flex;
+            align-items: center;
             text-decoration: none;
         }
 
@@ -201,7 +198,9 @@
 
     <div class="container">
         <header class="kaido-header">
-            <a href="index.html" class="brand-name">KAIDO</a>
+            <a href="index.html" class="brand-name">
+                <img src="image/logo kaido V4.png" alt="KAIDO" style="height: 45px; width: auto; object-fit: contain;">
+            </a>
             <nav>
                 <a href="index.html">Mes Voyages</a>
             </nav>
@@ -257,21 +256,18 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
-   <!-- LOGIQUE DE CRÉATION CORRIGÉE, SÉCURISÉE ET INTEGRÉE AVEC LOCALSTORAGE -->
- <script>
+    <!-- LOGIQUE DE CRÉATION DE VOYAGE DYNAMIQUE (IMAGE ET VILLE) -->
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('create-trip-form');
             const modernField = document.getElementById('trip-destination-modern');
             
-            // Variable globale pour stocker la sélection officielle de Google
             let selectedDestinationName = "";
 
             if (modernField) {
-                // On écoute la sélection officielle dans la liste déroulante de Google
                 modernField.addEventListener('gmp-placeselect', (event) => {
                     const place = event.detail.place;
                     if (place) {
-                        // On extrait le nom de la ville sélectionnée
                         selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
                         console.log("📍 Destination capturée via l'API Google :", selectedDestinationName);
                     }
@@ -287,10 +283,8 @@
                     const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
                     try {
-                        // Choix de la destination : priorité absolue à la sélection officielle Google
                         let destination = selectedDestinationName;
                         
-                        // Si l'utilisateur n'a pas cliqué sur la liste mais a juste tapé du texte brut
                         if (!destination && modernField) {
                             const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input');
                             if (innerInput && innerInput.value) {
@@ -298,14 +292,12 @@
                             }
                         }
 
-                        // Si vraiment tout est vide, on applique un nom générique pour ne pas bloquer
                         if (!destination || destination.trim() === "") {
                             destination = "Mon Voyage";
                         }
                         
                         console.log("📍 Destination finale retenue :", destination);
 
-                        // Récupération des autres données du formulaire
                         const departureInput = document.getElementById('trip-departure');
                         const departure = departureInput ? departureInput.value : 'Paris';
                         const dateStart = document.getElementById('trip-date-start').value;
@@ -344,7 +336,6 @@
                             return;
                         }
 
-                        // Itinéraire type distribué harmonieusement
                         const spots = [
                             "Le centre historique et ses monuments incontournables",
                             "Le grand parc de la ville et ses espaces de détente",
@@ -370,15 +361,17 @@
                             });
                         }
 
-                        // URL d'image moderne, stable et libre de droits (Thématique Voyage Générique)
-                        const coverImage = "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80";
+                        // --- GÉNÉRATION D'IMAGE DYNAMIQUE BASÉE SUR LA DESTINATION ---
+                        const cityNameClean = encodeURIComponent(destination.split(',')[0].trim());
+                        const coverImage = `https://source.unsplash.com/featured/1200x800/?${cityNameClean},travel`;
 
-                        // Construction du pack de données
                         const tripData = {
                             id: Date.now(),
-                            title: destination, // Ton script d'affichage utilise peut-être 'title' ou 'destination'
+                            title: destination, // Le nom exact de la ville
                             destination: destination,
                             departure: departure,
+                            dateStart: dateStart,
+                            dateEnd: dateEnd,
                             start: dateStart,
                             end: dateEnd,
                             dates: `${itinerary[0].dateText} au ${itinerary[itinerary.length - 1].dateText}`,
@@ -388,7 +381,6 @@
                             itinerary: itinerary
                         };
 
-                        // Sauvegarde propre
                         localStorage.setItem('currentTrip', JSON.stringify(tripData));
                         localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
 
