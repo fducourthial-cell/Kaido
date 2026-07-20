@@ -115,7 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const itinerary = generateItinerary(start, totalDays, spots);
 
                 // 4. IMAGE DE COUVERTURE FIXE ET FIABLE (Évite les blocages réseau d'Unsplash)
-                const finalImage = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80`;
+                // 4. IMAGE DYNAMIQUE BASÉE SUR LA DESTINATION
+const cleanCity = destination.split(',')[0].trim();
+const finalImage = `https://source.unsplash.com/1200x800/?${encodeURIComponent(cleanCity)},travel`;
 
                 // 5. CRÉATION DE L'OBJET VOYAGE
                 const newTrip = {
