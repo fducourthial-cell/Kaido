@@ -324,7 +324,7 @@
                         }
 
                         // APPEL DU SCRIPT BACKEND SÉCURISÉ
-                        const response = await fetch('/.netlify/functions/generate-trip', {
+                        const response = await fetch('https://ton-site-netlify.netlify.app/.netlify/functions/generate-trip', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
