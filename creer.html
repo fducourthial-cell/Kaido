@@ -243,7 +243,7 @@
 
                 <div class="form-group">
                     <label for="trip-notes">📝 Notes & envies de voyage (Optionnel)</label>
-                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Randonnées, visites de temples, spécialités culinaires..."></textarea>
+                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Randonnées, visites de temples, spécialités culinaires, fête, shopping..."></textarea>
                 </div>
 
                 <button type="submit" class="kaido-submit-btn">
@@ -256,7 +256,6 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
-    <!-- LOGIQUE DE CRÉATION DE VOYAGE DYNAMIQUE (IMAGE ET VILLE) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('create-trip-form');
@@ -274,10 +273,104 @@
                 });
             }
 
+            // --- MOTEUR D'ITINÉRAIRE INTELLIGENT & CONTEXTUEL ---
+            function generateSmartItinerary(destination, descText, totalDays, startDate) {
+                const textLower = descText.toLowerCase();
+
+                // Détection des envies dans la note
+                const isCulture = textLower.includes('culture') || textLower.includes('temple') || textLower.includes('musée') || textLower.includes('histoire') || textLower.includes('monument');
+                const isNature = textLower.includes('nature') || textLower.includes('parc') || textLower.includes('randonnée') || textLower.includes('montagne') || textLower.includes('lac');
+                const isFood = textLower.includes('manger') || textLower.includes('gastronomie') || textLower.includes('resto') || textLower.includes('culinaire') || textLower.includes('cuisine') || textLower.includes('marché');
+                const isFun = textLower.includes('fête') || textLower.includes('soirée') || textLower.includes('bar') || textLower.includes('shopping') || textLower.includes('fun') || textLower.includes('vie nocturne');
+                const isSport = textLower.includes('sport') || textLower.includes('velo') || textLower.includes('kayak') || textLower.includes('surf') || textLower.includes('activit');
+
+                // Banques d'activités thématisées
+                const cultureSpots = [
+                    "Visite guidée du centre historique et des monuments emblématiques",
+                    "Exploration des temples sacrés et bâtiments historiques célèbres",
+                    "Découverte du musée principal d'art et d'histoire de la région",
+                    "Immersion dans l'architecture ancienne et les quartiers historiques"
+                ];
+
+                const natureSpots = [
+                    "Randonnée panoramique et points de vue spectaculaires",
+                    "Balade relaxante dans le grand parc botanique et jardins de la ville",
+                    "Excursion vers les espaces naturels et paysages remarquables des environs",
+                    "Promenade au bord de l'eau et reconnexion avec la nature locale"
+                ];
+
+                const foodSpots = [
+                    "Tour gastronomique et dégustation des spécialités locales au marché central",
+                    "Pause culinaire et découverte des meilleurs salons de thé/cafés typiques",
+                    "Dîner dans une institution gastronomique réputée de la ville",
+                    "Atelier culinaire ou dégustation de produits du terroir"
+                ];
+
+                const funSpots = [
+                    "Session shopping dans les ruelles commerçantes et boutiques de créateurs",
+                    "Exploration des quartiers branchés, street-art et galeries indépendantes",
+                    "Soirée animée et cocktail avec vue panoramique sur la skyline",
+                    "Découverte de la vie nocturne et des lieux de divertissement populaires"
+                ];
+
+                const sportSpots = [
+                    "Parcours d'aventure et activité sportive de plein air",
+                    "Circuit en vélo à la découverte des plus beaux spots de la ville",
+                    "Session d'activité nautique ou randonnée dynamique",
+                    "Challenge sportif local et exploration active"
+                ];
+
+                const genericSpots = [
+                    "Incontournables du centre-ville et premiers pas à pied",
+                    "Flânerie dans les ruelles animées et observation de la vie locale",
+                    "Achat de souvenirs authentiques et rencontre avec les artisans",
+                    "Pause détente et immersion dans l'atmosphère unique de la ville"
+                ];
+
+                const itinerary = [];
+
+                for (let i = 0; i < totalDays; i++) {
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(startDate.getDate() + i);
+                    const dayText = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+
+                    let morningAct = genericSpots[i % genericSpots.length];
+                    let afternoonAct = genericSpots[(i + 1) % genericSpots.length];
+
+                    if (isCulture && i % 2 === 0) morningAct = cultureSpots[i % cultureSpots.length];
+                    if (isNature) afternoonAct = natureSpots[i % natureSpots.length];
+                    if (isSport && i % 2 === 1) morningAct = sportSpots[i % sportSpots.length];
+                    if (isFun) afternoonAct = funSpots[i % funSpots.length];
+
+                    itinerary.push({
+                        day: `Jour ${i + 1}`,
+                        dateText: dayText,
+                        steps: [
+                            { 
+                                time: "09:30", 
+                                activity: morningAct, 
+                                location: `${destination} Centre` 
+                            },
+                            { 
+                                time: "14:30", 
+                                activity: afternoonAct, 
+                                location: `${destination} Quartier Historique` 
+                            },
+                            { 
+                                time: "19:30", 
+                                activity: isFood ? "Dîner gastronomique local sélectionné selon vos envies" : "Soirée libre, détente et flânerie nocturne dans la ville", 
+                                location: destination 
+                            }
+                        ]
+                    });
+                }
+
+                return itinerary;
+            }
+
             if (form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    console.log("Formulaire intercepté, début de la génération...");
 
                     const submitBtn = form.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
@@ -295,8 +388,6 @@
                         if (!destination || destination.trim() === "") {
                             destination = "Mon Voyage";
                         }
-                        
-                        console.log("📍 Destination finale retenue :", destination);
 
                         const departureInput = document.getElementById('trip-departure');
                         const departure = departureInput ? departureInput.value : 'Paris';
@@ -313,7 +404,7 @@
                         }
 
                         if (submitBtn) {
-                            submitBtn.textContent = "Calcul de l'itinéraire...";
+                            submitBtn.textContent = "Calcul de l'itinéraire sur-mesure...";
                             submitBtn.disabled = true;
                         }
 
@@ -336,38 +427,16 @@
                             return;
                         }
 
-                        const spots = [
-                            "Le centre historique et ses monuments incontournables",
-                            "Le grand parc de la ville et ses espaces de détente",
-                            "Le musée d'art et d'histoire locale",
-                            "Le quartier animé et ses ruelles commerçantes",
-                            "Le belvédère principal pour une vue panoramique"
-                        ];
+                        // Génération du parcours personnalisé
+                        const itinerary = generateSmartItinerary(destination, desc, totalDays, start);
 
-                        const itinerary = [];
-                        for (let i = 0; i < totalDays; i++) {
-                            const currentDate = new Date(start);
-                            currentDate.setDate(start.getDate() + i);
-                            
-                            const dayText = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
-                            
-                            itinerary.push({
-                                day: `Jour ${i + 1}`,
-                                dateText: dayText,
-                                steps: [
-                                    { time: "10:00", activity: `Exploration : ${spots[i % spots.length]}`, location: destination },
-                                    { time: "15:00", activity: "Balade libre et découverte de la culture locale", location: destination }
-                                ]
-                            });
-                        }
-
-                        // --- GÉNÉRATION D'IMAGE DYNAMIQUE BASÉE SUR LA DESTINATION ---
+                        // Image dynamique liée à la ville
                         const cityNameClean = encodeURIComponent(destination.split(',')[0].trim());
                         const coverImage = `https://source.unsplash.com/featured/1200x800/?${cityNameClean},travel`;
 
                         const tripData = {
                             id: Date.now(),
-                            title: destination, // Le nom exact de la ville
+                            title: destination,
                             destination: destination,
                             departure: departure,
                             dateStart: dateStart,
@@ -388,7 +457,7 @@
                         currentTrips.push(tripData);
                         localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-                        console.log("✈️ Voyage sauvegardé ! Redirection...");
+                        console.log("✈️ Voyage personnalisé sauvegardé ! Redirection...");
                         window.location.href = 'voyage.html';
 
                     } catch (error) {
