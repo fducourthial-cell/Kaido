@@ -1,55 +1,54 @@
 exports.handler = async (event, context) => {
-  // En-têtes pour autoriser les requêtes cross-origin (CORS) depuis GitHub Pages
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Content-Type": "application/json"
   };
 
-  // Gestion de la requête de pré-vérification du navigateur (Preflight OPTIONS)
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers, body: "OK" };
+    return { statusCode: 200, headers, body: JSON.stringify({ message: "OK" }) };
   }
 
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method Not Allowed" }) };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Méthode non autorisée" }) };
   }
 
   try {
-    const { destination, departure, totalDays, descText } = JSON.parse(event.body);
+    const { destination, departure, totalDays, descText } = JSON.parse(event.body || "{}");
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: "Clé API Gemini non configurée sur le serveur Netlify." })
+        body: JSON.stringify({ error: "La variable GEMINI_API_KEY n'est pas configurée dans Netlify." })
       };
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Endpoint mis à jour vers v1 avec gemini-2.5-flash
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-    const prompt = `Tu es un expert en voyages sur-mesure pour l'application Kaido.
-Génère un itinéraire ultra-précis et réaliste de ${totalDays} jours pour ${destination} (Départ : ${departure}).
-Exigences et souhaits du voyageur : "${descText}".
+    const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
+Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
+Préférences / Notes : "${descText}".
 
-Consignes très strictes :
-1. Donne des NOMS DE LIEUX RÉELS et PRÉCIS (ex: "Eilean Donan Castle", "Glen Coe Valley", "Talisker Distillery", etc.).
-2. Pour chaque jour, inclus 3 étapes (09:30, 14:30, 19:30) adaptées au rythme du séjour.
-3. Remplis le champ "location" avec le lieu exact (ex: "Eilean Donan Castle, Écosse") pour que Google Maps puisse s'y placer.
-4. Propose une check-list de voyage (4 à 6 éléments) adaptée aux besoins de ce voyage précis (ex: permis de conduire, location voiture, chaussures de rando...).
+Consignes de réponse :
+1. Propose des noms de lieux RÉELS, EXACTS et PRÉCIS (ex: "Eilean Donan Castle", "Glen Coe Valley", "Talisker Distillery", "Burj Khalifa").
+2. Pour chaque jour, inclus 3 étapes clés (09:30, 14:30, 19:30).
+3. Remplis le champ "location" avec le nom exact du lieu pour le repérage sur carte.
+4. Crée une check-list de préparation (4 à 6 éléments) adaptée au type de voyage.
 
-Retourne UNIQUEMENT un JSON structuré comme ceci (sans aucun texte Markdown autour) :
+Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement cette structure :
 {
-  "checklist": ["Élément 1", "Élément 2", "Élément 3"],
+  "checklist": ["Passeport", "Permis de conduire", "Réservation véhicule"],
   "itinerary": [
     {
       "day": "Jour 1",
       "steps": [
-        { "time": "09:30", "activity": "Nom et détail de l'activité du matin", "location": "Lieu précis, Pays" },
-        { "time": "14:30", "activity": "Nom et détail de l'activité de l'après-midi", "location": "Lieu précis, Pays" },
-        { "time": "19:30", "activity": "Nom et détail de l'activité ou soirée", "location": "Lieu précis, Pays" }
+        { "time": "09:30", "activity": "Nom précis de l'activité", "location": "Lieu précis, Pays" },
+        { "time": "14:30", "activity": "Nom précis de l'activité", "location": "Lieu précis, Pays" },
+        { "time": "19:30", "activity": "Soirée ou dîner", "location": "Lieu précis, Pays" }
       ]
     }
   ]
@@ -67,12 +66,16 @@ Retourne UNIQUEMENT un JSON structuré comme ceci (sans aucun texte Markdown aut
     const data = await response.json();
 
     if (!response.ok) {
-      const errorMsg = data.error ? data.error.message : "Erreur API Google";
-      return { statusCode: response.status, headers, body: JSON.stringify({ error: errorMsg }) };
+      const errorMsg = data.error ? data.error.message : "Erreur de réponse de l'API Google";
+      return {
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify({ error: errorMsg })
+      };
     }
 
     const jsonText = data.candidates[0].content.parts[0].text;
-    
+
     return {
       statusCode: 200,
       headers,
