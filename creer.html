@@ -250,151 +250,159 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('create-trip-form');
-            const modernField = document.getElementById('trip-destination-modern');
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('create-trip-form');
+    const modernField = document.getElementById('trip-destination-modern');
 
-            let selectedDestinationName = "";
+    // ENDPOINT NETLIFY SERVERLESS
+    const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
 
-            if (modernField) {
-                modernField.addEventListener('gmp-placeselect', (event) => {
-                    const place = event.detail.place;
-                    if (place) {
-                        selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
-                    }
-                });
-            }
+    let selectedDestinationName = "";
 
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire sur-mesure";
-
-                    try {
-                        let destination = selectedDestinationName;
-                        if (!destination && modernField) {
-                            const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
-                            if (innerInput && innerInput.value) {
-                                destination = innerInput.value.trim();
-                            }
-                        }
-
-                        if (!destination || destination.trim() === "") {
-                            destination = "Écosse";
-                        }
-
-                        const departureInput = document.getElementById('trip-departure');
-                        const departure = departureInput ? departureInput.value : 'Paris';
-                        const dateStart = document.getElementById('trip-date-start').value;
-                        const dateEnd = document.getElementById('trip-date-end').value;
-                        const budgetInput = document.getElementById('trip-budget-input');
-                        const budget = budgetInput ? budgetInput.value : 0;
-                        const notesInput = document.getElementById('trip-notes');
-                        const desc = notesInput ? notesInput.value : '';
-
-                        if (!dateStart || !dateEnd) {
-                            alert("Veuillez renseigner les dates aller et retour.");
-                            return;
-                        }
-
-                        if (submitBtn) {
-                            submitBtn.textContent = "🧠 Kaido conçoit votre voyage sur-mesure...";
-                            submitBtn.disabled = true;
-                        }
-
-                        const start = new Date(dateStart);
-                        const end = new Date(dateEnd);
-
-                        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                            throw new Error("Le format des dates n'est pas valide.");
-                        }
-
-                        const timeDiff = end.getTime() - start.getTime();
-                        const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-                        if (totalDays <= 0) {
-                            alert("La date de retour doit être après la date de départ !");
-                            if (submitBtn) {
-                                submitBtn.textContent = originalBtnText;
-                                submitBtn.disabled = false;
-                            }
-                            return;
-                        }
-
-                        // APPEL DU SCRIPT BACKEND SÉCURISÉ
-                        const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                destination: destination,
-                                departure: departure,
-                                totalDays: totalDays,
-                                descText: desc
-                            })
-                        });
-
-                        const aiData = await response.json();
-
-                        if (!response.ok) {
-                            throw new Error(aiData.error || "Erreur de réponse du serveur.");
-                        }
-
-                        const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-                        
-                        const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
-                            const currentDate = new Date(start);
-                            currentDate.setDate(start.getDate() + index);
-                            return {
-                                day: dayObj.day || `Jour ${index + 1}`,
-                                dateText: formatDate(currentDate),
-                                steps: dayObj.steps || []
-                            };
-                        });
-
-                        const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
-
-                        const coverImage = "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80";
-
-                        const tripData = {
-                            id: Date.now(),
-                            title: destination,
-                            destination: destination,
-                            departure: departure,
-                            dateStart: dateStart,
-                            dateEnd: dateEnd,
-                            start: dateStart,
-                            end: dateEnd,
-                            dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
-                            budget: budget,
-                            desc: desc,
-                            image: coverImage, 
-                            itinerary: formattedItinerary,
-                            checklist: formattedChecklist
-                        };
-
-                        localStorage.setItem('currentTrip', JSON.stringify(tripData));
-                        localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
-
-                        const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                        currentTrips.push(tripData);
-                        localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
-
-                        window.location.href = 'voyage.html';
-
-                    } catch (error) {
-                        console.error("Erreur backend :", error);
-                        alert("Erreur lors de la génération : " + error.message);
-                        if (submitBtn) {
-                            submitBtn.textContent = originalBtnText;
-                            submitBtn.disabled = false;
-                        }
-                    }
-                });
+    if (modernField) {
+        modernField.addEventListener('gmp-placeselect', (event) => {
+            const place = event.detail.place;
+            if (place) {
+                selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
             }
         });
-    </script>
+    }
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            // STOPPE LE RAFRAÎCHISSEMENT PAR DÉFAUT DU NAVIGATEUR
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
+
+            try {
+                let destination = selectedDestinationName;
+                if (!destination && modernField) {
+                    const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
+                    if (innerInput && innerInput.value) {
+                        destination = innerInput.value.trim();
+                    }
+                }
+
+                if (!destination || destination.trim() === "") {
+                    destination = "Écosse";
+                }
+
+                const departureInput = document.getElementById('trip-departure');
+                const departure = departureInput ? departureInput.value : 'Paris';
+                const dateStart = document.getElementById('trip-date-start').value;
+                const dateEnd = document.getElementById('trip-date-end').value;
+                const budgetInput = document.getElementById('trip-budget-input');
+                const budget = budgetInput ? budgetInput.value : 0;
+                const notesInput = document.getElementById('trip-notes');
+                const desc = notesInput ? notesInput.value : '';
+
+                if (!dateStart || !dateEnd) {
+                    alert("Veuillez renseigner les dates aller et retour.");
+                    return;
+                }
+
+                if (submitBtn) {
+                    submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire sur-mesure...";
+                    submitBtn.disabled = true;
+                }
+
+                const start = new Date(dateStart);
+                const end = new Date(dateEnd);
+
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    throw new Error("Le format des dates n'est pas valide.");
+                }
+
+                const timeDiff = end.getTime() - start.getTime();
+                const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+                if (totalDays <= 0) {
+                    alert("La date de retour doit être après la date de départ !");
+                    if (submitBtn) {
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                    return;
+                }
+
+                // APPEL AU BACKEND NETLIFY
+                const response = await fetch(NETLIFY_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        destination: destination,
+                        departure: departure,
+                        totalDays: totalDays,
+                        descText: desc
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || `Erreur serveur (${response.status})`);
+                }
+
+                const aiData = await response.json();
+
+                const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+                const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
+                    const currentDate = new Date(start);
+                    currentDate.setDate(start.getDate() + index);
+                    return {
+                        day: dayObj.day || `Jour ${index + 1}`,
+                        dateText: formatDate(currentDate),
+                        steps: dayObj.steps || []
+                    };
+                });
+
+                const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
+                const coverImage = "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80";
+
+                const tripData = {
+                    id: Date.now(),
+                    title: destination,
+                    destination: destination,
+                    departure: departure,
+                    dateStart: dateStart,
+                    dateEnd: dateEnd,
+                    start: dateStart,
+                    end: dateEnd,
+                    dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
+                    budget: budget,
+                    desc: desc,
+                    image: coverImage, 
+                    itinerary: formattedItinerary,
+                    checklist: formattedChecklist
+                };
+
+                // SAUVEGARDE DANS LE LOCALSTORAGE
+                localStorage.setItem('currentTrip', JSON.stringify(tripData));
+                localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
+
+                const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                currentTrips.push(tripData);
+                localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
+
+                // REDIRECTION EXPLICITE VERS VOYAGE.HTML
+                window.location.href = 'voyage.html';
+
+            } catch (error) {
+                console.error("Erreur de génération :", error);
+                alert("Erreur lors de la création : " + error.message);
+                if (submitBtn) {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            }
+        });
+    }
+});
+</script>
 
 </body>
 </html>
