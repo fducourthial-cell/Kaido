@@ -222,6 +222,15 @@
             border-color: var(--color-gold) !important;
             transform: translateY(-2px);
         }
+
+        .step-item {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .step-item:hover {
+            background: rgba(212, 175, 55, 0.05) !important;
+        }
     </style>
 </head>
 <body>
@@ -249,7 +258,7 @@
             <section class="timeline-itinerary" style="flex: 2; min-width: 320px;">
                 <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Description & Notes</h3>
+                        <h3 style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Notes de voyage</h3>
                         <button id="btn-open-edit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-torii); color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ Modifier le voyage</button>
                     </div>
                     <p id="trip-main-desc" style="color: var(--text-muted); line-height: 1.6; margin: 0;"></p>
@@ -279,7 +288,7 @@
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif;">
                         🎒 Check-list de voyage
                     </h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">Ne rien oublier avant le départ</p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">Recommandée par Gemini pour ce séjour</p>
 
                     <ul class="checklist-items" id="checklist-container"></ul>
 
@@ -294,7 +303,7 @@
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif;">
                         📍 Carte interactive
                     </h3>
-                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur un jour pour cibler la zone</p>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une étape pour la placer sur la carte</p>
                     <div id="map"></div>
                 </div>
             </aside>
@@ -337,7 +346,6 @@
         let map;
         let currentMarkers = [];
 
-        // Initialisation de la carte Google Maps
         function initMap(destinationName) {
             const mapElement = document.getElementById('map');
             if (!mapElement || typeof google === 'undefined') return;
@@ -345,7 +353,7 @@
             const geocoder = new google.maps.Geocoder();
 
             geocoder.geocode({ address: destinationName }, (results, status) => {
-                let location = { lat: 56.4907, lng: -4.2026 }; // Coordonnées Écosse par défaut
+                let location = { lat: 56.4907, lng: -4.2026 };
 
                 if (status === 'OK' && results[0]) {
                     location = results[0].geometry.location;
@@ -372,7 +380,7 @@
             });
         }
 
-        // Fonction de centrage dynamique au clic sur un jour
+        // Recentrage et zoom doux sur le lieu ciblé
         function focusMapOnLocation(placeQuery, labelTitle) {
             if (!map || typeof google === 'undefined' || !google.maps.Geocoder) return;
 
@@ -382,7 +390,7 @@
                     const location = results[0].geometry.location;
 
                     map.panTo(location);
-                    map.setZoom(8);
+                    map.setZoom(10);
 
                     currentMarkers.forEach(m => m.setMap(null));
                     currentMarkers = [];
@@ -394,7 +402,7 @@
                         animation: google.maps.Animation.BOUNCE,
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
-                            scale: 9,
+                            scale: 10,
                             fillColor: "#D4AF37",
                             fillOpacity: 1,
                             strokeWeight: 2,
@@ -421,9 +429,8 @@
             if (!activeTrip.checklist) {
                 activeTrip.checklist = [
                     { id: 1, text: "Passeport / Carte d'identité", done: false },
-                    { id: 2, text: "Billets de transport & Réservations", done: false },
-                    { id: 3, text: "Adaptateur prise électrique", done: false },
-                    { id: 4, text: "Trousse de pharmacie", done: false }
+                    { id: 2, text: "Permis de conduire", done: false },
+                    { id: 3, text: "Réservations de transports", done: false }
                 ];
             }
 
@@ -506,6 +513,7 @@
                     flightBtn.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}`;
                 }
 
+                // RENDU DES JOURS
                 const daysContainer = document.getElementById('itinerary-days-container');
                 daysContainer.innerHTML = ''; 
                 
@@ -527,8 +535,8 @@
                         day.steps.forEach((step, sIndex) => {
                             const isLast = sIndex === day.steps.length - 1;
                             stepsHTML += `
-                                <div style="display: flex; gap: 1.2rem; position: relative; padding-bottom: ${isLast ? '0' : '1.5rem'};">
-                                    ${!isLast ? `<div style="position: absolute; left: 28px; top: 30px; bottom: 0; width: 2px; background: rgba(212, 175, 55, 0.2);"></div>` : ''}
+                                <div class="step-item" data-location="${step.location || destination}" style="display: flex; gap: 1.2rem; position: relative; padding: 0.6rem; border-radius: 6px; padding-bottom: ${isLast ? '0.6rem' : '1.5rem'};">
+                                    ${!isLast ? `<div style="position: absolute; left: 34px; top: 38px; bottom: 0; width: 2px; background: rgba(212, 175, 55, 0.2);"></div>` : ''}
 
                                     <div style="
                                         background: rgba(212, 175, 55, 0.1); 
@@ -560,7 +568,7 @@
                                 align-items: center; 
                                 border-bottom: 1px solid rgba(212, 175, 55, 0.15); 
                                 padding-bottom: 1rem; 
-                                margin-bottom: 1.5rem;">
+                                margin-bottom: 1rem;">
                                 
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <span style="
@@ -585,14 +593,24 @@
                             </div>
                         `;
 
-                        // Événement Clic : Recentrage de la carte sur la destination exacte
+                        // Événement Clic sur une étape pour centrer la carte
+                        dayBlock.querySelectorAll('.step-item').forEach(stepEl => {
+                            stepEl.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const loc = stepEl.getAttribute('data-location');
+                                focusMapOnLocation(loc, day.day);
+                            });
+                        });
+
+                        // Événement Clic sur le jour
                         dayBlock.addEventListener('click', () => {
                             document.querySelectorAll('.day-block-card').forEach(card => {
                                 card.style.borderColor = 'rgba(212, 175, 55, 0.15)';
                             });
                             dayBlock.style.borderColor = '#D4AF37';
 
-                            focusMapOnLocation(destination, day.day);
+                            const targetLoc = day.steps[0]?.location || destination;
+                            focusMapOnLocation(targetLoc, day.day);
                         });
 
                         daysContainer.appendChild(dayBlock);
