@@ -114,10 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 3. DISTRIBUTION DES POINTS D'INTÉRÊT DANS L'ITINÉRAIRE
                 const itinerary = generateItinerary(start, totalDays, spots);
 
-                // 4. IMAGE DE COUVERTURE FIXE ET FIABLE (Évite les blocages réseau d'Unsplash)
-                // 4. IMAGE DYNAMIQUE BASÉE SUR LA DESTINATION
-const cleanCity = destination.split(',')[0].trim();
-const finalImage = `https://source.unsplash.com/1200x800/?${encodeURIComponent(cleanCity)},travel`;
+// 4. RÉCUPÉRATION DE L'IMAGE HAUTE QUALITÉ WIKIPÉDIA
+const finalImage = await fetchWikiCityImage(destination);
 
                 // 5. CRÉATION DE L'OBJET VOYAGE
                 const newTrip = {
@@ -241,4 +239,27 @@ function formatDate(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+}
+// Fonction magique pour récupérer l'image HD officielle de Wikipédia pour une ville
+async function fetchWikiCityImage(cityName) {
+    try {
+        const cleanCity = cityName.split(',')[0].trim();
+        // Appel à l'API Summary de Wikipédia
+        const response = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanCity)}`);
+        
+        if (!response.ok) throw new Error("Ville non trouvée sur Wikipédia FR");
+        
+        const data = await response.json();
+        
+        if (data.originalimage && data.originalimage.source) {
+            return data.originalimage.source; // Image HD d'origine
+        } else if (data.thumbnail && data.thumbnail.source) {
+            // Si seulement la miniature existe, on force le redimensionnement en HD (1200px)
+            return data.thumbnail.source.replace(/\d+px-/, '1200px-');
+        }
+    } catch (e) {
+        console.warn("Image Wikipédia indisponible, utilisation de l'image de secours :", e);
+    }
+    // Image de secours esthétique si la ville n'est pas trouvée
+    return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
