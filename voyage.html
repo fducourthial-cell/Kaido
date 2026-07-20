@@ -211,6 +211,7 @@
             height: 250px;
             border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
         }
 
         .day-block-card {
@@ -348,71 +349,86 @@
 
         function initMap(destinationName) {
             const mapElement = document.getElementById('map');
-            if (!mapElement || typeof google === 'undefined') return;
+            if (!mapElement) return;
 
-            const geocoder = new google.maps.Geocoder();
+            if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+                const geocoder = new google.maps.Geocoder();
 
-            geocoder.geocode({ address: destinationName }, (results, status) => {
-                let location = { lat: 56.4907, lng: -4.2026 };
+                geocoder.geocode({ address: destinationName }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const location = results[0].geometry.location;
 
-                if (status === 'OK' && results[0]) {
-                    location = results[0].geometry.location;
-                }
+                        map = new google.maps.Map(mapElement, {
+                            zoom: 8,
+                            center: location,
+                            disableDefaultUI: true,
+                            zoomControl: true,
+                            styles: [
+                                { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                                { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                                { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                                { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                                { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                                { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                                { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+                                { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+                            ],
+                        });
 
-                map = new google.maps.Map(mapElement, {
-                    zoom: 7,
-                    center: location,
-                    disableDefaultUI: true,
-                    zoomControl: true,
-                    styles: [
-                        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-                        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-                        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-                        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-                        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
-                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-                    ],
+                        focusMapOnLocation(destinationName, "Destination");
+                    } else {
+                        showFallbackIframe(mapElement, destinationName);
+                    }
                 });
+            } else {
+                showFallbackIframe(mapElement, destinationName);
+            }
+        }
 
-                focusMapOnLocation(destinationName, "Destination");
-            });
+        function showFallbackIframe(container, query) {
+            const encoded = encodeURIComponent(query);
+            container.innerHTML = `<iframe width="100%" height="100%" style="border:0; border-radius:6px;" loading="lazy" allowfullscreen src="https://maps.google.com/maps?q=${encoded}&t=&z=11&ie=UTF8&iwloc=&output=embed"></iframe>`;
         }
 
         function focusMapOnLocation(placeQuery, labelTitle) {
-            if (!map || typeof google === 'undefined' || !google.maps.Geocoder) return;
+            const mapElement = document.getElementById('map');
 
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: placeQuery }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    const location = results[0].geometry.location;
+            if (map && typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: placeQuery }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const location = results[0].geometry.location;
 
-                    map.panTo(location);
-                    map.setZoom(10);
+                        map.panTo(location);
+                        map.setZoom(12);
 
-                    currentMarkers.forEach(m => m.setMap(null));
-                    currentMarkers = [];
+                        currentMarkers.forEach(m => m.setMap(null));
+                        currentMarkers = [];
 
-                    const marker = new google.maps.Marker({
-                        position: location,
-                        map: map,
-                        title: `${labelTitle} - ${placeQuery}`,
-                        animation: google.maps.Animation.BOUNCE,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 10,
-                            fillColor: "#D4AF37",
-                            fillOpacity: 1,
-                            strokeWeight: 2,
-                            strokeColor: "#A63A2B"
-                        }
-                    });
+                        const marker = new google.maps.Marker({
+                            position: location,
+                            map: map,
+                            title: `${labelTitle} - ${placeQuery}`,
+                            animation: google.maps.Animation.BOUNCE,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: "#D4AF37",
+                                fillOpacity: 1,
+                                strokeWeight: 2,
+                                strokeColor: "#A63A2B"
+                            }
+                        });
 
-                    setTimeout(() => marker.setAnimation(null), 1400);
-                    currentMarkers.push(marker);
-                }
-            });
+                        setTimeout(() => marker.setAnimation(null), 1400);
+                        currentMarkers.push(marker);
+                    } else if (mapElement) {
+                        showFallbackIframe(mapElement, placeQuery);
+                    }
+                });
+            } else if (mapElement) {
+                showFallbackIframe(mapElement, placeQuery);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
