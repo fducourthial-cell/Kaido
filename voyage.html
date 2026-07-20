@@ -380,7 +380,6 @@
             });
         }
 
-        // Recentrage et zoom doux sur le lieu ciblé
         function focusMapOnLocation(placeQuery, labelTitle) {
             if (!map || typeof google === 'undefined' || !google.maps.Geocoder) return;
 
@@ -593,7 +592,6 @@
                             </div>
                         `;
 
-                        // Événement Clic sur une étape pour centrer la carte
                         dayBlock.querySelectorAll('.step-item').forEach(stepEl => {
                             stepEl.addEventListener('click', (e) => {
                                 e.stopPropagation();
@@ -602,7 +600,6 @@
                             });
                         });
 
-                        // Événement Clic sur le jour
                         dayBlock.addEventListener('click', () => {
                             document.querySelectorAll('.day-block-card').forEach(card => {
                                 card.style.borderColor = 'rgba(212, 175, 55, 0.15)';
