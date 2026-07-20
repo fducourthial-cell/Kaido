@@ -275,29 +275,41 @@
                     const customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
                     const createZone = grid.querySelector('.create-trip-zone');
 
-                    customTrips.forEach(trip => {
-                        const card = document.createElement('article');
-                        card.className = 'trip-card dynamic-trip';
+                customTrips.forEach(trip => {
+                const card = document.createElement('article');
+                card.className = 'trip-card dynamic-trip';
+                
+                // Extraction du nom propre de la destination
+                const cityName = trip.destination || trip.title || 'Destination';
+                
+                // URL d'image dynamique Wikimedia / Unsplash automatique basée sur la ville
+                const imageQuery = encodeURIComponent(cityName.split(',')[0].trim());
+                const autoImage = `https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80`;
+                
+                // Si l'image enregistrée est l'image par défaut de la carte, on essaie une image de la ville
+                const finalImage = (trip.image && !trip.image.includes('photo-1507525428034')) 
+                    ? trip.image 
+                    : `https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80`;
+
+                card.innerHTML = `
+                    <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
+                    <div class="trip-details">
+                        <div>
+                            <!-- On force l'affichage du nom de la ville au lieu de 'Mon Voyage' -->
+                            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #F4EFEA; margin-bottom: 0.5rem;">${cityName}</h3>
+                            <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
+                            ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
+                        </div>
                         
-                        // Génération de la structure HTML propre avec la zone trip-footer et le bouton de suppression
-                        card.innerHTML = `
-                            <div class="trip-banner" style="background-image: url('${trip.image || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'}');"></div>
-                            <div class="trip-details">
-                                <div>
-                                    <h3>${trip.title || 'Mon Voyage'}</h3>
-                                    <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
-                                    ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
-                                </div>
-                                
-                                <div class="trip-footer">
-                                    <span class="trip-budget">${trip.budget ? trip.budget : '0'} €</span>
-                                    <div class="trip-actions">
-                                        <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
-                                        <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
-                                    </div>
-                                </div>
+                        <div class="trip-footer">
+                            <span class="trip-budget">${trip.budget ? trip.budget : '0'} €</span>
+                            <div class="trip-actions">
+                                <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
+                                <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
                             </div>
-                        `;
+                        </div>
+                    </div>
+                `;
 
                         // Écouteur pour charger le voyage sélectionné comme actif
                         const viewLink = card.querySelector('.btn-view');
