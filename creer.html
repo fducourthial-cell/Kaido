@@ -207,13 +207,6 @@
 
         <main class="kaido-form-box">
             <form id="create-trip-form">
-                
-                <!-- CLÉ API GEMINI (SAUVEGARDÉE DANS LE NAVIGATEUR) -->
-                <div class="form-group">
-                    <label for="gemini-api-key">🤖 Clé API Gemini Pro</label>
-                    <input type="password" id="gemini-api-key" class="form-control" placeholder="Collez votre clé API Gemini AIzaSy..." required>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem;">Votre clé reste stockée localement sur votre appareil.</p>
-                </div>
 
                 <div class="form-group">
                     <label for="trip-departure">🛫 Ville de départ</label>
@@ -247,7 +240,7 @@
                 </div>
 
                 <button type="submit" class="kaido-submit-btn">
-                    ✨ Générer mon itinéraire par IA (Gemini Pro)
+                    ✨ Concevoir mon itinéraire sur-mesure
                 </button>
 
             </form>
@@ -261,13 +254,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('create-trip-form');
             const modernField = document.getElementById('trip-destination-modern');
-            const apiKeyInput = document.getElementById('gemini-api-key');
 
-            // Récupérer la clé API enregistrée
-            const savedApiKey = localStorage.getItem('kaido_gemini_key');
-            if (savedApiKey) {
-                apiKeyInput.value = savedApiKey;
-            }
+            // CLÉ API GEMINI PRO DÉDIÉE À L'APPLICATION KAIDO
+            const GEMINI_API_KEY = "AQ.Ab8RN6IE6aVMTCXhuyQdorQw_Y3zsTuARubjoq18noCRdZhuJQ";
 
             let selectedDestinationName = "";
 
@@ -280,7 +269,7 @@
                 });
             }
 
-            // APPEL API GEMINI PRO POUR GÉNÉRATION DU JSON D'ITINÉRAIRE
+            // APPEL API GEMINI PRO
             async function generateItineraryWithGemini(apiKey, destination, departure, totalDays, descText) {
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
@@ -306,8 +295,8 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
     {
       "day": "Jour 1",
       "steps": [
-        { "time": "09:30", "activity": "Intitulé précis de l'activité du matin", "location": "Nom précis du lieu réels, Pays" },
-        { "time": "14:30", "activity": "Intitulé précis de l'activité de l'après-midi", "location": "Nom précis du lieu réels, Pays" },
+        { "time": "09:30", "activity": "Intitulé précis de l'activité du matin", "location": "Nom précis du lieu réel, Pays" },
+        { "time": "14:30", "activity": "Intitulé précis de l'activité de l'après-midi", "location": "Nom précis du lieu réel, Pays" },
         { "time": "19:30", "activity": "Intitulé de l'activité ou soirée", "location": "Nom du lieu ou ville, Pays" }
       ]
     }
@@ -324,7 +313,7 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                 });
 
                 if (!response.ok) {
-                    throw new Error("Erreur de connexion avec l'API Gemini. Vérifiez votre clé API.");
+                    throw new Error("Erreur de connexion avec l'API Gemini Pro.");
                 }
 
                 const data = await response.json();
@@ -337,18 +326,9 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                     e.preventDefault();
 
                     const submitBtn = form.querySelector('button[type="submit"]');
-                    const originalBtnText = submitBtn ? submitBtn.textContent : "Générer mon itinéraire";
+                    const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire sur-mesure";
 
                     try {
-                        const apiKey = apiKeyInput.value.trim();
-                        if (!apiKey) {
-                            alert("Veuillez saisir votre clé API Gemini Pro.");
-                            return;
-                        }
-
-                        // Sauvegarder la clé pour la suite
-                        localStorage.setItem('kaido_gemini_key', apiKey);
-
                         let destination = selectedDestinationName;
                         if (!destination && modernField) {
                             const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
@@ -400,7 +380,7 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                         }
 
                         // 1. GÉNÉRATION VIA GEMINI PRO
-                        const aiData = await generateItineraryWithGemini(apiKey, destination, departure, totalDays, desc);
+                        const aiData = await generateItineraryWithGemini(GEMINI_API_KEY, destination, departure, totalDays, desc);
 
                         // 2. FORMATAGE DES DATES
                         const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
