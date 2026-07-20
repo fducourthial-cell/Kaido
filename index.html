@@ -45,13 +45,12 @@
             padding: 0 2rem;
         }
 
-        /* HEADER */
-      /* HEADER AVEC LOGO CENTRÉ ET TXT A GAUCHE */
+/* HEADER AVEC LOGO BIEN MIS EN VALEUR ET TEXTE DISCRET */
 .kaido-header {
     display: grid;
-    grid-template-columns: 1fr auto 1fr; /* 3 colonnes égales pour un centrage parfait */
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    padding: 1.5rem 0;
+    padding: 1.2rem 0; /* Légèrement plus aéré pour laisser respirer le grand logo */
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -61,18 +60,21 @@
     justify-content: flex-start;
 }
 
+/* Texte KAIDO réduit et affiné */
 .kaido-header .brand-name {
     font-family: var(--font-serif);
-    font-size: 1.8rem;
-    font-weight: 600;
-    letter-spacing: 0.25em;
+    font-size: 1.2rem; /* Réduit pour un look plus subtil */
+    font-weight: 500;
+    letter-spacing: 0.3em; /* Un peu plus d'espacement pour garder l'élégance */
     color: var(--text-main);
     text-decoration: none;
-    transition: color 0.3s ease;
+    opacity: 0.85; /* Légèrement adouci */
+    transition: all 0.3s ease;
 }
 
 .kaido-header .brand-name:hover {
     color: var(--color-gold);
+    opacity: 1;
 }
 
 .header-center {
@@ -81,20 +83,22 @@
     align-items: center;
 }
 
+/* Logo nettement agrandi et mis en avant */
 .header-logo {
-    height: 75px; /* Ajuste la hauteur du logo selon tes préférences */
+    height: 120px; /* Augmenté de 75px à 120px */
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.15)); /* Légère lueur dorée */
-    transition: transform 0.3s ease;
+    filter: drop-shadow(0 6px 18px rgba(212, 175, 55, 0.25)); /* Effet d'ombre/lueur renforcé */
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .header-logo:hover {
-    transform: scale(1.05);
+    transform: scale(1.06);
+    filter: drop-shadow(0 8px 24px rgba(212, 175, 55, 0.35));
 }
 
 .header-right {
-    /* Maintient l'équilibre visuel du grid 3 colonnes */
+    /* Équilibre le grid à droite */
 }
 
         /* SECTION TITRE */
