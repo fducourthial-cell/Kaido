@@ -274,24 +274,20 @@
 <body>
 
     <div class="container">
-        <!-- BARRE DE NAVIGATION -->
-      
-<header class="kaido-header">
-    <!-- Côté Gauche : Texte Brand -->
-    <div class="header-left">
-        <a href="index.html" class="brand-name">KAIDO</a>
-    </div>
+        <!-- BARRE DE NAVIGATION RENOUVELÉE ET ÉQUILIBRÉE -->
+        <header class="kaido-header">
+            <div class="header-left">
+                <a href="index.html" class="brand-name">KAIDO</a>
+            </div>
 
-    <!-- Centre : Logo mis en valeur -->
-    <div class="header-center">
-        <a href="index.html">
-            <img src="image/logo kaido V4.png" alt="Logo Kaido" class="header-logo">
-        </a>
-    </div>
+            <div class="header-center">
+                <a href="index.html">
+                    <img src="image/logo kaido V4.png" alt="Logo Kaido" class="header-logo">
+                </a>
+            </div>
 
-    <!-- Côté Droit : Espaceur pour équilibrer la grille -->
-    <div class="header-right"></div>
-</header>
+            <div class="header-right"></div>
+        </header>
 
         <!-- TITRE PRINCIPAL -->
         <h2 class="dashboard-title">Mes carnets de route</h2>
@@ -299,7 +295,7 @@
         <!-- GRILLE DE VOYAGES -->
         <section class="dashboard-grid" id="trips-grid">
             
-            <!-- Zone fixe pour ajouter un voyage (Sert de repère d'insertion) -->
+            <!-- Zone fixe pour ajouter un voyage -->
             <a href="creer.html" class="create-trip-zone">
                 <div class="plus-icon">+</div>
                 <h3>Tracer une nouvelle route</h3>
@@ -308,14 +304,31 @@
         </section>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT DIRECTE POUR TOUT COMMANDER SANS ERREUR -->
+    <!-- LOGIQUE JAVASCRIPT AVEC IMAGES WIKIPÉDIA HD -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const grid = document.getElementById('trips-grid');
             
             if (grid) {
-                const renderTrips = () => {
-                    // Suppression des anciennes cartes dynamiques pour éviter les doublons
+                // Fonction pour récupérer l'image HD officielle sur Wikipédia
+                const fetchWikiImage = async (cityName) => {
+                    try {
+                        const cleanCity = cityName.split(',')[0].trim();
+                        const response = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanCity)}`);
+                        if (!response.ok) return null;
+                        const data = await response.json();
+                        
+                        if (data.thumbnail && data.thumbnail.source) {
+                            return data.thumbnail.source.replace(/\d+px-/, '1200px-');
+                        }
+                    } catch (e) {
+                        console.warn("Image non trouvée sur Wikipédia :", e);
+                    }
+                    return null;
+                };
+
+                const renderTrips = async () => {
+                    // Suppression des anciennes cartes dynamiques
                     const dynamicCards = grid.querySelectorAll('.dynamic-trip');
                     dynamicCards.forEach(card => card.remove());
 
@@ -323,43 +336,40 @@
                     const customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
                     const createZone = grid.querySelector('.create-trip-zone');
 
-                customTrips.forEach(trip => {
-                const card = document.createElement('article');
-                card.className = 'trip-card dynamic-trip';
-                
-                // Extraction du nom propre de la destination
-                const cityName = trip.destination || trip.title || 'Destination';
-                
-                // URL d'image dynamique Wikimedia / Unsplash automatique basée sur la ville
-                const imageQuery = encodeURIComponent(cityName.split(',')[0].trim());
-                const autoImage = `https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80`;
-                
-                // Si l'image enregistrée est l'image par défaut de la carte, on essaie une image de la ville
-                const finalImage = (trip.image && !trip.image.includes('photo-1507525428034')) 
-                    ? trip.image 
-                    : `https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80`;
-
-                card.innerHTML = `
-                    <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
-                    <div class="trip-details">
-                        <div>
-                            <!-- On force l'affichage du nom de la ville au lieu de 'Mon Voyage' -->
-                            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #F4EFEA; margin-bottom: 0.5rem;">${cityName}</h3>
-                            <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
-                            ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
-                        </div>
+                    for (const trip of customTrips) {
+                        const card = document.createElement('article');
+                        card.className = 'trip-card dynamic-trip';
                         
-                        <div class="trip-footer">
-                            <span class="trip-budget">${trip.budget ? trip.budget : '0'} €</span>
-                            <div class="trip-actions">
-                                <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
-                                <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                        const cityName = trip.destination || trip.title || 'Destination';
+                        
+                        // Si l'image enregistrée est l'ancienne image Unsplash ou manquante, on va chercher sur Wikipédia
+                        let finalImage = trip.image;
+                        if (!finalImage || finalImage.includes('unsplash.com')) {
+                            const wikiImg = await fetchWikiImage(cityName);
+                            finalImage = wikiImg || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
+                            trip.image = finalImage; // Mise à jour de l'objet
+                        }
 
-                        // Écouteur pour charger le voyage sélectionné comme actif
+                        card.innerHTML = `
+                            <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
+                            <div class="trip-details">
+                                <div>
+                                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #F4EFEA; margin-bottom: 0.5rem;">${cityName}</h3>
+                                    <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
+                                    ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
+                                </div>
+                                
+                                <div class="trip-footer">
+                                    <span class="trip-budget">${trip.budget ? trip.budget : '0'} €</span>
+                                    <div class="trip-actions">
+                                        <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
+                                        <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // Écouteur pour charger le voyage sélectionné
                         const viewLink = card.querySelector('.btn-view');
                         if (viewLink) {
                             viewLink.addEventListener('click', () => {
@@ -368,15 +378,18 @@
                             });
                         }
                         
-                        // Insertion propre juste avant le bouton "+"
+                        // Insertion avant le bouton "+"
                         if (createZone) {
                             grid.insertBefore(card, createZone);
                         } else {
                             grid.appendChild(card);
                         }
-                    });
+                    }
 
-                    // Écouteurs d'événements sur les boutons de suppression
+                    // Sauvegarde du localStorage nettoyé avec les nouvelles images
+                    localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
+
+                    // Écouteurs sur les boutons de suppression
                     const deleteButtons = grid.querySelectorAll('.btn-delete');
                     deleteButtons.forEach(button => {
                         button.addEventListener('click', (e) => {
@@ -390,20 +403,19 @@
                     });
                 };
 
-                // Fonction de nettoyage de la base de données locale
+                // Fonction de suppression de voyage
                 const deleteTrip = (id) => {
                     let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
                     customTrips = customTrips.filter(trip => trip.id !== id);
                     localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
                     
-                    // Si on supprime le voyage actuellement affiché en session, on nettoie l'état actif
                     const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
                     if (activeTrip && activeTrip.id === id) {
                         localStorage.removeItem('kaido_active_trip');
                         localStorage.removeItem('currentTrip');
                     }
                     
-                    renderTrips(); // Reconstruction immédiate de l'écran
+                    renderTrips();
                 };
 
                 // Lancement initial
@@ -413,3 +425,5 @@
     </script>
 </body>
 </html>
+
+   
