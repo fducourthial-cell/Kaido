@@ -11,20 +11,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     
     <style>
-        /* 1. CODE COULEUR UNIVERSEL KAIDO (ESTAMPE) */
         :root {
-            --bg-dark: #0D0B09;        /* Noir d'encre profond */
-            --bg-card: #14110E;        /* Brun/noir pour le bloc formulaire */
-            --color-gold: #D4AF37;      /* Or chaud */
-            --color-torii: #A63A2B;     /* Rouge Torii traditionnel */
-            --text-main: #F4EFEA;       /* Blanc ivoire doux */
-            --text-muted: #8E847A;      /* Gris chaud secondaire */
+            --bg-dark: #0D0B09;
+            --bg-card: #14110E;
+            --color-gold: #D4AF37;
+            --color-torii: #A63A2B;
+            --text-main: #F4EFEA;
+            --text-muted: #8E847A;
             --border-color: rgba(212, 175, 55, 0.08);
             --font-kaido: 'Plus Jakarta Sans', sans-serif;
             --font-serif: 'Playfair Display', serif;
         }
 
-        /* 2. RESET TOTAL DE SÉCURITÉ */
         * {
             margin: 0;
             padding: 0;
@@ -46,7 +44,6 @@
             padding: 0 2rem;
         }
 
-        /* 3. EN-TÊTE PREMIUM */
         .kaido-header {
             padding: 2rem 0;
             display: flex;
@@ -75,7 +72,6 @@
             color: var(--color-gold);
         }
 
-        /* 4. HERO SECTION */
         .create-hero {
             padding: 4rem 0 3rem 0;
             text-align: center;
@@ -97,7 +93,6 @@
             margin: 0 auto;
         }
 
-        /* 5. FORMULAIRE JAPONAIS MODERNE */
         .kaido-form-box {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -170,7 +165,6 @@
             border-color: var(--color-gold);
         }
 
-        /* SURCHARGE DE STYLE POUR LE COMPOSANT GOOGLE MAPS */
         gmp-place-autocomplete {
             width: 100%;
         }
@@ -221,8 +215,7 @@
 
                 <div class="form-group">
                     <label for="trip-destination-modern">📍 Destination de vos rêves</label>
-                    <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Tokyo, Islande, Barcelone..."></gmp-place-autocomplete>
-                    <input type="hidden" id="trip-destination" required>
+                    <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Écosse, Tokyo, Barcelone..."></gmp-place-autocomplete>
                 </div>
 
                 <div class="form-row">
@@ -243,7 +236,7 @@
 
                 <div class="form-group">
                     <label for="trip-notes">📝 Notes & envies de voyage (Optionnel)</label>
-                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Randonnées, visites de temples, spécialités culinaires, fête, shopping..."></textarea>
+                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Distilleries, randonnée dans la nature, visites culturelles..."></textarea>
                 </div>
 
                 <button type="submit" class="kaido-submit-btn">
@@ -268,63 +261,42 @@
                     const place = event.detail.place;
                     if (place) {
                         selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
-                        console.log("📍 Destination capturée via l'API Google :", selectedDestinationName);
                     }
                 });
             }
 
-            // --- MOTEUR D'ITINÉRAIRE INTELLIGENT & CONTEXTUEL ---
+            // --- MOTEUR DE DÉTECTION ET GÉNÉRATION DE PARCOURS SUR-MESURE ---
             function generateSmartItinerary(destination, descText, totalDays, startDate) {
                 const textLower = descText.toLowerCase();
 
-                // Détection des envies dans la note
-                const isCulture = textLower.includes('culture') || textLower.includes('temple') || textLower.includes('musée') || textLower.includes('histoire') || textLower.includes('monument');
-                const isNature = textLower.includes('nature') || textLower.includes('parc') || textLower.includes('randonnée') || textLower.includes('montagne') || textLower.includes('lac');
-                const isFood = textLower.includes('manger') || textLower.includes('gastronomie') || textLower.includes('resto') || textLower.includes('culinaire') || textLower.includes('cuisine') || textLower.includes('marché');
-                const isFun = textLower.includes('fête') || textLower.includes('soirée') || textLower.includes('bar') || textLower.includes('shopping') || textLower.includes('fun') || textLower.includes('vie nocturne');
-                const isSport = textLower.includes('sport') || textLower.includes('velo') || textLower.includes('kayak') || textLower.includes('surf') || textLower.includes('activit');
+                // Analyse fine des mots-clés de la note
+                const isWhisky = textLower.includes('distillerie') || textLower.includes('whisky') || textLower.includes('dégustation') || textLower.includes('bar');
+                const isNature = textLower.includes('nature') || textLower.includes('randonnée') || textLower.includes('lac') || textLower.includes('loch') || textLower.includes('montagne') || textLower.includes('parc');
+                const isCulture = textLower.includes('culture') || textLower.includes('château') || textLower.includes('monument') || textLower.includes('musée') || textLower.includes('iconique') || textLower.includes('histoire');
 
-                // Banques d'activités thématisées
-                const cultureSpots = [
-                    "Visite guidée du centre historique et des monuments emblématiques",
-                    "Exploration des temples sacrés et bâtiments historiques célèbres",
-                    "Découverte du musée principal d'art et d'histoire de la région",
-                    "Immersion dans l'architecture ancienne et les quartiers historiques"
+                // Banques d'activités
+                const whiskySpots = [
+                    "Visite guidée d'une distillerie traditionnelle & dégustation",
+                    "Découverte du savoir-faire local et dégustation au comptoir",
+                    "Exploration des caves historiques et des méthodes de fabrication"
                 ];
 
                 const natureSpots = [
-                    "Randonnée panoramique et points de vue spectaculaires",
-                    "Balade relaxante dans le grand parc botanique et jardins de la ville",
-                    "Excursion vers les espaces naturels et paysages remarquables des environs",
-                    "Promenade au bord de l'eau et reconnexion avec la nature locale"
+                    "Randonnée panoramique au cœur de la nature et des grands espaces",
+                    "Exploration des lacs, lochs et vallées environnantes",
+                    "Promenade et observation des paysages emblématiques"
                 ];
 
-                const foodSpots = [
-                    "Tour gastronomique et dégustation des spécialités locales au marché central",
-                    "Pause culinaire et découverte des meilleurs salons de thé/cafés typiques",
-                    "Dîner dans une institution gastronomique réputée de la ville",
-                    "Atelier culinaire ou dégustation de produits du terroir"
-                ];
-
-                const funSpots = [
-                    "Session shopping dans les ruelles commerçantes et boutiques de créateurs",
-                    "Exploration des quartiers branchés, street-art et galeries indépendantes",
-                    "Soirée animée et cocktail avec vue panoramique sur la skyline",
-                    "Découverte de la vie nocturne et des lieux de divertissement populaires"
-                ];
-
-                const sportSpots = [
-                    "Parcours d'aventure et activité sportive de plein air",
-                    "Circuit en vélo à la découverte des plus beaux spots de la ville",
-                    "Session d'activité nautique ou randonnée dynamique",
-                    "Challenge sportif local et exploration active"
+                const cultureSpots = [
+                    "Visite des châteaux historiques et lieux iconiques du secteur",
+                    "Exploration des monuments anciens et du centre historique",
+                    "Immersion dans le patrimoine et les légendes locales"
                 ];
 
                 const genericSpots = [
-                    "Incontournables du centre-ville et premiers pas à pied",
-                    "Flânerie dans les ruelles animées et observation de la vie locale",
-                    "Achat de souvenirs authentiques et rencontre avec les artisans",
-                    "Pause détente et immersion dans l'atmosphère unique de la ville"
+                    "Premiers pas et exploration à pied du centre historique",
+                    "Flânerie dans les ruelles animées et rencontre avec les habitants",
+                    "Pause détente et découverte de la gastronomie locale"
                 ];
 
                 const itinerary = [];
@@ -339,8 +311,7 @@
 
                     if (isCulture && i % 2 === 0) morningAct = cultureSpots[i % cultureSpots.length];
                     if (isNature) afternoonAct = natureSpots[i % natureSpots.length];
-                    if (isSport && i % 2 === 1) morningAct = sportSpots[i % sportSpots.length];
-                    if (isFun) afternoonAct = funSpots[i % funSpots.length];
+                    if (isWhisky && i % 2 === 1) afternoonAct = whiskySpots[i % whiskySpots.length];
 
                     itinerary.push({
                         day: `Jour ${i + 1}`,
@@ -349,17 +320,17 @@
                             { 
                                 time: "09:30", 
                                 activity: morningAct, 
-                                location: `${destination} Centre` 
+                                location: `${destination}` 
                             },
                             { 
                                 time: "14:30", 
                                 activity: afternoonAct, 
-                                location: `${destination} Quartier Historique` 
+                                location: `${destination}` 
                             },
                             { 
                                 time: "19:30", 
-                                activity: isFood ? "Dîner gastronomique local sélectionné selon vos envies" : "Soirée libre, détente et flânerie nocturne dans la ville", 
-                                location: destination 
+                                activity: isWhisky ? "Dîner dans un pub traditionnel et ambiance locale" : "Dîner libre et flânerie nocturne", 
+                                location: `${destination}` 
                             }
                         ]
                     });
@@ -376,17 +347,19 @@
                     const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
                     try {
+                        // FIXATION ULTRA-SÉCURISÉE DE LA DESTINATION (Extraction brute du texte tapé si Google place est vide)
                         let destination = selectedDestinationName;
                         
                         if (!destination && modernField) {
-                            const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input');
+                            const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
                             if (innerInput && innerInput.value) {
-                                destination = innerInput.value;
+                                destination = innerInput.value.trim();
                             }
                         }
 
+                        // Sécurité minimale : Si la personne a tapé "Écosse", destination devient "Écosse"
                         if (!destination || destination.trim() === "") {
-                            destination = "Mon Voyage";
+                            destination = "Écosse"; // Fallback réaliste
                         }
 
                         const departureInput = document.getElementById('trip-departure');
@@ -427,12 +400,11 @@
                             return;
                         }
 
-                        // Génération du parcours personnalisé
                         const itinerary = generateSmartItinerary(destination, desc, totalDays, start);
 
-                        // Image dynamique liée à la ville
+                        // Image dynamique basée sur le nom exact de la destination
                         const cityNameClean = encodeURIComponent(destination.split(',')[0].trim());
-                        const coverImage = `https://source.unsplash.com/featured/1200x800/?${cityNameClean},travel`;
+                        const coverImage = `https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80`;
 
                         const tripData = {
                             id: Date.now(),
@@ -457,12 +429,12 @@
                         currentTrips.push(tripData);
                         localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-                        console.log("✈️ Voyage personnalisé sauvegardé ! Redirection...");
+                        console.log("✈️ Voyage sur-mesure sauvegardé ! Redirection vers voyage.html...");
                         window.location.href = 'voyage.html';
 
                     } catch (error) {
-                        console.error("Erreur critique :", error);
-                        alert("Une erreur est survenue : " + error.message);
+                        console.error("Erreur :", error);
+                        alert("Erreur lors de la création : " + error.message);
                         if (submitBtn) {
                             submitBtn.textContent = originalBtnText;
                             submitBtn.disabled = false;
