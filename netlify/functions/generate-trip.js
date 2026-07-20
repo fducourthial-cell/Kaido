@@ -26,8 +26,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Utilisation de gemini-2.5-flash qui est le modèle actif par défaut
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Endpoint officiel V1 avec le modèle recommandé gemini-2.5-flash
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
@@ -39,7 +39,7 @@ Consignes de réponse :
 3. Remplis le champ "location" avec le nom exact du lieu pour le repérage sur carte.
 4. Crée une check-list de préparation (4 à 6 éléments) adaptée au type de voyage.
 
-Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement cette structure :
+Exigence absolue : Retourne UNIQUEMENT un objet JSON valide sans aucune explication autour, suivant exactement cette structure :
 {
   "checklist": ["Passeport", "Permis de conduire", "Réservation véhicule"],
   "itinerary": [
@@ -58,10 +58,7 @@ Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement c
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          response_mime_type: "application/json"
-        }
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
@@ -77,6 +74,8 @@ Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement c
     }
 
     let rawText = data.candidates[0].content.parts[0].text;
+    
+    // Nettoyage au cas où des balises de code Markdown entourent le JSON
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
     return {
