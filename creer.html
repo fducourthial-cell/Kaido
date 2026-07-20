@@ -324,7 +324,7 @@
                         }
 
                         // APPEL DU SCRIPT BACKEND SÉCURISÉ
-                        const response = await fetch('https://app.netlify.com/projects/quiet-hamster-f904c2/logs-and-metrics/functions/generate-trip', {
+                        const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
