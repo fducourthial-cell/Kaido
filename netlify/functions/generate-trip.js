@@ -1,19 +1,30 @@
 exports.handler = async (event, context) => {
-  // Accepter uniquement les requêtes POST
+  // En-têtes pour autoriser les requêtes cross-origin (CORS) depuis GitHub Pages
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json"
+  };
+
+  // Gestion de la requête de pré-vérification du navigateur (Preflight OPTIONS)
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers, body: "OK" };
+  }
+
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method Not Allowed" }) };
   }
 
   try {
     const { destination, departure, totalDays, descText } = JSON.parse(event.body);
-
-    // Récupération de la clé API stockée en toute sécurité dans les variables d'environnement
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: "Clé API Gemini non configurée sur le serveur." })
+        headers,
+        body: JSON.stringify({ error: "Clé API Gemini non configurée sur le serveur Netlify." })
       };
     }
 
@@ -57,23 +68,21 @@ Retourne UNIQUEMENT un JSON structuré comme ceci (sans aucun texte Markdown aut
 
     if (!response.ok) {
       const errorMsg = data.error ? data.error.message : "Erreur API Google";
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: errorMsg })
-      };
+      return { statusCode: response.status, headers, body: JSON.stringify({ error: errorMsg }) };
     }
 
     const jsonText = data.candidates[0].content.parts[0].text;
     
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: jsonText
     };
 
   } catch (error) {
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({ error: error.message })
     };
   }
