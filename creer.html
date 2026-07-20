@@ -202,7 +202,7 @@
 
         <section class="create-hero">
             <h1>Tracer une nouvelle route</h1>
-            <p>Laissez l'intelligence artificielle de Kaido concevoir votre carnet de voyage sur-mesure.</p>
+            <p>Laissez l'intelligence de Kaido concevoir votre carnet de voyage sur-mesure.</p>
         </section>
 
         <main class="kaido-form-box">
@@ -249,14 +249,13 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
-    <!-- LOGIQUE DE GÉNÉRATION D'ITINÉRAIRE PAR GEMINI PRO API -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('create-trip-form');
             const modernField = document.getElementById('trip-destination-modern');
 
-            // CLÉ API GEMINI PRO DÉDIÉE À L'APPLICATION KAIDO
-            const GEMINI_API_KEY = "AQ.Ab8RN6IqFk7puKdFU_AH8yB3_TJpZsZ0R5az78RHzqWdk62t4Q";
+            // CLÉ API GEMINI
+            const GEMINI_API_KEY = "AQ.Ab8RN6IE6aVMTCXhuyQdorQw_Y3zsTuARubjoq18noCRdZhuJQ";
 
             let selectedDestinationName = "";
 
@@ -269,35 +268,68 @@
                 });
             }
 
-            // APPEL API GEMINI PRO
+            // MOTEUR SECOURS : Génération locale si l'API est indisponible
+            function generateLocalFallbackItinerary(destination, descText, totalDays, startDate) {
+                const textLower = descText.toLowerCase();
+
+                const isWhisky = textLower.includes('distillerie') || textLower.includes('whisky') || textLower.includes('bar');
+                const isNature = textLower.includes('nature') || textLower.includes('randonnée') || textLower.includes('lac') || textLower.includes('montagne');
+                const isCulture = textLower.includes('culture') || textLower.includes('château') || textLower.includes('monument');
+
+                const spots = [
+                    "Centre historique et monuments incontournables",
+                    "Randonnée panoramique et découverte des grands espaces",
+                    "Visite d'une distillerie locale & dégustation traditionnelle",
+                    "Exploration des sites emblématiques et châteaux régionaux",
+                    "Pause culinaire et découverte des marchés locaux"
+                ];
+
+                const itinerary = [];
+                const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+                for (let i = 0; i < totalDays; i++) {
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(startDate.getDate() + i);
+
+                    itinerary.push({
+                        day: `Jour ${i + 1}`,
+                        dateText: formatDate(currentDate),
+                        steps: [
+                            { time: "09:30", activity: `Matinée : ${spots[i % spots.length]}`, location: destination },
+                            { time: "14:30", activity: `Après-midi : Exploration & découverte de ${destination}`, location: destination },
+                            { time: "19:30", activity: "Soirée libre, dîner local et détente", location: destination }
+                        ]
+                    });
+                }
+
+                return {
+                    checklist: [
+                        { id: 1, text: "Passeport / Carte d'identité", done: false },
+                        { id: 2, text: "Permis de conduire / Location voiture", done: false },
+                        { id: 3, text: "Réservations de logements & transports", done: false }
+                    ],
+                    itinerary: itinerary
+                };
+            }
+
+            // APPEL API GEMINI PRO (AVEC CAPTURE D'ERREURS DÉTAILLÉE)
             async function generateItineraryWithGemini(apiKey, destination, departure, totalDays, descText) {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-                const prompt = `Tu es un expert mondial en voyage et création d'itinéraires sur-mesure pour l'application Kaido.
-Génère un itinéraire ultra-précis, réaliste et cohérent pour un séjour de ${totalDays} jours.
+                const prompt = `Tu es un expert mondial en voyage pour Kaido.
+Génère un itinéraire de ${totalDays} jours pour ${destination} (départ de ${departure}).
+Contraintes/Notes : "${descText}".
 
-INFORMATIONS :
-- Destination : ${destination}
-- Ville de départ : ${departure}
-- Durée : ${totalDays} jours
-- Envies / Notes / Contraintes : "${descText}"
-
-INSTRUCTIONS STRICTES :
-1. Propose de vrais noms de lieux, châteaux, parcs, distilleries, quartiers ou monuments réels de la région/ville.
-2. Pour chaque jour, inclus 3 étapes (Matin ~09:30, Après-midi ~14:30, Soirée ~19:30) avec des heures réalistes.
-3. Attribue une localisation géographique exacte à chaque étape ("location"), par exemple "Glen Coe, Écosse" ou "Eilean Donan Castle, Écosse" pour permettre à Google Maps de la cibler.
-4. Crée une check-list de préparation adaptée au voyage (4 à 6 éléments spécifiques comme location de voiture, permis, réservations...).
-
-RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
+Format JSON strict attendu :
 {
-  "checklist": ["Permis de conduire", "Réservation voiture", "Vêtements de pluie", "Passeport"],
+  "checklist": ["Element 1", "Element 2"],
   "itinerary": [
     {
       "day": "Jour 1",
       "steps": [
-        { "time": "09:30", "activity": "Intitulé précis de l'activité du matin", "location": "Nom précis du lieu réel, Pays" },
-        { "time": "14:30", "activity": "Intitulé précis de l'activité de l'après-midi", "location": "Nom précis du lieu réel, Pays" },
-        { "time": "19:30", "activity": "Intitulé de l'activité ou soirée", "location": "Nom du lieu ou ville, Pays" }
+        { "time": "09:30", "activity": "Description de l'activité", "location": "Lieu réels précis, Pays" },
+        { "time": "14:30", "activity": "Description de l'activité", "location": "Lieu réels précis, Pays" },
+        { "time": "19:30", "activity": "Description de l'activité", "location": "Lieu réels précis, Pays" }
       ]
     }
   ]
@@ -312,11 +344,13 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                     })
                 });
 
+                const data = await response.json();
+
                 if (!response.ok) {
-                    throw new Error("Erreur de connexion avec l'API Gemini Pro.");
+                    const errorMsg = data.error ? data.error.message : "Réponse invalide du serveur";
+                    throw new Error(`Google API: ${errorMsg}`);
                 }
 
-                const data = await response.json();
                 const jsonText = data.candidates[0].content.parts[0].text;
                 return JSON.parse(jsonText);
             }
@@ -356,7 +390,7 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                         }
 
                         if (submitBtn) {
-                            submitBtn.textContent = "🧠 Gemini Pro conçoit votre itinéraire...";
+                            submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire...";
                             submitBtn.disabled = true;
                         }
 
@@ -379,31 +413,35 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                             return;
                         }
 
-                        // 1. GÉNÉRATION VIA GEMINI PRO
-                        const aiData = await generateItineraryWithGemini(GEMINI_API_KEY, destination, departure, totalDays, desc);
+                        let formattedItinerary = [];
+                        let formattedChecklist = [];
 
-                        // 2. FORMATAGE DES DATES
-                        const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-                        
-                        const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
-                            const currentDate = new Date(start);
-                            currentDate.setDate(start.getDate() + index);
-                            return {
-                                day: dayObj.day || `Jour ${index + 1}`,
-                                dateText: formatDate(currentDate),
-                                steps: dayObj.steps || []
-                            };
-                        });
+                        // 1. TENTATIVE VIA GEMINI AI
+                        try {
+                            const aiData = await generateItineraryWithGemini(GEMINI_API_KEY, destination, departure, totalDays, desc);
+                            const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                            
+                            formattedItinerary = aiData.itinerary.map((dayObj, index) => {
+                                const currentDate = new Date(start);
+                                currentDate.setDate(start.getDate() + index);
+                                return {
+                                    day: dayObj.day || `Jour ${index + 1}`,
+                                    dateText: formatDate(currentDate),
+                                    steps: dayObj.steps || []
+                                };
+                            });
 
-                        // 3. CHECKLIST ADAPTÉE PAR L'IA
-                        const formattedChecklist = (aiData.checklist || [
-                            "Passeport / Carte d'identité",
-                            "Permis de conduire",
-                            "Réservations de transports / voiture",
-                            "Trousse de pharmacie"
-                        ]).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
+                            formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
 
-                        // 4. IMAGE ILLUSTRATIVE DE LA DESTINATION
+                        } catch (aiError) {
+                            console.warn("L'API Gemini n'a pas pu être contactée, passage sur le générateur local :", aiError.message);
+                            
+                            // 2. SECOURS LOCAL : Si la clé Gemini échoue
+                            const fallbackData = generateLocalFallbackItinerary(destination, desc, totalDays, start);
+                            formattedItinerary = fallbackData.itinerary;
+                            formattedChecklist = fallbackData.checklist;
+                        }
+
                         const coverImage = "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80";
 
                         const tripData = {
@@ -430,12 +468,11 @@ RETOURNE EXCLUSIVEMENT DU CODE JSON STRICT, AUCUN TEXTE AUTOUR :
                         currentTrips.push(tripData);
                         localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
 
-                        console.log("✈️ Voyage généré par Gemini Pro et sauvegardé ! Redirection...");
                         window.location.href = 'voyage.html';
 
                     } catch (error) {
                         console.error("Erreur critique :", error);
-                        alert("Erreur de génération : " + error.message);
+                        alert("Erreur lors de la création : " + error.message);
                         if (submitBtn) {
                             submitBtn.textContent = originalBtnText;
                             submitBtn.disabled = false;
