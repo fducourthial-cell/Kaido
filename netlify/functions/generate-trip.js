@@ -26,7 +26,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Utilisation de gemini-2.5-flash sur l'API v1beta sans options bloquantes
+    // Utilisation de gemini-2.5-flash qui est le modèle actif par défaut
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
@@ -58,7 +58,10 @@ Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement c
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          response_mime_type: "application/json"
+        }
       })
     });
 
