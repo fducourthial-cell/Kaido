@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Style pour la zone d'édition masquée */
+        /* Modale d'édition */
         .edit-modal {
             display: none;
             position: fixed;
@@ -30,7 +30,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* Style spécifique pour le conteneur de la carte Google Maps */
+        /* Carte de la Google Map */
         .map-card {
             margin-top: 1.5rem;
             padding: 1rem;
@@ -41,9 +41,106 @@
 
         #map {
             width: 100%;
-            height: 280px;
+            height: 220px;
             border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* STYLES SPÉCIFIQUES POUR LA CHECK-LIST KAIDO */
+        .checklist-card {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            background-color: #14110E;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+        }
+
+        .checklist-items {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.9rem;
+        }
+
+        .checklist-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #F4EFEA;
+            flex-grow: 1;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            accent-color: #D4AF37;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .checklist-item.completed label {
+            text-decoration: line-through;
+            color: #8E847A;
+        }
+
+        .btn-delete-task {
+            background: none;
+            border: none;
+            color: #A63A2B;
+            cursor: pointer;
+            font-size: 0.85rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .btn-delete-task:hover {
+            opacity: 1;
+        }
+
+        .checklist-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+
+        .checklist-input {
+            flex: 1;
+            background: #0D0B09;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: #F4EFEA;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .checklist-input:focus {
+            outline: none;
+            border-color: #D4AF37;
+        }
+
+        .btn-add-task {
+            background: #D4AF37;
+            color: #0D0B09;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add-task:hover {
+            background: #e6c247;
         }
     </style>
 </head>
@@ -81,8 +178,9 @@
                 <div id="itinerary-days-container"></div>
             </section>
 
-            <!-- BARRE LATÉRALE LOGISTIQUE & CARTE (DROITE) -->
-            <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
+            <!-- BARRE LATÉRALE LOGISTIQUE, CHECKLIST & CARTE (DROITE) -->
+            <aside class="sidebar-logistique" style="flex: 1; min-width: 320px;">
+                <!-- LOGISTIQUE & BUDGET -->
                 <div class="card-box budget-card" style="padding: 1.5rem; background-color: #14110E; border-radius: 8px;">
                     <h3 style="color: #F4EFEA; margin-bottom: 1rem;">Logistique & Budget</h3>
                     <div class="budget-stat">
@@ -96,7 +194,24 @@
                     </a>
                 </div>
 
-                <!-- CONTENEUR CARTE GOOGLE MAPS -->
+                <!-- MODULE CHECK-LIST DE VOYAGE -->
+                <div class="checklist-card">
+                    <h3 style="color: #F4EFEA; font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+                        🎒 Check-list de voyage
+                    </h3>
+                    <p style="color: #8E847A; font-size: 0.8rem;">Ne rien oublier avant le départ</p>
+
+                    <ul class="checklist-items" id="checklist-container">
+                        <!-- Les éléments seront injectés ici par JS -->
+                    </ul>
+
+                    <form class="checklist-form" id="add-task-form">
+                        <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
+                        <button type="submit" class="btn-add-task">+</button>
+                    </form>
+                </div>
+
+                <!-- CARTE GOOGLE MAPS -->
                 <div class="map-card">
                     <h3 style="color: #F4EFEA; font-size: 1.1rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px;">
                         📍 Carte de la destination
@@ -136,23 +251,21 @@
         </div>
     </div>
 
-    <!-- CHARGEMENT ASYNCHRONE DE L'API GOOGLE MAPS -->
+    <!-- CHARGEMENT GOOGLE MAPS -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly" defer></script>
 
-    <!-- SCRIPT DE GESTION DU VOYAGE & CARTE -->
+    <!-- LOGIQUE JS COMPLETE -->
     <script>
-        let map; // Instance globale de la carte
+        let map;
 
-        // Initialisation de la carte Google Maps
         function initMap(destinationName) {
             const mapElement = document.getElementById('map');
             if (!mapElement || typeof google === 'undefined') return;
 
             const geocoder = new google.maps.Geocoder();
 
-            // Géocodage du nom de la destination pour centrer la carte
             geocoder.geocode({ address: destinationName || "Tokyo, Japon" }, (results, status) => {
-                let location = { lat: 35.6762, lng: 139.6503 }; // Tokyo par défaut si statut d'erreur
+                let location = { lat: 35.6762, lng: 139.6503 };
 
                 if (status === 'OK' && results[0]) {
                     location = results[0].geometry.location;
@@ -167,35 +280,14 @@
                         { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
                         { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
                         { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                        {
-                            featureType: "administrative.locality",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#d59563" }],
-                        },
-                        {
-                            featureType: "poi",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#d59563" }],
-                        },
-                        {
-                            featureType: "road",
-                            elementType: "geometry",
-                            stylers: [{ color: "#38414e" }],
-                        },
-                        {
-                            featureType: "road",
-                            elementType: "geometry.stroke",
-                            stylers: [{ color: "#212a37" }],
-                        },
-                        {
-                            featureType: "water",
-                            elementType: "geometry",
-                            stylers: [{ color: "#17263c" }],
-                        },
+                        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                     ],
                 });
 
-                // Placer le marqueur principal
                 new google.maps.Marker({
                     position: location,
                     map: map,
@@ -215,7 +307,83 @@
                 return;
             }
 
-            // --- RENDU DE LA PAGE ---
+            // --- TÂCHES PAR DÉFAUT SI LA LISTE EST VIDE ---
+            if (!activeTrip.checklist) {
+                activeTrip.checklist = [
+                    { id: 1, text: "Passeport / Carte d'identité", done: false },
+                    { id: 2, text: "Billets de transport & Réservations", done: false },
+                    { id: 3, text: "Adaptateur prise électrique", done: false },
+                    { id: 4, text: "Trousse de pharmacie", done: false }
+                ];
+            }
+
+            // --- FONCTION DE SAUVEGARDE GLOBALE ---
+            function saveActiveTrip() {
+                const tripIndex = allTrips.findIndex(t => t.id === activeTrip.id);
+                if (tripIndex !== -1) {
+                    allTrips[tripIndex] = activeTrip;
+                    localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
+                }
+                localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
+            }
+
+            // --- RENDU DE LA CHECKLIST ---
+            function renderChecklist() {
+                const container = document.getElementById('checklist-container');
+                container.innerHTML = '';
+
+                activeTrip.checklist.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = `checklist-item ${item.done ? 'completed' : ''}`;
+                    
+                    li.innerHTML = `
+                        <label>
+                            <input type="checkbox" data-id="${item.id}" ${item.done ? 'checked' : ''}>
+                            <span>${item.text}</span>
+                        </label>
+                        <button class="btn-delete-task" data-id="${item.id}">✖</button>
+                    `;
+
+                    // Changement d'état (Cocher / Décochez)
+                    const checkbox = li.querySelector('input[type="checkbox"]');
+                    checkbox.addEventListener('change', (e) => {
+                        item.done = e.target.checked;
+                        saveActiveTrip();
+                        renderChecklist();
+                    });
+
+                    // Suppression de la tâche
+                    const deleteBtn = li.querySelector('.btn-delete-task');
+                    deleteBtn.addEventListener('click', () => {
+                        activeTrip.checklist = activeTrip.checklist.filter(t => t.id !== item.id);
+                        saveActiveTrip();
+                        renderChecklist();
+                    });
+
+                    container.appendChild(li);
+                });
+            }
+
+            // Ajouter une nouvelle tâche via le formulaire
+            const addTaskForm = document.getElementById('add-task-form');
+            const taskInput = document.getElementById('new-task-input');
+
+            addTaskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = taskInput.value.trim();
+                if (text) {
+                    activeTrip.checklist.push({
+                        id: Date.now(),
+                        text: text,
+                        done: false
+                    });
+                    saveActiveTrip();
+                    renderChecklist();
+                    taskInput.value = '';
+                }
+            });
+
+            // --- RENDU GÉNÉRAL DE LA PAGE ---
             function renderPage() {
                 const destination = activeTrip.title || activeTrip.destination || "Destination";
 
@@ -228,14 +396,13 @@
                     document.getElementById('trip-cover').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${activeTrip.image}')`;
                 }
 
-                // Lien Google Flights
                 const departure = activeTrip.departure ? activeTrip.departure.split(',')[0].trim() : 'Paris';
                 const flightBtn = document.getElementById('btn-google-flights');
                 if (destination) {
                     flightBtn.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}`;
                 }
 
-                // Rendu des jours
+                // ITINÉRAIRE
                 const daysContainer = document.getElementById('itinerary-days-container');
                 daysContainer.innerHTML = ''; 
                 
@@ -269,7 +436,8 @@
                     });
                 }
 
-                // Chargement de la carte pour la destination
+                renderChecklist();
+
                 setTimeout(() => {
                     initMap(destination);
                 }, 500);
@@ -277,7 +445,7 @@
 
             renderPage();
 
-            // --- MODALE DE MODIFICATION ---
+            // MODALE D'ÉDITION
             const modal = document.getElementById('editModal');
             const btnOpen = document.getElementById('btn-open-edit');
             const btnClose = document.getElementById('btn-close-edit');
@@ -327,13 +495,7 @@
                     });
                 }
 
-                const tripIndex = allTrips.findIndex(t => t.id === activeTrip.id);
-                if (tripIndex !== -1) {
-                    allTrips[tripIndex] = activeTrip;
-                    localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
-                }
-                localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
-
+                saveActiveTrip();
                 modal.style.display = 'none';
                 renderPage();
             });
