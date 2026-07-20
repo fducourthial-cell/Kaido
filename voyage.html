@@ -8,50 +8,107 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        /* Modale d'édition */
+        :root {
+            --bg-dark: #0D0B09;
+            --bg-card: #14110E;
+            --color-gold: #D4AF37;
+            --color-torii: #A63A2B;
+            --text-main: #F4EFEA;
+            --text-muted: #8E847A;
+            --border-color: rgba(212, 175, 55, 0.15);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        /* HEADER */
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: var(--bg-dark);
+        }
+
+        header nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        header nav a:hover {
+            color: var(--color-gold);
+        }
+
+        /* BANNIÈRE EN-TÊTE */
+        .trip-header-visual {
+            height: 260px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 2rem;
+            box-shadow: inset 0 -100px 80px rgba(13, 11, 9, 0.9);
+        }
+
+        .trip-header-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-main);
+        }
+
+        .trip-header-title p {
+            margin: 0;
+            color: var(--color-gold);
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem 1.5rem;
+        }
+
+        /* MODALE D'ÉDITION */
         .edit-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 1000;
             justify-content: center; align-items: center;
         }
+
         .edit-modal-content {
-            background: #14110E;
-            border: 1px solid rgba(212, 175, 55, 0.2);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             padding: 2rem;
             border-radius: 8px;
             width: 90%; max-width: 500px;
-            color: white;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            color: var(--text-main);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Carte de la Google Map */
-        .map-card {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background-color: var(--bg-card, #14110E);
-            border: 1px solid var(--border-color, rgba(212, 175, 55, 0.1));
-            border-radius: 8px;
-        }
-
-        #map {
-            width: 100%;
-            height: 220px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* STYLES SPÉCIFIQUES POUR LA CHECK-LIST KAIDO */
+        /* BARRE LATÉRALE - CHECKLIST */
         .checklist-card {
             margin-top: 1.5rem;
             padding: 1.2rem;
-            background-color: #14110E;
-            border: 1px solid rgba(212, 175, 55, 0.1);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
         }
 
@@ -77,12 +134,12 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            color: #F4EFEA;
+            color: var(--text-main);
             flex-grow: 1;
         }
 
         .checklist-item input[type="checkbox"] {
-            accent-color: #D4AF37;
+            accent-color: var(--color-gold);
             width: 16px;
             height: 16px;
             cursor: pointer;
@@ -90,13 +147,13 @@
 
         .checklist-item.completed label {
             text-decoration: line-through;
-            color: #8E847A;
+            color: var(--text-muted);
         }
 
         .btn-delete-task {
             background: none;
             border: none;
-            color: #A63A2B;
+            color: var(--color-torii);
             cursor: pointer;
             font-size: 0.85rem;
             opacity: 0.6;
@@ -115,9 +172,9 @@
 
         .checklist-input {
             flex: 1;
-            background: #0D0B09;
+            background: var(--bg-dark);
             border: 1px solid rgba(212, 175, 55, 0.2);
-            color: #F4EFEA;
+            color: var(--text-main);
             padding: 0.5rem 0.8rem;
             border-radius: 4px;
             font-size: 0.85rem;
@@ -125,12 +182,12 @@
 
         .checklist-input:focus {
             outline: none;
-            border-color: #D4AF37;
+            border-color: var(--color-gold);
         }
 
         .btn-add-task {
-            background: #D4AF37;
-            color: #0D0B09;
+            background: var(--color-gold);
+            color: var(--bg-dark);
             border: none;
             padding: 0.5rem 0.8rem;
             border-radius: 4px;
@@ -142,13 +199,29 @@
         .btn-add-task:hover {
             background: #e6c247;
         }
+
+        /* BARRE LATÉRALE - CARTE MAPS */
+        .map-card {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        #map {
+            width: 100%;
+            height: 220px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
 <body>
 
     <header>
         <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 50px; width: auto; object-fit: contain;">
+            <img src="image/kaido logo.png" alt="Kaido Logo" style="height: 45px; width: auto; object-fit: contain;">
         </a>
         <nav>
             <a href="index.html">Mes Voyages</a>
@@ -163,31 +236,31 @@
     </section>
 
     <main class="container">
-        <div class="trip-layout" style="display: flex; gap: 2rem; margin-top: 2rem;">
+        <div class="trip-layout" style="display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
             
             <!-- CONTENU DE L'ITINÉRAIRE (GAUCHE) -->
-            <section class="timeline-itinerary" style="flex: 2;">
-                <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem; background-color: #14110E; border-radius: 8px;">
+            <section class="timeline-itinerary" style="flex: 2; min-width: 320px;">
+                <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="margin: 0; color: #F4EFEA;">Description & Notes</h3>
-                        <button id="btn-open-edit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background-color: #A63A2B; color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ Modifier le voyage</button>
+                        <h3 style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Description & Notes</h3>
+                        <button id="btn-open-edit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-torii); color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ Modifier le voyage</button>
                     </div>
-                    <p id="trip-main-desc" style="color: #8E847A; line-height: 1.6;"></p>
+                    <p id="trip-main-desc" style="color: var(--text-muted); line-height: 1.6; margin: 0;"></p>
                 </div>
 
                 <div id="itinerary-days-container"></div>
             </section>
 
             <!-- BARRE LATÉRALE LOGISTIQUE, CHECKLIST & CARTE (DROITE) -->
-            <aside class="sidebar-logistique" style="flex: 1; min-width: 320px;">
+            <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
                 <!-- LOGISTIQUE & BUDGET -->
-                <div class="card-box budget-card" style="padding: 1.5rem; background-color: #14110E; border-radius: 8px;">
-                    <h3 style="color: #F4EFEA; margin-bottom: 1rem;">Logistique & Budget</h3>
+                <div class="card-box budget-card" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 1rem;">Logistique & Budget</h3>
                     <div class="budget-stat">
-                        <span class="budget-amount" id="trip-budget" style="color: #D4AF37; font-size: 1.8rem; font-weight: bold;">0 €</span>
-                        <span class="budget-label" style="display: block; color: #8E847A; font-size: 0.85rem;">Estimation Total</span>
+                        <span class="budget-amount" id="trip-budget" style="color: var(--color-gold); font-size: 1.8rem; font-weight: bold;">0 €</span>
+                        <span class="budget-label" style="display: block; color: var(--text-muted); font-size: 0.85rem;">Estimation Total</span>
                     </div>
-                    <hr style="border: 0; border-top: 1px solid rgba(212, 175, 55, 0.1); margin: 1.5rem 0;">
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
                     
                     <a id="btn-google-flights" href="#" target="_blank" class="btn" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white; padding: 0.8rem; border-radius: 4px; font-weight: 500;">
                         ✈️ Voir les vols sur Google Flights
@@ -196,14 +269,12 @@
 
                 <!-- MODULE CHECK-LIST DE VOYAGE -->
                 <div class="checklist-card">
-                    <h3 style="color: #F4EFEA; font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif;">
                         🎒 Check-list de voyage
                     </h3>
-                    <p style="color: #8E847A; font-size: 0.8rem;">Ne rien oublier avant le départ</p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">Ne rien oublier avant le départ</p>
 
-                    <ul class="checklist-items" id="checklist-container">
-                        <!-- Les éléments seront injectés ici par JS -->
-                    </ul>
+                    <ul class="checklist-items" id="checklist-container"></ul>
 
                     <form class="checklist-form" id="add-task-form">
                         <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
@@ -213,7 +284,7 @@
 
                 <!-- CARTE GOOGLE MAPS -->
                 <div class="map-card">
-                    <h3 style="color: #F4EFEA; font-size: 1.1rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px;">
+                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.8rem 0; display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif;">
                         📍 Carte de la destination
                     </h3>
                     <div id="map"></div>
@@ -225,27 +296,27 @@
     <!-- FENÊTRE MODALE DE MODIFICATION -->
     <div id="editModal" class="edit-modal">
         <div class="edit-modal-content">
-            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: #D4AF37;">Modifier les détails du voyage</h3>
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--color-gold); font-family: 'Playfair Display', serif;">Modifier les détails du voyage</h3>
             <form id="edit-trip-form">
                 <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:#8E847A;">📅 Date Aller</label>
-                    <input type="date" id="edit-date-start" class="form-control" style="width:100%; padding:0.5rem; background:#0D0B09; border:1px solid #333; color:white; border-radius:4px;" required>
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📅 Date Aller</label>
+                    <input type="date" id="edit-date-start" class="form-control" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:#8E847A;">📅 Date Retour</label>
-                    <input type="date" id="edit-date-end" class="form-control" style="width:100%; padding:0.5rem; background:#0D0B09; border:1px solid #333; color:white; border-radius:4px;" required>
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📅 Date Retour</label>
+                    <input type="date" id="edit-date-end" class="form-control" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:#8E847A;">💶 Budget (€)</label>
-                    <input type="number" id="edit-budget" class="form-control" style="width:100%; padding:0.5rem; background:#0D0B09; border:1px solid #333; color:white; border-radius:4px;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">💶 Budget (€)</label>
+                    <input type="number" id="edit-budget" class="form-control" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;">
                 </div>
                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:#8E847A;">📝 Notes & Description</label>
-                    <textarea id="edit-desc" class="form-control" rows="3" style="width:100%; padding:0.5rem; background:#0D0B09; border:1px solid #333; color:white; border-radius:4px;"></textarea>
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📝 Notes & Description</label>
+                    <textarea id="edit-desc" class="form-control" rows="3" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;"></textarea>
                 </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                     <button type="button" id="btn-close-edit" class="btn" style="background: #333; color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Annuler</button>
-                    <button type="submit" class="btn" style="background: #A63A2B; color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Sauvegarder</button>
+                    <button type="submit" class="btn" style="background: var(--color-torii); color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Sauvegarder</button>
                 </div>
             </form>
         </div>
@@ -344,7 +415,6 @@
                         <button class="btn-delete-task" data-id="${item.id}">✖</button>
                     `;
 
-                    // Changement d'état (Cocher / Décochez)
                     const checkbox = li.querySelector('input[type="checkbox"]');
                     checkbox.addEventListener('change', (e) => {
                         item.done = e.target.checked;
@@ -352,7 +422,6 @@
                         renderChecklist();
                     });
 
-                    // Suppression de la tâche
                     const deleteBtn = li.querySelector('.btn-delete-task');
                     deleteBtn.addEventListener('click', () => {
                         activeTrip.checklist = activeTrip.checklist.filter(t => t.id !== item.id);
@@ -364,7 +433,6 @@
                 });
             }
 
-            // Ajouter une nouvelle tâche via le formulaire
             const addTaskForm = document.getElementById('add-task-form');
             const taskInput = document.getElementById('new-task-input');
 
@@ -402,36 +470,86 @@
                     flightBtn.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}`;
                 }
 
-                // ITINÉRAIRE
+                // --- RENDU DESIGN & STRUCTURÉ DES JOURS (ITINÉRAIRE) ---
                 const daysContainer = document.getElementById('itinerary-days-container');
                 daysContainer.innerHTML = ''; 
                 
                 if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
                     activeTrip.itinerary.forEach(day => {
                         const dayBlock = document.createElement('div');
-                        dayBlock.className = 'day-block card-box';
-                        dayBlock.style.cssText = 'background-color: #14110E; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(212, 175, 55, 0.08);';
+                        dayBlock.className = 'day-block-card';
+                        
+                        dayBlock.style.cssText = `
+                            background-color: #14110E;
+                            border: 1px solid rgba(212, 175, 55, 0.15);
+                            border-radius: 10px;
+                            padding: 1.5rem;
+                            margin-bottom: 2rem;
+                            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+                        `;
                         
                         let stepsHTML = '';
-                        day.steps.forEach(step => {
+                        day.steps.forEach((step, index) => {
+                            const isLast = index === day.steps.length - 1;
                             stepsHTML += `
-                                <div class="step-item" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                    <div class="step-time" style="color: #D4AF37; font-weight: bold; min-width: 60px;">${step.time || '--:--'}</div>
-                                    <div class="step-details">
-                                        <h4 style="margin: 0; color: #F4EFEA;">${step.activity}</h4>
-                                        ${step.location ? `<p style="font-size:0.85rem; color:#8E847A; margin-top: 0.2rem;">📍 ${step.location}</p>` : ''}
+                                <div style="display: flex; gap: 1.2rem; position: relative; padding-bottom: ${isLast ? '0' : '1.5rem'};">
+                                    ${!isLast ? `<div style="position: absolute; left: 28px; top: 30px; bottom: 0; width: 2px; background: rgba(212, 175, 55, 0.2);"></div>` : ''}
+
+                                    <div style="
+                                        background: rgba(212, 175, 55, 0.1); 
+                                        border: 1px solid #D4AF37; 
+                                        color: #D4AF37; 
+                                        font-weight: 700; 
+                                        font-size: 0.85rem; 
+                                        padding: 0.4rem 0.6rem; 
+                                        border-radius: 6px; 
+                                        height: fit-content; 
+                                        min-width: 58px; 
+                                        text-align: center;
+                                        z-index: 1;">
+                                        ${step.time || '--:--'}
+                                    </div>
+
+                                    <div style="flex: 1; background: rgba(255, 255, 255, 0.02); padding: 0.8rem 1rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.03);">
+                                        <h4 style="margin: 0; color: #F4EFEA; font-size: 1rem; font-weight: 600;">${step.activity}</h4>
+                                        ${step.location ? `<p style="font-size:0.85rem; color:#8E847A; margin: 0.4rem 0 0 0; display: flex; align-items: center; gap: 5px;">📍 ${step.location}</p>` : ''}
                                     </div>
                                 </div>
                             `;
                         });
 
                         dayBlock.innerHTML = `
-                            <div class="day-title-box" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.8rem;">
-                                <span class="day-number" style="color: #A63A2B; font-weight: bold; font-size: 1.1rem; margin-right: 0.5rem;">${day.day}</span>
-                                <h4 style="display: inline; color: #8E847A;">${day.dateText || ''}</h4>
+                            <div style="
+                                display: flex; 
+                                justify-content: space-between; 
+                                align-items: center; 
+                                border-bottom: 1px solid rgba(212, 175, 55, 0.15); 
+                                padding-bottom: 1rem; 
+                                margin-bottom: 1.5rem;">
+                                
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="
+                                        background: #A63A2B; 
+                                        color: #FFFFFF; 
+                                        font-weight: 700; 
+                                        font-size: 0.9rem; 
+                                        padding: 0.3rem 0.8rem; 
+                                        border-radius: 4px; 
+                                        text-transform: uppercase; 
+                                        letter-spacing: 0.05em;">
+                                        ${day.day}
+                                    </span>
+                                    <h3 style="margin: 0; color: #F4EFEA; font-size: 1.1rem; font-weight: 500;">
+                                        ${day.dateText || ''}
+                                    </h3>
+                                </div>
                             </div>
-                            <div class="steps-timeline" style="margin-top: 1rem;">${stepsHTML}</div>
+
+                            <div class="steps-timeline">
+                                ${stepsHTML}
+                            </div>
                         `;
+
                         daysContainer.appendChild(dayBlock);
                     });
                 }
