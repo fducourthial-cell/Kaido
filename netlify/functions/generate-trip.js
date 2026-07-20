@@ -26,7 +26,6 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Endpoint stable v1 avec gemini-2.5-flash
     const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
@@ -58,10 +57,7 @@ Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement c
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json"
-        }
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
@@ -77,6 +73,9 @@ Exigence absolue : Retourne UNIQUEMENT un objet JSON valide suivant exactement c
     }
 
     let rawText = data.candidates[0].content.parts[0].text;
+    
+    // Nettoyage au cas où Gemini entoure le JSON de balises ```json
+    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
     return {
       statusCode: 200,
