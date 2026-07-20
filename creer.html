@@ -236,7 +236,7 @@
 
                 <div class="form-group">
                     <label for="trip-notes">📝 Notes, mode de transport & envies de voyage</label>
-                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Road trip en voiture de location pour visiter les distilleries, randonnée nature dans les Highlands et lieux iconiques..."></textarea>
+                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Road trip en voiture de location sur 5 jours pour visiter les distilleries de whisky, randonnée nature dans les Highlands et lieux iconiques..."></textarea>
                 </div>
 
                 <button type="submit" class="kaido-submit-btn">
@@ -254,9 +254,6 @@
             const form = document.getElementById('create-trip-form');
             const modernField = document.getElementById('trip-destination-modern');
 
-            // CLÉ API GEMINI
-            const GEMINI_API_KEY = "AQ.Ab8RN6IqFk7puKdFU_AH8yB3_TJpZsZ0R5az78RHzqWdk62t4Q";
-
             let selectedDestinationName = "";
 
             if (modernField) {
@@ -266,93 +263,6 @@
                         selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
                     }
                 });
-            }
-
-            // MOTEUR SECOURS : Génération locale si l'API est indisponible
-            function generateLocalFallbackItinerary(destination, descText, totalDays, startDate) {
-                const textLower = descText.toLowerCase();
-
-                const isWhisky = textLower.includes('distillerie') || textLower.includes('whisky') || textLower.includes('bar');
-                const isNature = textLower.includes('nature') || textLower.includes('randonnée') || textLower.includes('lac') || textLower.includes('montagne');
-                const isCulture = textLower.includes('culture') || textLower.includes('château') || textLower.includes('monument');
-
-                const spots = [
-                    "Centre historique et monuments incontournables",
-                    "Randonnée panoramique et découverte des grands espaces",
-                    "Visite d'une distillerie locale & dégustation traditionnelle",
-                    "Exploration des sites emblématiques et châteaux régionaux",
-                    "Pause culinaire et découverte des marchés locaux"
-                ];
-
-                const itinerary = [];
-                const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-
-                for (let i = 0; i < totalDays; i++) {
-                    const currentDate = new Date(startDate);
-                    currentDate.setDate(startDate.getDate() + i);
-
-                    itinerary.push({
-                        day: `Jour ${i + 1}`,
-                        dateText: formatDate(currentDate),
-                        steps: [
-                            { time: "09:30", activity: `Matinée : ${spots[i % spots.length]}`, location: destination },
-                            { time: "14:30", activity: `Après-midi : Exploration & découverte de ${destination}`, location: destination },
-                            { time: "19:30", activity: "Soirée libre, dîner local et détente", location: destination }
-                        ]
-                    });
-                }
-
-                return {
-                    checklist: [
-                        { id: 1, text: "Passeport / Carte d'identité", done: false },
-                        { id: 2, text: "Permis de conduire / Location voiture", done: false },
-                        { id: 3, text: "Réservations de logements & transports", done: false }
-                    ],
-                    itinerary: itinerary
-                };
-            }
-
-            // APPEL API GEMINI PRO (AVEC CAPTURE D'ERREURS DÉTAILLÉE)
-            async function generateItineraryWithGemini(apiKey, destination, departure, totalDays, descText) {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-                const prompt = `Tu es un expert mondial en voyage pour Kaido.
-Génère un itinéraire de ${totalDays} jours pour ${destination} (départ de ${departure}).
-Contraintes/Notes : "${descText}".
-
-Format JSON strict attendu :
-{
-  "checklist": ["Element 1", "Element 2"],
-  "itinerary": [
-    {
-      "day": "Jour 1",
-      "steps": [
-        { "time": "09:30", "activity": "Description de l'activité", "location": "Lieu réels précis, Pays" },
-        { "time": "14:30", "activity": "Description de l'activité", "location": "Lieu réels précis, Pays" },
-        { "time": "19:30", "activity": "Description de l'activité", "location": "Lieu réels précis, Pays" }
-      ]
-    }
-  ]
-}`;
-
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    const errorMsg = data.error ? data.error.message : "Réponse invalide du serveur";
-                    throw new Error(`Google API: ${errorMsg}`);
-                }
-
-                const jsonText = data.candidates[0].content.parts[0].text;
-                return JSON.parse(jsonText);
             }
 
             if (form) {
@@ -390,7 +300,7 @@ Format JSON strict attendu :
                         }
 
                         if (submitBtn) {
-                            submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire...";
+                            submitBtn.textContent = "🧠 Kaido conçoit votre voyage sur-mesure...";
                             submitBtn.disabled = true;
                         }
 
@@ -413,34 +323,37 @@ Format JSON strict attendu :
                             return;
                         }
 
-                        let formattedItinerary = [];
-                        let formattedChecklist = [];
+                        // APPEL DU SCRIPT BACKEND SÉCURISÉ
+                        const response = await fetch('/.netlify/functions/generate-trip', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                destination: destination,
+                                departure: departure,
+                                totalDays: totalDays,
+                                descText: desc
+                            })
+                        });
 
-                        // 1. TENTATIVE VIA GEMINI AI
-                        try {
-                            const aiData = await generateItineraryWithGemini(GEMINI_API_KEY, destination, departure, totalDays, desc);
-                            const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-                            
-                            formattedItinerary = aiData.itinerary.map((dayObj, index) => {
-                                const currentDate = new Date(start);
-                                currentDate.setDate(start.getDate() + index);
-                                return {
-                                    day: dayObj.day || `Jour ${index + 1}`,
-                                    dateText: formatDate(currentDate),
-                                    steps: dayObj.steps || []
-                                };
-                            });
+                        const aiData = await response.json();
 
-                            formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
-
-                        } catch (aiError) {
-                            console.warn("L'API Gemini n'a pas pu être contactée, passage sur le générateur local :", aiError.message);
-                            
-                            // 2. SECOURS LOCAL : Si la clé Gemini échoue
-                            const fallbackData = generateLocalFallbackItinerary(destination, desc, totalDays, start);
-                            formattedItinerary = fallbackData.itinerary;
-                            formattedChecklist = fallbackData.checklist;
+                        if (!response.ok) {
+                            throw new Error(aiData.error || "Erreur de réponse du serveur.");
                         }
+
+                        const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                        
+                        const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
+                            const currentDate = new Date(start);
+                            currentDate.setDate(start.getDate() + index);
+                            return {
+                                day: dayObj.day || `Jour ${index + 1}`,
+                                dateText: formatDate(currentDate),
+                                steps: dayObj.steps || []
+                            };
+                        });
+
+                        const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
 
                         const coverImage = "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80";
 
@@ -471,8 +384,8 @@ Format JSON strict attendu :
                         window.location.href = 'voyage.html';
 
                     } catch (error) {
-                        console.error("Erreur critique :", error);
-                        alert("Erreur lors de la création : " + error.message);
+                        console.error("Erreur backend :", error);
+                        alert("Erreur lors de la génération : " + error.message);
                         if (submitBtn) {
                             submitBtn.textContent = originalBtnText;
                             submitBtn.disabled = false;
