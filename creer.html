@@ -324,7 +324,7 @@
                         }
 
                         // APPEL DU SCRIPT BACKEND SÉCURISÉ
-                        const response = await fetch('https://ton-site-netlify.netlify.app/.netlify/functions/generate-trip', {
+                        const response = await fetch('https://app.netlify.com/projects/quiet-hamster-f904c2/overview', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
