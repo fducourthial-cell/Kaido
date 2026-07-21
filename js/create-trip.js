@@ -10,28 +10,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
             try {
-                let destination = "";
+                // 1. EXTRACTION ULTRA-BLINDÉE DE LA DESTINATION (TXT PROPRE)
+                let destinationText = "";
+
                 const modernField = document.getElementById('trip-destination-modern');
-                
                 if (modernField) {
-                    if (modernField.value) {
-                        destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || (typeof modernField.value === 'string' ? modernField.value : "");
+                    if (typeof modernField.value === 'string' && modernField.value.trim() !== '') {
+                        destinationText = modernField.value;
+                    } else if (typeof modernField.value === 'object' && modernField.value !== null) {
+                        destinationText = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
                     }
-                    if (!destination) {
+                    
+                    if (!destinationText) {
                         const innerInput = modernField.shadowRoot ? modernField.shadowRoot.querySelector('input') : modernField.querySelector('input');
                         if (innerInput && innerInput.value) {
-                            destination = innerInput.value;
+                            destinationText = innerInput.value;
                         }
                     }
                 }
 
-                if (!destination) {
+                if (!destinationText) {
                     const backupInput = document.getElementById('trip-destination');
-                    if (backupInput) destination = backupInput.value;
+                    if (backupInput) destinationText = backupInput.value;
                 }
-                
-                console.log("📍 Destination détectée :", destination);
 
+                const cleanDestination = String(destinationText).trim();
+
+                if (!cleanDestination) {
+                    alert("Veuillez sélectionner ou saisir une destination de voyage.");
+                    return;
+                }
+
+                console.log("📍 Destination textuelle extraite :", cleanDestination);
+
+                // 2. LECTURE DES AUTRES CHAMPS
                 const departureInput = document.getElementById('trip-departure');
                 const departure = departureInput ? departureInput.value : 'Paris';
                 
@@ -43,11 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const notesInput = document.getElementById('trip-notes');
                 const desc = notesInput ? notesInput.value : '';
-
-                if (!destination) {
-                    alert("Veuillez sélectionner ou saisir une destination de voyage.");
-                    return;
-                }
 
                 if (!dateStart || !dateEnd) {
                     alert("Veuillez renseigner les dates aller et retour.");
@@ -78,9 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                // 3. RECHERCHE DES LIEUX À VISITER
                 let spots = [];
                 try {
-                    spots = await fetchTopPlacesSafe(destination);
+                    spots = await fetchTopPlacesSafe(cleanDestination);
                 } catch (placesError) {
                     console.warn("Google Places indisponible. Utilisation de la liste de secours.", placesError);
                     spots = [
@@ -95,15 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const itinerary = generateItinerary(start, totalDays, spots);
                 
-                // 📸 APPEL PEXELS
-                console.log("🖼️ Appel de l'API Pexels pour :", destination);
-                const finalImage = await fetchPexelsImage(destination);
-                console.log("✅ Image Pexels récupérée :", finalImage);
+                // 4. RÉCUPÉRATION DE L'IMAGE PEXELS ENVOYÉE AVEC LE TEXTE PROPRE
+                console.log("🖼️ Appel Pexels pour :", cleanDestination);
+                const finalImage = await fetchPexelsImage(cleanDestination);
+                console.log("✅ Image retenue :", finalImage);
 
+                // 5. ENREGISTREMENT DU VOYAGE
                 const newTrip = {
                     id: Date.now(),
-                    title: destination,
-                    destination: destination,
+                    title: cleanDestination,
+                    destination: cleanDestination,
                     departure: departure,
                     dates: `${formatDate(start)} au ${formatDate(end)}`,
                     dateStart: dateStart,
@@ -119,11 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
                 localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
 
-                console.log("💾 Voyage enregistré avec succès ! Redirection...");
+                console.log("💾 Redirection vers la page du voyage...");
                 window.location.href = 'voyage.html';
 
             } catch (error) {
-                console.error("❌ Erreur critique durant la soumission :", error);
+                console.error("❌ Erreur durant la création :", error);
                 alert("Une erreur est survenue : " + error.message);
                 if (submitBtn) {
                     submitBtn.textContent = originalBtnText;
@@ -134,22 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Interrogation sécurisée de l'API Pexels
+// INTERROGATION DE L'API PEXELS AVEC TA CLÉ
 async function fetchPexelsImage(cityName) {
     const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
     try {
-        // Sécurisation au cas où cityName serait un objet ou contiendrait des virgules
-        let searchQuery = cityName;
-        if (typeof cityName === 'object' && cityName !== null) {
-            searchQuery = cityName.displayName || cityName.formattedAddress || cityName.name || '';
-        }
-        
-        const cleanCity = String(searchQuery).split(',')[0].trim();
-        console.log("🔍 Recherche Pexels pour :", cleanCity);
+        const cleanCity = String(cityName).split(',')[0].trim();
+        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`;
 
-        if (!cleanCity) throw new Error("Nom de ville vide pour Pexels");
-
-        const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`, {
+        const response = await fetch(url, {
             headers: { Authorization: PEXELS_API_KEY }
         });
 
@@ -157,11 +158,10 @@ async function fetchPexelsImage(cityName) {
 
         const data = await response.json();
         if (data.photos && data.photos.length > 0) {
-            console.log("📸 Image Pexels trouvée :", data.photos[0].src.landscape);
             return data.photos[0].src.landscape;
         }
     } catch (error) {
-        console.warn("⚠️ Fallback activé :", error);
+        console.warn("⚠️ Impossible d'obtenir la photo Pexels, fallback activé :", error);
     }
 
     return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
