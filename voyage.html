@@ -522,11 +522,22 @@
                     document.getElementById('trip-cover').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${activeTrip.image}')`;
                 }
 
-                const departure = activeTrip.departure ? activeTrip.departure.split(',')[0].trim() : 'Paris';
-                const flightBtn = document.getElementById('btn-google-flights');
-                if (destination) {
-                    flightBtn.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(destination)}%20from%20${encodeURIComponent(departure)}`;
-                }
+               const departure = activeTrip.departure ? activeTrip.departure.split(',')[0].trim() : 'Paris';
+const flightBtn = document.getElementById('btn-google-flights');
+
+if (destination && flightBtn) {
+    // Construction de la recherche Google Flights avec les dates si elles existent
+    let flightQuery = `Flights to ${encodeURIComponent(destination)} from ${encodeURIComponent(departure)}`;
+    
+    if (activeTrip.dateStart) {
+        flightQuery += ` on ${activeTrip.dateStart}`;
+    }
+    if (activeTrip.dateEnd) {
+        flightQuery += ` to ${activeTrip.dateEnd}`;
+    }
+
+    flightBtn.href = `https://www.google.com/travel/flights?q=${flightQuery}`;
+}
 
                 // RENDU DES JOURS
                 const daysContainer = document.getElementById('itinerary-days-container');
