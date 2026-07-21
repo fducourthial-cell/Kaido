@@ -521,23 +521,27 @@
                 if (activeTrip.image) {
                     document.getElementById('trip-cover').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${activeTrip.image}')`;
                 }
-
-               const departure = activeTrip.departure ? activeTrip.departure.split(',')[0].trim() : 'Paris';
+const departure = activeTrip.departure ? activeTrip.departure.split(',')[0].trim() : 'Lyon';
+const destinationClean = destination ? destination.split(',')[0].trim() : '';
 const flightBtn = document.getElementById('btn-google-flights');
 
-if (destination && flightBtn) {
-    // Construction de la recherche Google Flights avec les dates si elles existent
-    let flightQuery = `Flights to ${encodeURIComponent(destination)} from ${encodeURIComponent(departure)}`;
+if (destinationClean && flightBtn) {
+    // 1. Formatage propre des paramètres
+    const depEncoded = encodeURIComponent(departure);
+    const destEncoded = encodeURIComponent(destinationClean);
     
-    if (activeTrip.dateStart) {
-        flightQuery += ` on ${activeTrip.dateStart}`;
-    }
-    if (activeTrip.dateEnd) {
-        flightQuery += ` to ${activeTrip.dateEnd}`;
-    }
+    // 2. Récupération des dates au format YYYY-MM-DD
+    const dateStart = activeTrip.dateStart || '';
+    const dateEnd = activeTrip.dateEnd || '';
 
-    flightBtn.href = `https://www.google.com/travel/flights?q=${flightQuery}`;
+    // 3. Construction de l'URL Google Flights exacte
+    if (dateStart && dateEnd) {
+        flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${depEncoded}%20%C3%A0%20${destEncoded}%20du%20${dateStart}%20au%20${dateEnd}`;
+    } else {
+        flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${depEncoded}%20%C3%A0%20${destEncoded}`;
+    }
 }
+               
 
                 // RENDU DES JOURS
                 const daysContainer = document.getElementById('itinerary-days-container');
