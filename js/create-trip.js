@@ -140,19 +140,7 @@ async function fetchPexelsImage(cityName) {
             }
         });
 
-        if (!response.ok) throw new Error('Erreur lors de la requête Pexels');
-
-        const data = await response.json();
-        if (data.photos && data.photos.length > 0) {
-            return data.photos[0].src.landscape;
-        }
-    } catch (error) {
-        console.warn("Impossible de récupérer l'image Pexels :", error);
-    }
-
-    // Image de secours uniquement en cas de souci réseau
-    return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
-}
+       
 
 function fetchTopPlacesSafe(destinationName) {
     return new Promise((resolve, reject) => {
