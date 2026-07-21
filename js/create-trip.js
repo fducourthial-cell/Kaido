@@ -138,35 +138,32 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchPexelsImage(cityName) {
     const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
     try {
-        const cleanCity = cityName.split(',')[0].trim();
-        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`;
+        // Sécurisation au cas où cityName serait un objet ou contiendrait des virgules
+        let searchQuery = cityName;
+        if (typeof cityName === 'object' && cityName !== null) {
+            searchQuery = cityName.displayName || cityName.formattedAddress || cityName.name || '';
+        }
         
-        console.log("📡 Requête envoyée à Pexels :", url);
+        const cleanCity = String(searchQuery).split(',')[0].trim();
+        console.log("🔍 Recherche Pexels pour :", cleanCity);
 
-        const response = await fetch(url, {
-            headers: {
-                Authorization: PEXELS_API_KEY
-            }
+        if (!cleanCity) throw new Error("Nom de ville vide pour Pexels");
+
+        const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`, {
+            headers: { Authorization: PEXELS_API_KEY }
         });
 
-        if (!response.ok) {
-            console.error("❌ Erreur Réponse Pexels Status :", response.status);
-            throw new Error(`Pexels API Error HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Pexels HTTP ${response.status}`);
 
         const data = await response.json();
-        console.log("📦 Données brutes de Pexels :", data);
-
         if (data.photos && data.photos.length > 0) {
+            console.log("📸 Image Pexels trouvée :", data.photos[0].src.landscape);
             return data.photos[0].src.landscape;
-        } else {
-            console.warn("⚠️ Aucune photo trouvée sur Pexels pour", cleanCity);
         }
     } catch (error) {
-        console.error("❌ Exception lors de l'appel Pexels :", error);
+        console.warn("⚠️ Fallback activé :", error);
     }
 
-    // Image de secours uniquement si Pexels ne répond pas ou ne trouve rien
     return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
 
