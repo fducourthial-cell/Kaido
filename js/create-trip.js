@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const itinerary = generateItinerary(start, totalDays, spots);
                 
-                // 📸 Récupération dynamique de l'image via l'API Pexels avec ta clé
+                // 📸 100% Dynamique : Récupération de la vraie photo de destination via Pexels
                 const finalImage = await fetchPexelsImage(destination);
 
                 const newTrip = {
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dateEnd: dateEnd,
                     budget: budget,
                     desc: desc,
-                    image: finalImage,
+                    image: finalImage, // Enregistrement de l'URL spécifique
                     itinerary: itinerary
                 };
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Fonction d'interrogation de l'API Pexels
+// Interrogation de l'API Pexels avec ta clé
 async function fetchPexelsImage(cityName) {
     const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
     try {
@@ -140,7 +140,19 @@ async function fetchPexelsImage(cityName) {
             }
         });
 
-       
+        if (!response.ok) throw new Error('Erreur lors de la requête Pexels');
+
+        const data = await response.json();
+        if (data.photos && data.photos.length > 0) {
+            return data.photos[0].src.landscape;
+        }
+    } catch (error) {
+        console.warn("Impossible de récupérer l'image Pexels :", error);
+    }
+
+    // Image de secours uniquement en cas d'échec réseau ou si Pexels n'a rien trouvé
+    return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
+}
 
 function fetchTopPlacesSafe(destinationName) {
     return new Promise((resolve, reject) => {
