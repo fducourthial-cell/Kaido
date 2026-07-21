@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            console.log("Formulaire intercepté, début de la génération...");
+            console.log("🚀 Formulaire soumis, début du traitement...");
 
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (modernField) {
                     if (modernField.value) {
-                        destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
+                        destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || (typeof modernField.value === 'string' ? modernField.value : "");
                     }
                     if (!destination) {
                         const innerInput = modernField.shadowRoot ? modernField.shadowRoot.querySelector('input') : modernField.querySelector('input');
@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (backupInput) destination = backupInput.value;
                 }
                 
+                console.log("📍 Destination détectée :", destination);
+
                 const departureInput = document.getElementById('trip-departure');
                 const departure = departureInput ? departureInput.value : 'Paris';
                 
@@ -93,8 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const itinerary = generateItinerary(start, totalDays, spots);
                 
-                // 📸 100% Dynamique : Récupération de la vraie photo de destination via Pexels
+                // 📸 APPEL PEXELS
+                console.log("🖼️ Appel de l'API Pexels pour :", destination);
                 const finalImage = await fetchPexelsImage(destination);
+                console.log("✅ Image Pexels récupérée :", finalImage);
 
                 const newTrip = {
                     id: Date.now(),
@@ -106,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dateEnd: dateEnd,
                     budget: budget,
                     desc: desc,
-                    image: finalImage, // Enregistrement de l'URL spécifique
+                    image: finalImage,
                     itinerary: itinerary
                 };
 
@@ -115,10 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
                 localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
 
+                console.log("💾 Voyage enregistré avec succès ! Redirection...");
                 window.location.href = 'voyage.html';
 
             } catch (error) {
-                console.error("Erreur critique durant la soumission :", error);
+                console.error("❌ Erreur critique durant la soumission :", error);
                 alert("Une erreur est survenue : " + error.message);
                 if (submitBtn) {
                     submitBtn.textContent = originalBtnText;
@@ -129,28 +134,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Interrogation de l'API Pexels avec ta clé
+// Interrogation sécurisée de l'API Pexels
 async function fetchPexelsImage(cityName) {
     const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
     try {
         const cleanCity = cityName.split(',')[0].trim();
-        const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`, {
+        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`;
+        
+        console.log("📡 Requête envoyée à Pexels :", url);
+
+        const response = await fetch(url, {
             headers: {
                 Authorization: PEXELS_API_KEY
             }
         });
 
-        if (!response.ok) throw new Error('Erreur lors de la requête Pexels');
+        if (!response.ok) {
+            console.error("❌ Erreur Réponse Pexels Status :", response.status);
+            throw new Error(`Pexels API Error HTTP ${response.status}`);
+        }
 
         const data = await response.json();
+        console.log("📦 Données brutes de Pexels :", data);
+
         if (data.photos && data.photos.length > 0) {
             return data.photos[0].src.landscape;
+        } else {
+            console.warn("⚠️ Aucune photo trouvée sur Pexels pour", cleanCity);
         }
     } catch (error) {
-        console.warn("Impossible de récupérer l'image Pexels :", error);
+        console.error("❌ Exception lors de l'appel Pexels :", error);
     }
 
-    // Image de secours uniquement en cas d'échec réseau ou si Pexels n'a rien trouvé
+    // Image de secours uniquement si Pexels ne répond pas ou ne trouve rien
     return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
 
