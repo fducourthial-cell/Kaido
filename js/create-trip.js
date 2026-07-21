@@ -147,7 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchPexelsImage(cityName) {
     const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
     try {
-        const cleanCity = String(cityName).split(',')[0].trim();
+        // Nettoyage agressif : extraire UNIQUEMENT le nom de la ville (ex: "Dubaï" au lieu de "Dubaï - Émirats...")
+        let cleanCity = String(cityName)
+            .split(',')[0]        // Coupe à la virgule
+            .split('–')[0]        // Coupe au tiret cadratin
+            .split('-')[0]        // Coupe au tiret simple
+            .trim();
+
+        console.log("🔍 Mot-clé exact envoyé à Pexels :", cleanCity);
+
         const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`;
 
         const response = await fetch(url, {
@@ -158,12 +166,16 @@ async function fetchPexelsImage(cityName) {
 
         const data = await response.json();
         if (data.photos && data.photos.length > 0) {
+            console.log("📸 Image spécifique trouvée sur Pexels pour", cleanCity);
             return data.photos[0].src.landscape;
+        } else {
+            console.warn("⚠️ Pexels n'a rien trouvé pour", cleanCity);
         }
     } catch (error) {
-        console.warn("⚠️ Impossible d'obtenir la photo Pexels, fallback activé :", error);
+        console.warn("⚠️ Erreur lors de la récupération Pexels :", error);
     }
 
+    // Image de secours si vraiment rien n'est trouvé
     return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
 
