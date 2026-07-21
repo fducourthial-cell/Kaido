@@ -3,26 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (form) {
         form.addEventListener('submit', async (e) => {
-            // 💡 Bloque immédiatement le rechargement automatique de la page
             e.preventDefault();
             console.log("Formulaire intercepté, début de la génération...");
 
-            // Récupération des boutons pour gestion d'état
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
             try {
-                // 1. RÉCUPÉRATION SÉCURISÉE DE LA DESTINATION (INFAILLIBLE)
                 let destination = "";
                 const modernField = document.getElementById('trip-destination-modern');
                 
                 if (modernField) {
-                    // Option A : Lecture de l'objet "value" officiel de Google
                     if (modernField.value) {
                         destination = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
                     }
-                    
-                    // Option B : Lecture directe dans l'input physique
                     if (!destination) {
                         const innerInput = modernField.shadowRoot ? modernField.shadowRoot.querySelector('input') : modernField.querySelector('input');
                         if (innerInput && innerInput.value) {
@@ -31,15 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Option C : Repli historique
                 if (!destination) {
                     const backupInput = document.getElementById('trip-destination');
                     if (backupInput) destination = backupInput.value;
                 }
                 
-                console.log("📍 Destination détectée pour la soumission :", destination);
-
-                // Récupération des autres données du formulaire
                 const departureInput = document.getElementById('trip-departure');
                 const departure = departureInput ? departureInput.value : 'Paris';
                 
@@ -52,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const notesInput = document.getElementById('trip-notes');
                 const desc = notesInput ? notesInput.value : '';
 
-                // --- VÉRIFICATIONS DE SÉCURITÉ ---
                 if (!destination) {
                     alert("Veuillez sélectionner ou saisir une destination de voyage.");
                     return;
@@ -63,14 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Désactivation temporaire du bouton
                 if (submitBtn) {
                     submitBtn.textContent = "Calcul de l'itinéraire en cours...";
                     submitBtn.disabled = true;
                 }
-
-                // --- CONVERSION ET CALCUL SÉCURISÉ DES DATES ---
-                console.log("Dates brutes reçues du formulaire :", { dateStart, dateEnd });
 
                 const start = new Date(dateStart);
                 const end = new Date(dateEnd);
@@ -82,8 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const timeDiff = end.getTime() - start.getTime();
                 const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
-                console.log("Calcul de la durée de voyage effectué :", { totalDays });
-
                 if (totalDays <= 0) {
                     alert("La date de retour doit être égale ou postérieure à la date de départ !");
                     if (submitBtn) {
@@ -93,10 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // 2. RÉCUPÉRATION DES LIEUX (AVEC BLOCAGE DU CRASH)
                 let spots = [];
                 try {
-                    console.log(`Recherche Google Places pour : ${destination}`);
                     spots = await fetchTopPlacesSafe(destination);
                 } catch (placesError) {
                     console.warn("Google Places indisponible. Utilisation de la liste de secours.", placesError);
@@ -106,21 +87,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         "Le musée d'art et d'histoire locale",
                         "Le quartier animé et ses ruelles commerçantes",
                         "Le belvédère principal pour une vue panoramique",
-                        "Le grand marché traditionnel local",
-                        "Découverte de l'architecture typique de la région"
+                        "Le grand marché traditionnel local"
                     ];
                 }
 
-                // 3. DISTRIBUTION DES POINTS D'INTÉRÊT DANS L'ITINÉRAIRE
                 const itinerary = generateItinerary(start, totalDays, spots);
+                
+                // 📸 Récupération dynamique de l'image via l'API Pexels avec ta clé
+                const finalImage = await fetchPexelsImage(destination);
 
-// 4. RÉCUPÉRATION DE L'IMAGE HAUTE QUALITÉ WIKIPÉDIA
-const finalImage = await fetchWikiCityImage(destination);
-
-                // 5. CRÉATION DE L'OBJET VOYAGE
                 const newTrip = {
                     id: Date.now(),
                     title: destination,
+                    destination: destination,
                     departure: departure,
                     dates: `${formatDate(start)} au ${formatDate(end)}`,
                     dateStart: dateStart,
@@ -131,22 +110,16 @@ const finalImage = await fetchWikiCityImage(destination);
                     itinerary: itinerary
                 };
 
-                // 6. ENREGISTREMENT ET REDIRECTION
                 const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
                 currentTrips.push(newTrip);
                 localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
-
-                // Définition du voyage actif
                 localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
 
-                console.log("Voyage créé ! Redirection...");
                 window.location.href = 'voyage.html';
 
             } catch (error) {
-                // 🛑 EN CAS DE CRASH : On bloque la page, on réactive le bouton et on affiche l'erreur exacte
-                console.error("Erreur critique stoppée durant la soumission :", error);
-                alert("Une erreur est survenue lors de la création du voyage : " + error.message);
-                
+                console.error("Erreur critique durant la soumission :", error);
+                alert("Une erreur est survenue : " + error.message);
                 if (submitBtn) {
                     submitBtn.textContent = originalBtnText;
                     submitBtn.disabled = false;
@@ -156,9 +129,30 @@ const finalImage = await fetchWikiCityImage(destination);
     }
 });
 
-// ==========================================================================
-// FONCTIONS SECONDAIRES
-// ==========================================================================
+// Fonction d'interrogation de l'API Pexels
+async function fetchPexelsImage(cityName) {
+    const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
+    try {
+        const cleanCity = cityName.split(',')[0].trim();
+        const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(cleanCity)}&per_page=1`, {
+            headers: {
+                Authorization: PEXELS_API_KEY
+            }
+        });
+
+        if (!response.ok) throw new Error('Erreur lors de la requête Pexels');
+
+        const data = await response.json();
+        if (data.photos && data.photos.length > 0) {
+            return data.photos[0].src.landscape;
+        }
+    } catch (error) {
+        console.warn("Impossible de récupérer l'image Pexels :", error);
+    }
+
+    // Image de secours uniquement en cas de souci réseau
+    return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
+}
 
 function fetchTopPlacesSafe(destinationName) {
     return new Promise((resolve, reject) => {
@@ -178,16 +172,9 @@ function fetchTopPlacesSafe(destinationName) {
 
             service.textSearch(request, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                    const topSpots = results
-                        .filter(place => place.name)
-                        .slice(0, 10)
-                        .map(place => place.name);
-                    
-                    if (topSpots.length > 0) {
-                        resolve(topSpots);
-                    } else {
-                        reject("Aucun lieu trouvé.");
-                    }
+                    const topSpots = results.filter(place => place.name).slice(0, 10).map(place => place.name);
+                    if (topSpots.length > 0) resolve(topSpots);
+                    else reject("Aucun lieu trouvé.");
                 } else {
                     reject(`Statut API invalide : ${status}`);
                 }
@@ -239,27 +226,4 @@ function formatDate(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
-}
-// Fonction magique pour récupérer l'image HD officielle de Wikipédia pour une ville
-async function fetchWikiCityImage(cityName) {
-    try {
-        const cleanCity = cityName.split(',')[0].trim();
-        // Appel à l'API Summary de Wikipédia
-        const response = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanCity)}`);
-        
-        if (!response.ok) throw new Error("Ville non trouvée sur Wikipédia FR");
-        
-        const data = await response.json();
-        
-        if (data.originalimage && data.originalimage.source) {
-            return data.originalimage.source; // Image HD d'origine
-        } else if (data.thumbnail && data.thumbnail.source) {
-            // Si seulement la miniature existe, on force le redimensionnement en HD (1200px)
-            return data.thumbnail.source.replace(/\d+px-/, '1200px-');
-        }
-    } catch (e) {
-        console.warn("Image Wikipédia indisponible, utilisation de l'image de secours :", e);
-    }
-    // Image de secours esthétique si la ville n'est pas trouvée
-    return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
