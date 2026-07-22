@@ -247,6 +247,9 @@
         </main>
     </div>
 
+    <!-- Div invisible requis pour instancier le PlacesService (aucun affichage de carte nécessaire) -->
+    <div id="hidden-places-helper" style="display:none;"></div>
+
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
     <script>
@@ -258,6 +261,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
 
     let selectedDestinationName = "";
+    let placesService = null;
+
+    // Le PlacesService a besoin d'un élément (map ou simple div) pour être instancié
+    function getPlacesService() {
+        if (!placesService && typeof google !== 'undefined' && google.maps && google.maps.places) {
+            placesService = new google.maps.places.PlacesService(document.getElementById('hidden-places-helper'));
+        }
+        return placesService;
+    }
+
+    // Génère une image de secours propre (dégradé + initiale) quand aucune photo n'est trouvée
+    function buildFallbackImage(name) {
+        const initial = (name || '?').trim().charAt(0).toUpperCase();
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600">
+                <defs>
+                    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#A63A2B"/>
+                        <stop offset="100%" stop-color="#0D0B09"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1200" height="600" fill="url(#g)"/>
+                <text x="50%" y="52%" font-family="Georgia, serif" font-size="220" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
+            </svg>`;
+        return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+    }
+
+    // Cherche une vraie photo de la destination via Google Places. Retourne une Promise<string>.
+    function getDestinationPhoto(destinationName) {
+        return new Promise((resolve) => {
+            const service = getPlacesService();
+            if (!service || !destinationName) {
+                resolve(buildFallbackImage(destinationName));
+                return;
+            }
+
+            service.findPlaceFromQuery(
+                { query: destinationName, fields: ['photos', 'name'] },
+                (results, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0] && results[0].photos && results[0].photos.length > 0) {
+                        resolve(results[0].photos[0].getUrl({ maxWidth: 1200, maxHeight: 600 }));
+                    } else {
+                        resolve(buildFallbackImage(destinationName));
+                    }
+                }
+            );
+        });
+    }
 
     if (modernField) {
         modernField.addEventListener('gmp-placeselect', (event) => {
@@ -327,6 +378,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                // Lance la recherche de la photo de destination EN PARALLÈLE de l'appel IA
+                const photoPromise = getDestinationPhoto(destination);
+
                 // APPEL AU BACKEND NETLIFY
                 const response = await fetch(NETLIFY_ENDPOINT, {
                     method: 'POST',
@@ -361,7 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
-                const coverImage = "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80";
+
+                // Récupère la vraie photo de la destination (ou le dégradé de secours)
+                const coverImage = await photoPromise;
 
                 const tripData = {
                     id: Date.now(),
