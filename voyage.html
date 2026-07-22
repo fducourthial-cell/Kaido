@@ -737,6 +737,57 @@ if (destinationClean && flightBtn) {
                         day.dateText = formatDate(currentDate);
                     });
                 }
+                // CALCUL DYNAMIQUE DU BUDGET ET VENTILATION PAR POSTE DE DÉPENSE
+const calculateBudgetBreakdown = (trip) => {
+    let totalBudget = parseFloat(trip.budget) || 0;
+
+    // Si aucun budget global n'a été saisi, on le calcule sur une moyenne estimative selon la durée
+    let totalDays = 1;
+    if (trip.dateStart && trip.dateEnd) {
+        const start = new Date(trip.dateStart);
+        const end = new Date(trip.dateEnd);
+        const diff = end.getTime() - start.getTime();
+        totalDays = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)) + 1);
+    } else if (trip.itinerary && trip.itinerary.length > 0) {
+        totalDays = trip.itinerary.length;
+    }
+
+    // Ratio de répartition standard pour un voyage équilibré
+    let flightsCost = 0;
+    let hotelCost = 0;
+    let foodCost = 0;
+    let carCost = 0;
+    let activitiesCost = 0;
+
+    if (totalBudget > 0) {
+        // Si l'utilisateur a saisi un budget total (ex: 1200 €)
+        flightsCost = Math.round(totalBudget * 0.25);    // 25% Vol
+        hotelCost = Math.round(totalBudget * 0.35);      // 35% Logement
+        foodCost = Math.round(totalBudget * 0.20);       // 20% Nourriture
+        carCost = Math.round(totalBudget * 0.10);        // 10% Voiture/Transports
+        activitiesCost = Math.round(totalBudget * 0.10); // 10% Activités
+    } else {
+        // Estimation par défaut par jour si le budget était à 0 €
+        flightsCost = 180;                           // ~180€ vol AR
+        hotelCost = totalDays * 80;                  // 80€ / nuit
+        foodCost = totalDays * 45;                   // 45€ / jour repas
+        carCost = totalDays * 30;                    // 30€ / jour location voiture
+        activitiesCost = totalDays * 25;             // 25€ / jour activités
+        
+        totalBudget = flightsCost + hotelCost + foodCost + carCost + activitiesCost;
+    }
+
+    // Affichage des montants
+    document.getElementById('trip-budget-total').textContent = `${totalBudget} €`;
+    document.getElementById('budget-flights').textContent = `${flightsCost} €`;
+    document.getElementById('budget-hotel').textContent = `${hotelCost} €`;
+    document.getElementById('budget-food').textContent = `${foodCost} €`;
+    document.getElementById('budget-car').textContent = `${carCost} €`;
+    document.getElementById('budget-activities').textContent = `${activitiesCost} €`;
+};
+
+// Exécution du calcul dans renderPage()
+calculateBudgetBreakdown(activeTrip);
 
                 saveActiveTrip();
                 modal.style.display = 'none';
