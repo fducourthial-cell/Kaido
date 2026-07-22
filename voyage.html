@@ -108,7 +108,7 @@
         .checklist-items {
             list-style: none;
             padding: 0; margin: 1rem 0;
-            max-height: 250px;
+            max-height: 220px;
             overflow-y: auto;
         }
 
@@ -159,19 +159,22 @@
             font-weight: bold; cursor: pointer; transition: background 0.2s;
         }
 
-        /* CORRECTION STICKY : suppression de position: sticky pour éviter de chevaucher la checklist */
+        /* STICKY MAP : La carte descend avec le scroll sous la checklist */
         .map-card {
             margin-top: 1.5rem; padding: 1.2rem;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
+            position: sticky;
+            top: 1.5rem;
+            z-index: 10;
         }
 
         #map {
             width: 100%; height: 250px;
             border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .activity-preview-box {
@@ -259,7 +262,7 @@
             <!-- SIDEBAR LOGISTIQUE -->
             <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
                 
-                <!-- CARTE BUDGET -->
+                <!-- 1. CARTE BUDGET -->
                 <div class="card-box budget-card" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;">Budget & Estimation</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Estimation globale du séjour</p>
@@ -291,7 +294,7 @@
                     </a>
                 </div>
 
-                          <!-- CHECK-LIST -->
+                <!-- 2. CHECK-LIST (Placée au-dessus de la carte) -->
                 <div class="checklist-card">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">À ne pas oublier</p>
@@ -302,21 +305,18 @@
                     </form>
                 </div>
 
-                <!-- CARTE INTERACTIVE ET APERÇU PHOTO -->
+                <!-- 3. CARTE INTERACTIVE (STICKY POUR SUIVRE LE SCROLL) -->
                 <div class="map-card">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
                     <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité pour la localiser</p>
                     <div id="map"></div>
                     
-                    <!-- APERÇU PHOTO DE L'ACTIVITÉ SÉLECTIONNÉE -->
                     <div id="activity-preview" class="activity-preview-box">
                         <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
                         <div id="activity-loading" class="activity-preview-loading">Recherche de la photo...</div>
                         <div id="activity-title" class="activity-preview-title"></div>
                     </div>
                 </div>
-
-      
 
             </aside>
         </div>
@@ -351,7 +351,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT NATIVE -->
+    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
 
     <script>
@@ -359,22 +359,23 @@
         let activeMarker = null;
         let placesService = null;
 
-        // CORRECTION DYNAMIQUE DE LA CARTE : On géocode directement la destination passée
-        function initGoogleMap(defaultLocation) {
+        // INITIALISATION DYNAMIQUE RIGOUREUSE DE LA CARTE SUR LA DESTINATION ACTIVE
+        function initGoogleMap(destinationName) {
             const mapContainer = document.getElementById('map');
             if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
 
             const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: defaultLocation }, (results, status) => {
-                let centerPos = { lat: 40.4168, lng: -3.7038 }; // Madrid comme fallback au lieu de Lisbonne
+            
+            geocoder.geocode({ address: destinationName }, (results, status) => {
+                let initialPos = { lat: 35.6762, lng: 139.6503 }; // Fallback par défaut Tokyo si échec
 
                 if (status === 'OK' && results[0]) {
-                    centerPos = results[0].geometry.location;
+                    initialPos = results[0].geometry.location;
                 }
 
                 map = new google.maps.Map(mapContainer, {
-                    zoom: 12,
-                    center: centerPos,
+                    zoom: 11,
+                    center: initialPos,
                     disableDefaultUI: true,
                     zoomControl: true,
                     styles: [
@@ -492,7 +493,8 @@
                 localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
             }
 
-            const destination = activeTrip.destination || activeTrip.title || "Madrid";
+            // EXTRACTION DE LA VRAIE DESTINATION DU VOYAGE SÉLECTIONNÉ
+            const destination = activeTrip.destination || activeTrip.title || "Japon";
             document.getElementById('trip-main-title').textContent = destination;
             document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates || ''}`;
             document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
@@ -521,7 +523,7 @@
             const dest = encodeURIComponent(destination.split(',')[0].trim());
             flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
 
-            // Initialisation de la carte avec la destination courante (ex: Madrid)
+            // INITIALISATION CARTE SUR LA VRAIE DESTINATION DU SÉJOUR (Ex: Tokyo, Écosse, etc.)
             initGoogleMap(destination);
 
             // Rendu de l'itinéraire
