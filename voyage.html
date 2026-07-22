@@ -271,18 +271,52 @@
             <!-- BARRE LATÉRALE LOGISTIQUE, CHECKLIST & CARTE (DROITE) -->
             <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
                 <!-- LOGISTIQUE & BUDGET -->
-                <div class="card-box budget-card" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 1rem;">Logistique & Budget</h3>
-                    <div class="budget-stat">
-                        <span class="budget-amount" id="trip-budget" style="color: var(--color-gold); font-size: 1.8rem; font-weight: bold;">0 €</span>
-                        <span class="budget-label" style="display: block; color: var(--text-muted); font-size: 0.85rem;">Estimation Total</span>
-                    </div>
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-                    
-                    <a id="btn-google-flights" href="#" target="_blank" class="btn" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white; padding: 0.8rem; border-radius: 4px; font-weight: 500;">
-                        ✈️ Voir les vols sur Google Flights
-                    </a>
-                </div>
+               <div class="card-box budget-card" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+    <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.5rem;">Estimation du Budget</h3>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Ventilation estimée selon la durée du séjour</p>
+    
+    <!-- TOTAL DU BUDGET -->
+    <div class="budget-stat" style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.15); margin-bottom: 1.5rem; text-align: center;">
+        <span class="budget-amount" id="trip-budget-total" style="color: var(--color-gold); font-size: 2rem; font-weight: bold; display: block;">0 €</span>
+        <span class="budget-label" style="color: var(--text-muted); font-size: 0.85rem;">Budget Total Estimé</span>
+    </div>
+
+    <!-- VENTILATION PAR POSTE DE DÉPENSE -->
+    <div class="budget-breakdown" style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+            <span style="color: var(--text-main); display: flex; align-items: center; gap: 8px;">✈️ Vols / Transports</span>
+            <span id="budget-flights" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+            <span style="color: var(--text-main); display: flex; align-items: center; gap: 8px;">🏨 Hébergement</span>
+            <span id="budget-hotel" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+            <span style="color: var(--text-main); display: flex; align-items: center; gap: 8px;">🍕 Restauration & Nourriture</span>
+            <span id="budget-food" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+            <span style="color: var(--text-main); display: flex; align-items: center; gap: 8px;">🚗 Voiture / Transports locaux</span>
+            <span id="budget-car" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+            <span style="color: var(--text-main); display: flex; align-items: center; gap: 8px;">🎟️ Activités & Visites</span>
+            <span id="budget-activities" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+        </div>
+
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+    
+    <a id="btn-google-flights" href="#" target="_blank" class="btn" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white; padding: 0.8rem; border-radius: 4px; font-weight: 500; transition: background 0.2s;">
+        ✈️ Voir les vols sur Google Flights
+    </a>
+</div>
 
                 <!-- MODULE CHECK-LIST DE VOYAGE -->
                 <div class="checklist-card">
