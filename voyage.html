@@ -159,12 +159,12 @@
             font-weight: bold; cursor: pointer; transition: background 0.2s;
         }
 
+        /* CORRECTION STICKY : suppression de position: sticky pour éviter de chevaucher la checklist */
         .map-card {
             margin-top: 1.5rem; padding: 1.2rem;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            position: sticky; top: 1.5rem;
         }
 
         #map {
@@ -355,16 +355,16 @@
     <script>
         let map;
         let activeMarker = null;
-        let placesService = null; // NEW: service Google Places pour récupérer les vraies photos des lieux
+        let placesService = null;
 
-        // Initialisation de la carte Google Maps
+        // CORRECTION DYNAMIQUE DE LA CARTE : On géocode directement la destination passée
         function initGoogleMap(defaultLocation) {
             const mapContainer = document.getElementById('map');
             if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
 
             const geocoder = new google.maps.Geocoder();
             geocoder.geocode({ address: defaultLocation }, (results, status) => {
-                let centerPos = { lat: 38.7223, lng: -9.1393 }; // Par défaut Lisbonne
+                let centerPos = { lat: 40.4168, lng: -3.7038 }; // Madrid comme fallback au lieu de Lisbonne
 
                 if (status === 'OK' && results[0]) {
                     centerPos = results[0].geometry.location;
@@ -385,12 +385,10 @@
                     ]
                 });
 
-                // Le PlacesService a besoin d'une carte (ou d'un div) pour être instancié
                 placesService = new google.maps.places.PlacesService(map);
             });
         }
 
-        // Génère une image de secours propre (dégradé + initiale) quand aucune photo n'est trouvée
         function buildFallbackImage(activityName) {
             const initial = (activityName || '?').trim().charAt(0).toUpperCase();
             const svg = `
@@ -407,7 +405,6 @@
             return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
         }
 
-        // Fonction appelée lors du clic sur une activité
         function selectActivityOnMap(addressQuery, activityName) {
             if (!addressQuery) return;
 
@@ -421,7 +418,6 @@
             previewLoading.style.display = 'flex';
             previewTitle.textContent = `📍 ${activityName}`;
 
-            // 1. Recherche de la vraie photo du lieu via Google Places (findPlaceFromQuery + photos)
             if (placesService) {
                 const query = `${activityName}, ${addressQuery}`;
                 placesService.findPlaceFromQuery(
@@ -438,7 +434,6 @@
                             }
                             previewImg.style.display = 'block';
                         } else {
-                            // Aucun résultat trouvé -> image de secours (pas de photo générique sans rapport)
                             previewImg.src = buildFallbackImage(activityName);
                             previewImg.style.display = 'block';
                         }
@@ -450,7 +445,6 @@
                 previewImg.style.display = 'block';
             }
 
-            // 2. Géolocalisation et marqueur sur la carte
             if (map && typeof google !== 'undefined' && google.maps) {
                 const geocoder = new google.maps.Geocoder();
                 geocoder.geocode({ address: addressQuery }, (results, status) => {
@@ -496,7 +490,7 @@
                 localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
             }
 
-            const destination = activeTrip.destination || activeTrip.title || "Destination";
+            const destination = activeTrip.destination || activeTrip.title || "Madrid";
             document.getElementById('trip-main-title').textContent = destination;
             document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates || ''}`;
             document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
@@ -525,7 +519,7 @@
             const dest = encodeURIComponent(destination.split(',')[0].trim());
             flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
 
-            // Initialisation de la carte
+            // Initialisation de la carte avec la destination courante (ex: Madrid)
             initGoogleMap(destination);
 
             // Rendu de l'itinéraire
@@ -568,7 +562,6 @@
                         <div>${stepsHTML}</div>
                     `;
 
-                    // Gestion du clic sur chaque activité
                     block.querySelectorAll('.step-item').forEach(itemEl => {
                         itemEl.addEventListener('click', () => {
                             document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active-step'));
