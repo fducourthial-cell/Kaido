@@ -189,6 +189,7 @@
             height: 140px;
             object-fit: cover;
             display: block;
+            background-color: #1a1714;
         }
 
         .activity-preview-title {
@@ -197,6 +198,15 @@
             color: var(--color-gold);
             font-weight: 600;
             text-align: center;
+        }
+
+        .activity-preview-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
         }
 
         .step-item { 
@@ -289,7 +299,8 @@
                     
                     <!-- APERÇU PHOTO DE L'ACTIVITÉ SÉLECTIONNÉE -->
                     <div id="activity-preview" class="activity-preview-box">
-                        <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité">
+                        <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
+                        <div id="activity-loading" class="activity-preview-loading">Recherche de la photo...</div>
                         <div id="activity-title" class="activity-preview-title"></div>
                     </div>
                 </div>
@@ -344,6 +355,7 @@
     <script>
         let map;
         let activeMarker = null;
+        let placesService = null; // NEW: service Google Places pour récupérer les vraies photos des lieux
 
         // Initialisation de la carte Google Maps
         function initGoogleMap(defaultLocation) {
@@ -372,29 +384,70 @@
                         { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                     ]
                 });
+
+                // Le PlacesService a besoin d'une carte (ou d'un div) pour être instancié
+                placesService = new google.maps.places.PlacesService(map);
             });
+        }
+
+        // Génère une image de secours propre (dégradé + initiale) quand aucune photo n'est trouvée
+        function buildFallbackImage(activityName) {
+            const initial = (activityName || '?').trim().charAt(0).toUpperCase();
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">
+                    <defs>
+                        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#A63A2B"/>
+                            <stop offset="100%" stop-color="#0D0B09"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="600" height="400" fill="url(#g)"/>
+                    <text x="50%" y="52%" font-family="Georgia, serif" font-size="120" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
+                </svg>`;
+            return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
         }
 
         // Fonction appelée lors du clic sur une activité
         function selectActivityOnMap(addressQuery, activityName) {
             if (!addressQuery) return;
 
-            // 1. Mise à jour de l'image de prévisualisation sous la carte
             const previewBox = document.getElementById('activity-preview');
             const previewImg = document.getElementById('activity-img');
+            const previewLoading = document.getElementById('activity-loading');
             const previewTitle = document.getElementById('activity-title');
 
-            if (previewBox && previewImg && previewTitle) {
-                const searchKeyword = encodeURIComponent(activityName.split(' ')[0] + " " + addressQuery.split(',')[0]);
-                previewImg.src = `https://source.unsplash.com/600x400/?${searchKeyword}`;
-                
-                // Fallback si source.unsplash est lent/bloqué
-                previewImg.onerror = () => {
-                    previewImg.src = `https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=600`;
-                };
+            previewBox.style.display = 'block';
+            previewImg.style.display = 'none';
+            previewLoading.style.display = 'flex';
+            previewTitle.textContent = `📍 ${activityName}`;
 
-                previewTitle.textContent = `📍 ${activityName}`;
-                previewBox.style.display = 'block';
+            // 1. Recherche de la vraie photo du lieu via Google Places (findPlaceFromQuery + photos)
+            if (placesService) {
+                const query = `${activityName}, ${addressQuery}`;
+                placesService.findPlaceFromQuery(
+                    { query: query, fields: ['photos', 'name', 'geometry'] },
+                    (results, status) => {
+                        previewLoading.style.display = 'none';
+
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+                            const place = results[0];
+                            if (place.photos && place.photos.length > 0) {
+                                previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
+                            } else {
+                                previewImg.src = buildFallbackImage(activityName);
+                            }
+                            previewImg.style.display = 'block';
+                        } else {
+                            // Aucun résultat trouvé -> image de secours (pas de photo générique sans rapport)
+                            previewImg.src = buildFallbackImage(activityName);
+                            previewImg.style.display = 'block';
+                        }
+                    }
+                );
+            } else {
+                previewLoading.style.display = 'none';
+                previewImg.src = buildFallbackImage(activityName);
+                previewImg.style.display = 'block';
             }
 
             // 2. Géolocalisation et marqueur sur la carte
