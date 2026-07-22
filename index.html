@@ -303,7 +303,7 @@
     </div>
 
     <!-- LOGIQUE JAVASCRIPT ROBUSTE ET RAPIDE -->
-  <script>
+    <script>
     document.addEventListener('DOMContentLoaded', () => {
         const grid = document.getElementById('trips-grid');
         
@@ -320,10 +320,24 @@
                     card.className = 'trip-card dynamic-trip';
                     
                     const cityName = trip.destination || trip.title || 'Destination';
-                    
-                    // Utilise l'image sauvegardée à la création (photo réelle Google Places, ou dégradé de secours).
-                    // Toute image valide (y compris depuis Unsplash ou en data:image/svg+xml) est acceptée telle quelle.
                     const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
+
+                    // --- CALCUL DU BUDGET ESTIMATIF POUR LA CARTE ---
+                    let displayBudget = parseFloat(trip.budget) || 0;
+
+                    if (displayBudget <= 0) {
+                        let daysCount = 3;
+                        if (trip.itinerary && trip.itinerary.length > 0) {
+                            daysCount = trip.itinerary.length;
+                        } else if (trip.dateStart && trip.dateEnd) {
+                            const start = new Date(trip.dateStart);
+                            const end = new Date(trip.dateEnd);
+                            const diff = end.getTime() - start.getTime();
+                            daysCount = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)) + 1);
+                        }
+                        
+                        displayBudget = (daysCount * 150) + 200;
+                    }
 
                     card.innerHTML = `
                         <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
@@ -335,7 +349,7 @@
                             </div>
                             
                             <div class="trip-footer">
-                                <span class="trip-budget">${trip.budget ? trip.budget : '0'} €</span>
+                                <span class="trip-budget">~ ${displayBudget} €</span>
                                 <div class="trip-actions">
                                     <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
                                     <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
@@ -389,6 +403,6 @@
             renderTrips();
         }
     });
-</script>
+    </script>
 </body>
 </html>
