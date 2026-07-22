@@ -160,22 +160,58 @@
         }
 
         .map-card {
-            margin-top: 1.5rem; padding: 1rem;
+            margin-top: 1.5rem; padding: 1.2rem;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
+            position: sticky; top: 1.5rem;
         }
 
         #map {
             width: 100%; height: 250px;
             border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
+            margin-bottom: 1rem;
         }
 
-        .day-block-card { transition: all 0.3s ease; cursor: pointer; }
-        .day-block-card:hover { border-color: var(--color-gold) !important; transform: translateY(-2px); }
-        .step-item { cursor: pointer; transition: background 0.2s; }
-        .step-item:hover { background: rgba(212, 175, 55, 0.05) !important; }
+        .activity-preview-box {
+            display: none;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .activity-preview-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .activity-preview-title {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+            color: var(--color-gold);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .step-item { 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+        }
+        .step-item:hover { 
+            background: rgba(212, 175, 55, 0.08) !important; 
+            border-color: var(--color-gold) !important;
+            transform: translateX(4px);
+        }
+        .step-item.active-step {
+            border-color: var(--color-gold) !important;
+            background: rgba(212, 175, 55, 0.12) !important;
+        }
     </style>
 </head>
 <body>
@@ -245,6 +281,19 @@
                     </a>
                 </div>
 
+                <!-- CARTE INTERACTIVE ET APERÇU PHOTO -->
+                <div class="map-card">
+                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité pour la localiser</p>
+                    <div id="map"></div>
+                    
+                    <!-- APERÇU PHOTO DE L'ACTIVITÉ SÉLECTIONNÉE -->
+                    <div id="activity-preview" class="activity-preview-box">
+                        <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité">
+                        <div id="activity-title" class="activity-preview-title"></div>
+                    </div>
+                </div>
+
                 <!-- CHECK-LIST -->
                 <div class="checklist-card">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
@@ -254,13 +303,6 @@
                         <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
                         <button type="submit" class="btn-add-task">+</button>
                     </form>
-                </div>
-
-                <!-- CARTE INTERACTIVE -->
-                <div class="map-card">
-                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
-                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Localisation de la destination</p>
-                    <div id="map"></div>
                 </div>
 
             </aside>
@@ -296,10 +338,88 @@
         </div>
     </div>
 
-    <!-- SCRIPT JS SÉCURISÉ ET STABLE -->
+    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT NATIVE -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
+
     <script>
+        let map;
+        let activeMarker = null;
+
+        // Initialisation de la carte Google Maps
+        function initGoogleMap(defaultLocation) {
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
+
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: defaultLocation }, (results, status) => {
+                let centerPos = { lat: 38.7223, lng: -9.1393 }; // Par défaut Lisbonne
+
+                if (status === 'OK' && results[0]) {
+                    centerPos = results[0].geometry.location;
+                }
+
+                map = new google.maps.Map(mapContainer, {
+                    zoom: 12,
+                    center: centerPos,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    styles: [
+                        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+                    ]
+                });
+            });
+        }
+
+        // Fonction appelée lors du clic sur une activité
+        function selectActivityOnMap(addressQuery, activityName) {
+            if (!addressQuery) return;
+
+            // 1. Mise à jour de l'image de prévisualisation sous la carte
+            const previewBox = document.getElementById('activity-preview');
+            const previewImg = document.getElementById('activity-img');
+            const previewTitle = document.getElementById('activity-title');
+
+            if (previewBox && previewImg && previewTitle) {
+                const searchKeyword = encodeURIComponent(activityName.split(' ')[0] + " " + addressQuery.split(',')[0]);
+                previewImg.src = `https://source.unsplash.com/600x400/?${searchKeyword}`;
+                
+                // Fallback si source.unsplash est lent/bloqué
+                previewImg.onerror = () => {
+                    previewImg.src = `https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=600`;
+                };
+
+                previewTitle.textContent = `📍 ${activityName}`;
+                previewBox.style.display = 'block';
+            }
+
+            // 2. Géolocalisation et marqueur sur la carte
+            if (map && typeof google !== 'undefined' && google.maps) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: addressQuery }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const loc = results[0].geometry.location;
+                        map.panTo(loc);
+                        map.setZoom(15);
+
+                        if (activeMarker) activeMarker.setMap(null);
+
+                        activeMarker = new google.maps.Marker({
+                            position: loc,
+                            map: map,
+                            title: activityName,
+                            animation: google.maps.Animation.DROP
+                        });
+                    }
+                });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. CHARGEMENT DES DONNÉES DU VOYAGE
             let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
             const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
 
@@ -309,7 +429,6 @@
                 return;
             }
 
-            // Initialisation de la checklist si absente
             if (!activeTrip.checklist) {
                 activeTrip.checklist = [
                     { id: 1, text: "Passeport / Carte d'identité", done: false },
@@ -324,7 +443,6 @@
                 localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
             }
 
-            // 2. AFFICHAGE DE LA PAGE
             const destination = activeTrip.destination || activeTrip.title || "Destination";
             document.getElementById('trip-main-title').textContent = destination;
             document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates || ''}`;
@@ -334,13 +452,10 @@
                 document.getElementById('trip-cover').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${activeTrip.image}')`;
             }
 
-            // 3. LOGIQUE BUDGET ULTRA SOLIDE
+            // Budget
             let totalB = parseFloat(activeTrip.budget) || 0;
             let daysCount = (activeTrip.itinerary && activeTrip.itinerary.length) ? activeTrip.itinerary.length : 3;
-
-            if (totalB <= 0) {
-                totalB = daysCount * 150 + 200; // Estimation simple si à 0
-            }
+            if (totalB <= 0) totalB = daysCount * 150 + 200;
 
             const flights = Math.round(totalB * 0.30);
             const hotel = Math.round(totalB * 0.40);
@@ -351,13 +466,16 @@
             document.getElementById('budget-hotel').textContent = `${hotel} €`;
             document.getElementById('budget-rest').textContent = `${rest} €`;
 
-            // 4. BOUTON GOOGLE FLIGHTS
+            // Google Flights Link
             const flightBtn = document.getElementById('btn-google-flights');
             const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
             const dest = encodeURIComponent(destination.split(',')[0].trim());
             flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
 
-            // 5. AFFICHAGE DE L'ITINÉRAIRE (JOURS)
+            // Initialisation de la carte
+            initGoogleMap(destination);
+
+            // Rendu de l'itinéraire
             const daysContainer = document.getElementById('itinerary-days-container');
             daysContainer.innerHTML = '';
 
@@ -376,12 +494,13 @@
                     let stepsHTML = '';
                     if (day.steps) {
                         day.steps.forEach((step) => {
+                            const loc = step.location || destination;
                             stepsHTML += `
-                                <div style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.6rem; border-radius:6px;">
+                                <div class="step-item" data-location="${loc}" data-activity="${step.activity}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent;">
                                     <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${step.time || '--:--'}</span>
                                     <div>
                                         <div style="color:#F4EFEA; font-weight:600;">${step.activity}</div>
-                                        <div style="color:#8E847A; font-size:0.8rem;">📍 ${step.location || destination}</div>
+                                        <div style="color:#8E847A; font-size:0.8rem;">📍 ${loc}</div>
                                     </div>
                                 </div>
                             `;
@@ -396,11 +515,23 @@
                         <div>${stepsHTML}</div>
                     `;
 
+                    // Gestion du clic sur chaque activité
+                    block.querySelectorAll('.step-item').forEach(itemEl => {
+                        itemEl.addEventListener('click', () => {
+                            document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active-step'));
+                            itemEl.classList.add('active-step');
+
+                            const locQuery = itemEl.getAttribute('data-location');
+                            const actName = itemEl.getAttribute('data-activity');
+                            selectActivityOnMap(locQuery, actName);
+                        });
+                    });
+
                     daysContainer.appendChild(block);
                 });
             }
 
-            // 6. RENDER CHECKLIST
+            // Checklist
             function renderChecklist() {
                 const container = document.getElementById('checklist-container');
                 container.innerHTML = '';
@@ -443,12 +574,7 @@
                 }
             });
 
-            // 7. CARTE DE SECOURS STABLE (IFRAME)
-            const mapContainer = document.getElementById('map');
-            const mapQuery = encodeURIComponent(destination);
-            mapContainer.innerHTML = `<iframe width="100%" height="100%" style="border:0;" loading="lazy" src="https://maps.google.com/maps?q=${mapQuery}&t=&z=11&ie=UTF8&iwloc=&output=embed"></iframe>`;
-
-            // 8. MODALE DE MODIFICATION
+            // Modale
             const modal = document.getElementById('editModal');
             document.getElementById('btn-open-edit').addEventListener('click', () => {
                 document.getElementById('edit-date-start').value = activeTrip.dateStart || '';
