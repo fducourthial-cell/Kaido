@@ -108,7 +108,7 @@
         .checklist-items {
             list-style: none;
             padding: 0; margin: 1rem 0;
-            max-height: 220px;
+            max-height: 250px;
             overflow-y: auto;
         }
 
@@ -159,13 +159,13 @@
             font-weight: bold; cursor: pointer; transition: background 0.2s;
         }
 
-        /* STICKY MAP : La carte descend avec le scroll sous la checklist */
+        /* MAP CARD STICKY : Suit le scroll de la page sous la checklist */
         .map-card {
             margin-top: 1.5rem; padding: 1.2rem;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            position: sticky;
+            position: sticky; 
             top: 1.5rem;
             z-index: 10;
         }
@@ -311,6 +311,7 @@
                     <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité pour la localiser</p>
                     <div id="map"></div>
                     
+                    <!-- APERÇU PHOTO DE L'ACTIVITÉ SÉLECTIONNÉE -->
                     <div id="activity-preview" class="activity-preview-box">
                         <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
                         <div id="activity-loading" class="activity-preview-loading">Recherche de la photo...</div>
@@ -351,7 +352,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT -->
+    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT NATIVE -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
 
     <script>
@@ -359,23 +360,15 @@
         let activeMarker = null;
         let placesService = null;
 
-        // INITIALISATION DYNAMIQUE RIGOUREUSE DE LA CARTE SUR LA DESTINATION ACTIVE
-        function initGoogleMap(destinationName) {
+        // INITIALISATION DE LA CARTE (Utilise knownLat/knownLng si disponible)
+        function initGoogleMap(defaultLocation, knownLat, knownLng) {
             const mapContainer = document.getElementById('map');
             if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
 
-            const geocoder = new google.maps.Geocoder();
-            
-            geocoder.geocode({ address: destinationName }, (results, status) => {
-                let initialPos = { lat: 35.6762, lng: 139.6503 }; // Fallback par défaut Tokyo si échec
-
-                if (status === 'OK' && results[0]) {
-                    initialPos = results[0].geometry.location;
-                }
-
+            function buildMap(centerPos) {
                 map = new google.maps.Map(mapContainer, {
                     zoom: 11,
-                    center: initialPos,
+                    center: centerPos,
                     disableDefaultUI: true,
                     zoomControl: true,
                     styles: [
@@ -389,6 +382,34 @@
                 });
 
                 placesService = new google.maps.places.PlacesService(map);
+
+                new google.maps.Marker({
+                    position: centerPos,
+                    map: map,
+                    title: defaultLocation,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#D4AF37',
+                        fillOpacity: 1,
+                        strokeColor: '#0D0B09',
+                        strokeWeight: 2
+                    }
+                });
+            }
+
+            if (typeof knownLat === 'number' && typeof knownLng === 'number') {
+                buildMap({ lat: knownLat, lng: knownLng });
+                return;
+            }
+
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: defaultLocation }, (results, status) => {
+                let centerPos = { lat: 35.6762, lng: 139.6503 }; // Fallback par défaut
+                if (status === 'OK' && results[0]) {
+                    centerPos = results[0].geometry.location;
+                }
+                buildMap(centerPos);
             });
         }
 
@@ -421,24 +442,55 @@
             previewLoading.style.display = 'flex';
             previewTitle.textContent = `📍 ${activityName}`;
 
+            const preciseQuery = `${activityName}, ${addressQuery}`;
+
+            function placeMarker(loc) {
+                if (!map) return;
+                map.panTo(loc);
+                map.setZoom(15);
+                if (activeMarker) activeMarker.setMap(null);
+                activeMarker = new google.maps.Marker({
+                    position: loc,
+                    map: map,
+                    title: activityName,
+                    animation: google.maps.Animation.DROP
+                });
+            }
+
             if (placesService) {
-                const query = `${activityName}, ${addressQuery}`;
                 placesService.findPlaceFromQuery(
-                    { query: query, fields: ['photos', 'name', 'geometry'] },
+                    { query: preciseQuery, fields: ['photos', 'name', 'geometry'] },
                     (results, status) => {
                         previewLoading.style.display = 'none';
 
                         if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
                             const place = results[0];
+
                             if (place.photos && place.photos.length > 0) {
                                 previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
                             } else {
                                 previewImg.src = buildFallbackImage(activityName);
                             }
                             previewImg.style.display = 'block';
+
+                            if (place.geometry && place.geometry.location) {
+                                placeMarker(place.geometry.location);
+                            } else if (map) {
+                                const geocoder = new google.maps.Geocoder();
+                                geocoder.geocode({ address: preciseQuery }, (gResults, gStatus) => {
+                                    if (gStatus === 'OK' && gResults[0]) placeMarker(gResults[0].geometry.location);
+                                });
+                            }
                         } else {
                             previewImg.src = buildFallbackImage(activityName);
                             previewImg.style.display = 'block';
+
+                            if (map) {
+                                const geocoder = new google.maps.Geocoder();
+                                geocoder.geocode({ address: preciseQuery }, (gResults, gStatus) => {
+                                    if (gStatus === 'OK' && gResults[0]) placeMarker(gResults[0].geometry.location);
+                                });
+                            }
                         }
                     }
                 );
@@ -446,26 +498,6 @@
                 previewLoading.style.display = 'none';
                 previewImg.src = buildFallbackImage(activityName);
                 previewImg.style.display = 'block';
-            }
-
-            if (map && typeof google !== 'undefined' && google.maps) {
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ address: addressQuery }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        const loc = results[0].geometry.location;
-                        map.panTo(loc);
-                        map.setZoom(15);
-
-                        if (activeMarker) activeMarker.setMap(null);
-
-                        activeMarker = new google.maps.Marker({
-                            position: loc,
-                            map: map,
-                            title: activityName,
-                            animation: google.maps.Animation.DROP
-                        });
-                    }
-                });
             }
         }
 
@@ -493,8 +525,7 @@
                 localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
             }
 
-            // EXTRACTION DE LA VRAIE DESTINATION DU VOYAGE SÉLECTIONNÉ
-            const destination = activeTrip.destination || activeTrip.title || "Japon";
+            const destination = activeTrip.destination || activeTrip.title || "Destination";
             document.getElementById('trip-main-title').textContent = destination;
             document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates || ''}`;
             document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
@@ -523,8 +554,8 @@
             const dest = encodeURIComponent(destination.split(',')[0].trim());
             flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
 
-            // INITIALISATION CARTE SUR LA VRAIE DESTINATION DU SÉJOUR (Ex: Tokyo, Écosse, etc.)
-            initGoogleMap(destination);
+            // Initialisation de la carte (utilise les coordonnées exactes stockées à la création)
+            initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
 
             // Rendu de l'itinéraire
             const daysContainer = document.getElementById('itinerary-days-container');
