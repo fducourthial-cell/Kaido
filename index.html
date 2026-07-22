@@ -321,11 +321,9 @@
                     
                     const cityName = trip.destination || trip.title || 'Destination';
                     
-                    // Utilise l'image Pexels sauvegardée lors de la création
-                    let finalImage = trip.image;
-                    if (!finalImage || finalImage.includes('unsplash.com')) {
-                        finalImage = 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
-                    }
+                    // Utilise l'image sauvegardée à la création (photo réelle Google Places, ou dégradé de secours).
+                    // Toute image valide (y compris depuis Unsplash ou en data:image/svg+xml) est acceptée telle quelle.
+                    const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
                     card.innerHTML = `
                         <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
