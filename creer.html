@@ -44,18 +44,20 @@
             line-height: 1.5;
         }
 
+        /* CONTENEUR ÉLARGI SUR ÉCRAN GEANT */
         .container {
-            max-width: 800px;
+            width: 92%;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 1.5rem;
         }
 
         .kaido-header {
-            padding: 2rem 0;
+            padding: 1.5rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .kaido-header .brand-name {
@@ -79,7 +81,7 @@
         }
 
         .create-hero {
-            padding: 4rem 0 3rem 0;
+            padding: 3.5rem 0 2.5rem 0;
             text-align: center;
         }
 
@@ -95,16 +97,18 @@
             color: var(--text-muted);
             font-size: 1.05rem;
             font-weight: 300;
-            max-width: 500px;
+            max-width: 550px;
             margin: 0 auto;
         }
 
+        /* FORMULAIRE BIEN CADRÉ */
         .kaido-form-box {
+            max-width: 800px;
+            margin: 0 auto 5rem auto;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 2.5rem;
-            border-radius: 4px;
-            margin-bottom: 5rem;
+            padding: 2.8rem;
+            border-radius: 6px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
         }
 
@@ -187,10 +191,50 @@
             border-radius: 4px !important;
         }
 
-        @media (max-width: 600px) {
-            .form-row { grid-template-columns: 1fr; gap: 0; }
-            .kaido-form-box { padding: 1.5rem; }
-            .create-hero h1 { font-size: 2rem; }
+        /* ===================================================
+           OPTIMISATION SMARTPHONE (MOBILE CSS)
+           =================================================== */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                padding: 0 1rem;
+            }
+
+            .kaido-header {
+                padding: 1rem 0;
+            }
+
+            .kaido-header .brand-name img {
+                height: 38px !important;
+            }
+
+            .create-hero {
+                padding: 2rem 0 1.5rem 0;
+            }
+
+            .create-hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .create-hero p {
+                font-size: 0.95rem;
+            }
+
+            .kaido-form-box {
+                padding: 1.5rem 1.2rem;
+                margin-bottom: 2.5rem;
+            }
+
+            /* Passage en 1 seule colonne pour les dates */
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .kaido-submit-btn {
+                padding: 1rem 0.8rem;
+                font-size: 0.82rem;
+            }
         }
     </style>
 </head>
@@ -199,7 +243,7 @@
     <div class="container">
         <header class="kaido-header">
             <a href="index.html" class="brand-name">
-                <img src="image/logo kaido V4.png" alt="KAIDO" style="height: 45px; width: auto; object-fit: contain;">
+                <img src="image/logo kaido V4.png" alt="KAIDO" style="height: 90px; width: auto; object-fit: contain;">
             </a>
             <nav>
                 <a href="index.html">Mes Voyages</a>
