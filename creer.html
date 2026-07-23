@@ -6,6 +6,12 @@
     <title>Tracer une nouvelle route - Kaido</title>
     <link rel="icon" type="image/png" href="image/logo kaido V4.png">
     
+    <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -250,15 +256,10 @@
     <!-- Helper div invisible requis pour instancier le PlacesService -->
     <div id="hidden-places-helper" style="display:none;"></div>
 
-    <!-- 1. SDK SUPABASE & FICHIER CONFIGURATION DE BASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
-
-    <!-- 2. API GOOGLE MAPS & PLACES -->
+    <!-- API GOOGLE MAPS & PLACES -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
-    <!-- 3. LOGIQUE METIER KAIDO -->
+    <!-- LOGIQUE METIER KAIDO -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('create-trip-form');
