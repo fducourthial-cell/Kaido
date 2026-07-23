@@ -270,6 +270,55 @@
             font-weight: 500;
             font-size: 1.1rem;
         }
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                padding: 0 1rem;
+            }
+
+            /* Le header s'adapte proprement */
+            .kaido-header {
+                grid-template-columns: auto 1fr auto;
+                gap: 10px;
+                padding: 0.8rem 0;
+            }
+
+            .header-logo {
+                height: 65px; /* Un logo plus discret sur mobile */
+            }
+
+            .kaido-header .brand-name {
+                font-size: 1.1rem;
+                letter-spacing: 0.15em;
+            }
+
+            /* Le titre se recentre et s'ajuste */
+            .dashboard-title {
+                font-size: 1.35rem;
+                margin: 1.5rem 0 1.2rem 0;
+                text-align: center;
+                line-height: 1.4;
+            }
+
+            /* Cartes en 1 seule colonne pleine largeur */
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+                padding-bottom: 2.5rem;
+            }
+
+            .trip-card, .create-trip-zone {
+                min-height: 360px;
+            }
+
+            .trip-banner {
+                height: 160px;
+            }
+
+            .trip-details {
+                padding: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
