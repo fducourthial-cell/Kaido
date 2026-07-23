@@ -44,7 +44,6 @@
             line-height: 1.5;
         }
 
-        /* CONTENEUR ÉLARGI SUR ÉCRAN GÉANT */
         .container {
             width: 92%;
             max-width: 1550px;
@@ -55,7 +54,7 @@
         /* BANNIÈRE HERO */
         .hero-section {
             position: relative;
-            min-height: 400px;
+            min-height: 380px;
             background-size: cover;
             background-position: center;
             display: flex;
@@ -88,7 +87,6 @@
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 3px 10px rgba(212, 175, 55, 0.2));
-            transition: transform 0.3s ease;
         }
 
         .hero-content {
@@ -109,7 +107,6 @@
             font-size: 1rem;
         }
 
-        /* BOUTON RETOUR SOUS LES DATES (À GAUCHE) */
         .btn-back-left {
             display: inline-flex;
             align-items: center;
@@ -136,7 +133,7 @@
             transform: translateX(-3px);
         }
 
-        /* LAYOUT PRINCIPAL DES DÉTAILS DE L'ITINÉRAIRE */
+        /* LAYOUT PRINCIPAL */
         .voyage-main-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -162,80 +159,51 @@
             display: block;
         }
 
-        /* ===================================================
-           OPTIMISATION SMARTPHONE & TABLETTE (MOBILE CSS)
-           =================================================== */
         @media (max-width: 992px) {
-            .container {
-                width: 100%;
-                padding: 0 1rem;
-            }
-
-            .hero-section {
-                min-height: 320px;
-                padding: 1rem 0 1.5rem 0;
-            }
-
-            .header-logo {
-                height: 90px !important;
-            }
-
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-
-            .trip-dates {
-                font-size: 0.9rem;
-            }
-
-            /* Passage en 1 seule colonne sous les tablettes */
-            .voyage-main-layout {
-                grid-template-columns: 1fr;
-                gap: 1.8rem;
-                margin: 2rem 0 3rem 0;
-            }
-
-            .activity-preview-box {
-                height: 220px;
-            }
+            .container { width: 100%; padding: 0 1rem; }
+            .hero-section { min-height: 320px; padding: 1rem 0 1.5rem 0; }
+            .header-logo { height: 90px !important; }
+            .hero-content h1 { font-size: 2rem; }
+            .voyage-main-layout { grid-template-columns: 1fr; gap: 1.8rem; margin: 2rem 0 3rem 0; }
+            .activity-preview-box { height: 220px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="hero-section">
+    <div class="hero-section" id="hero-banner">
         <div class="container">
-            <!-- HEADER SUPÉRIEUR -->
             <header class="kaido-header">
                 <div class="header-left">
                     <a href="index.html">
                         <img src="image/logo kaido V4.png" alt="Logo Kaido" class="header-logo">
                     </a>
                 </div>
-                <div class="header-right">
-                    <!-- auth.js injectera le bouton utilisateur ici -->
-                </div>
+                <div class="header-right"></div>
             </header>
 
-            <!-- CONTENU DU BANNER HERO -->
             <div class="hero-content">
                 <h1 id="trip-title">Chargement du voyage...</h1>
                 <p class="trip-dates" id="trip-dates">📅 --/--/---- au --/--/----</p>
                 
-                <!-- Bouton retour repositionné à gauche sous les dates -->
                 <a href="index.html" class="btn-back-left">← Retour à mes Voyages</a>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- ZONES DE CONTENU D'ITINÉRAIRE ET DE CARTE -->
-        <main class="voyage-main-layout" id="voyage-content">
-            <!-- Ton code JS chargera dynamiquement l'itinéraire et la carte ici -->
+        <main class="voyage-main-layout">
+            <!-- SECTION GAUCHE : ITINÉRAIRE -->
+            <section id="itinerary-section"></section>
+
+            <!-- SECTION DROITE : CARTE ET VISIONNEUSE -->
+            <section id="map-section">
+                <div id="map" style="width:100%; height:450px; border-radius:6px; border:1px solid var(--border-color);"></div>
+                <div class="activity-preview-box" id="activity-preview"></div>
+            </section>
         </main>
     </div>
 
-    <!-- SCRIPT DE LOGIQUE DU VOYAGE -->
     <script src="js/voyage.js"></script>
 </body>
 </html>
