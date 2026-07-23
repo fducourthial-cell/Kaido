@@ -6,6 +6,11 @@
     <title>Mes carnets de route - Kaido</title>
     <link rel="icon" type="image/png" href="image/logo kaido V4.png">
     
+    <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,6 +97,12 @@
 
         .header-logo:hover {
             transform: scale(1.05);
+        }
+
+        .header-right {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
         }
 
         /* SECTION TITRE */
@@ -293,11 +304,7 @@
         </section>
     </div>
 
-    <!-- 1. SDK CLIENT SUPABASE & FICHIER DE CONFIGURATION -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
-    <!-- 2. LOGIQUE DE RENDU -->
+    <!-- LOGIQUE DE RENDU -->
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const grid = document.getElementById('trips-grid');
