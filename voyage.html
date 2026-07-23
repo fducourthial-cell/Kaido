@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Itinéraire - Kaido</title>
     <link rel="icon" type="image/png" href="image/logo kaido V4.png">
-    <link rel="stylesheet" href="css/style.css">
     
     <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,7 +14,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -25,703 +24,218 @@
             --color-torii: #A63A2B;
             --text-main: #F4EFEA;
             --text-muted: #8E847A;
-            --border-color: rgba(212, 175, 55, 0.15);
+            --border-color: rgba(212, 175, 55, 0.08);
+            --font-kaido: 'Plus Jakarta Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0; padding: 0; line-height: 1.5;
+            font-family: var(--font-kaido);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
         }
 
-        header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 20;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(to bottom, rgba(13, 11, 9, 0.8) 0%, rgba(13, 11, 9, 0) 100%);
-            border-bottom: none;
+        /* CONTENEUR ÉLARGI SUR ÉCRAN GÉANT */
+        .container {
+            width: 92%;
+            max-width: 1550px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
         }
 
-        header nav a {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-        }
-
-        header nav a:hover { color: var(--color-gold); }
-
-        .trip-header-visual {
-            height: 380px; /* Grand visuel panoramique immersif */
+        /* BANNIÈRE HERO */
+        .hero-section {
+            position: relative;
+            min-height: 400px;
             background-size: cover;
             background-position: center;
-            position: relative;
             display: flex;
-            align-items: flex-end;
-            padding: 3rem 2rem 2.5rem 2rem;
-            box-sizing: border-box;
-            box-shadow: inset 0 -120px 90px rgba(13, 11, 9, 0.95);
-            background-color: #1a1714;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem 0 2.5rem 0;
         }
 
-        .trip-header-title {
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(13, 11, 9, 0.6), rgba(13, 11, 9, 0.95));
+            z-index: 1;
+        }
+
+        .hero-section > * {
             position: relative;
             z-index: 2;
         }
 
-        .trip-header-title h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.8rem;
-            margin: 0 0 0.4rem 0;
-            color: #ffffff;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        .kaido-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .trip-header-title p {
-            margin: 0;
+        .header-logo {
+            height: 150px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 10px rgba(212, 175, 55, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .hero-content {
+            margin-top: auto;
+        }
+
+        .hero-content h1 {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 0.4rem;
+        }
+
+        .trip-dates {
             color: var(--color-gold);
             font-weight: 600;
-            font-size: 1.05rem;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            font-size: 1rem;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem 4rem 1.5rem;
-        }
-
-        .edit-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
-            justify-content: center; align-items: center;
-        }
-
-        .edit-modal-content {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 2rem;
-            border-radius: 8px;
-            width: 90%; max-width: 500px;
-            color: var(--text-main);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .checklist-card {
-            margin-top: 1.5rem;
-            padding: 1.2rem;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }
-
-        .checklist-items {
-            list-style: none;
-            padding: 0; margin: 1rem 0;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .checklist-item {
-            display: flex;
+        /* BOUTON RETOUR SOUS LES DATES (À GAUCHE) */
+        .btn-back-left {
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            font-size: 0.9rem;
-        }
-
-        .checklist-item label {
-            display: flex; align-items: center; gap: 10px;
-            cursor: pointer; color: var(--text-main); flex-grow: 1;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            accent-color: var(--color-gold);
-            width: 16px; height: 16px; cursor: pointer;
-        }
-
-        .checklist-item.completed label {
-            text-decoration: line-through; color: var(--text-muted);
-        }
-
-        .btn-delete-task {
-            background: none; border: none; color: var(--color-torii);
-            cursor: pointer; font-size: 0.85rem; opacity: 0.6; transition: opacity 0.2s;
-        }
-
-        .btn-delete-task:hover { opacity: 1; }
-
-        .checklist-form { display: flex; gap: 8px; margin-top: 1rem; }
-
-        .checklist-input {
-            flex: 1; background: var(--bg-dark);
+            gap: 8px;
+            margin-top: 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.45rem 0.9rem;
+            background: rgba(20, 17, 14, 0.6);
             border: 1px solid rgba(212, 175, 55, 0.2);
-            color: var(--text-main); padding: 0.5rem 0.8rem;
-            border-radius: 4px; font-size: 0.85rem;
-        }
-
-        .checklist-input:focus { outline: none; border-color: var(--color-gold); }
-
-        .btn-add-task {
-            background: var(--color-gold); color: var(--bg-dark);
-            border: none; padding: 0.5rem 0.8rem; border-radius: 4px;
-            font-weight: bold; cursor: pointer; transition: background 0.2s;
-        }
-
-        /* MAP CARD STICKY : Suit le scroll de la page sous la checklist */
-        .map-card {
-            margin-top: 1.5rem; padding: 1.2rem;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            position: sticky; 
-            top: 1.5rem;
-            z-index: 10;
-        }
-
-        #map {
-            width: 100%; height: 250px;
-            border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .activity-preview-box {
-            display: none;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-top: 0.8rem;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
             transition: all 0.3s ease;
         }
 
-        .activity-preview-img {
+        .btn-back-left:hover {
+            color: var(--color-gold);
+            border-color: var(--color-gold);
+            background: rgba(20, 17, 14, 0.9);
+            transform: translateX(-3px);
+        }
+
+        /* LAYOUT PRINCIPAL DES DÉTAILS DE L'ITINÉRAIRE */
+        .voyage-main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            margin: 3rem 0 5rem 0;
+        }
+
+        .activity-preview-box {
             width: 100%;
             height: 250px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        .activity-preview-box img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             display: block;
-            background-color: #1a1714;
         }
 
-        .activity-preview-title {
-            padding: 0.6rem 0.8rem;
-            font-size: 0.85rem;
-            color: var(--color-gold);
-            font-weight: 600;
-            text-align: center;
-        }
+        /* ===================================================
+           OPTIMISATION SMARTPHONE & TABLETTE (MOBILE CSS)
+           =================================================== */
+        @media (max-width: 992px) {
+            .container {
+                width: 100%;
+                padding: 0 1rem;
+            }
 
-        .activity-preview-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 140px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
+            .hero-section {
+                min-height: 320px;
+                padding: 1rem 0 1.5rem 0;
+            }
 
-        .step-item { 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-        }
-        .step-item:hover { 
-            background: rgba(212, 175, 55, 0.08) !important; 
-            border-color: var(--color-gold) !important;
-            transform: translateX(4px);
-        }
-        .step-item.active-step {
-            border-color: var(--color-gold) !important;
-            background: rgba(212, 175, 55, 0.12) !important;
+            .header-logo {
+                height: 90px !important;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .trip-dates {
+                font-size: 0.9rem;
+            }
+
+            /* Passage en 1 seule colonne sous les tablettes */
+            .voyage-main-layout {
+                grid-template-columns: 1fr;
+                gap: 1.8rem;
+                margin: 2rem 0 3rem 0;
+            }
+
+            .activity-preview-box {
+                height: 220px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/logo kaido V4.png" alt="Kaido Logo" style="height: 150px; width: auto; object-fit: contain;">
-        </a>
-    </header>
-
-    <section class="trip-header-visual" id="trip-cover">
-        <div class="trip-header-title">
-            <h2 id="trip-main-title">Chargement...</h2>
-            <p id="trip-main-dates">📅 --/--/---- au --/--/----</p>
-        </div>
-    </section>
-
-    <main class="container">
-        <div class="trip-layout" style="display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
-            
-            <!-- SECTION PRINCIPALE : ITINÉRAIRE -->
-            <section class="timeline-itinerary" style="flex: 2; min-width: 320px;">
-                <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Notes de voyage</h3>
-                        <button id="btn-open-edit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-torii); color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ Modifier le voyage</button>
-                    </div>
-                    <p id="trip-main-desc" style="color: var(--text-muted); line-height: 1.6; margin: 0;"></p>
-                </div>
-
-                <div id="itinerary-days-container"></div>
-            </section>
-
-            <!-- SIDEBAR LOGISTIQUE -->
-            <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
-                
-                <!-- 1. CARTE BUDGET -->
-                <div class="card-box budget-card" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;">Budget & Estimation</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Estimation globale du séjour</p>
-                    
-                    <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.15); margin-bottom: 1.2rem; text-align: center;">
-                        <span id="trip-budget-total" style="color: var(--color-gold); font-size: 2rem; font-weight: bold; display: block;">0 €</span>
-                        <span style="color: var(--text-muted); font-size: 0.8rem;">Budget Total Estimé</span>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.2rem; font-size: 0.88rem;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>✈️ Transports & Vols</span>
-                            <span id="budget-flights" style="color: var(--color-gold); font-weight: 600;">0 €</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>🏨 Hébergement</span>
-                            <span id="budget-hotel" style="color: var(--color-gold); font-weight: 600;">0 €</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>🍽️ Repas & Activités</span>
-                            <span id="budget-rest" style="color: var(--color-gold); font-weight: 600;">0 €</span>
-                        </div>
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
-                    
-                    <a id="btn-google-flights" href="#" target="_blank" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white; padding: 0.8rem; border-radius: 4px; font-weight: 500;">
-                        ✈️ Voir les vols sur Google Flights
+    <div class="hero-section">
+        <div class="container">
+            <!-- HEADER SUPÉRIEUR -->
+            <header class="kaido-header">
+                <div class="header-left">
+                    <a href="index.html">
+                        <img src="image/logo kaido V4.png" alt="Logo Kaido" class="header-logo">
                     </a>
                 </div>
+                <div class="header-right">
+                    <!-- auth.js injectera le bouton utilisateur ici -->
+                </div>
+            </header>
 
-                <!-- 2. CHECK-LIST (Placée au-dessus de la carte) -->
-                <div class="checklist-card">
-                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">À ne pas oublier</p>
-                    <ul class="checklist-items" id="checklist-container"></ul>
-                    <form class="checklist-form" id="add-task-form">
-                        <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
-                        <button type="submit" class="btn-add-task">+</button>
-                    </form>
-                </div>
-
-                <!-- 3. CARTE INTERACTIVE (STICKY POUR SUIVRE LE SCROLL) -->
-                <div class="map-card">
-                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
-                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité pour la localiser</p>
-                    <div id="map"></div>
-                    
-                    <!-- APERÇU PHOTO DE L'ACTIVITÉ SÉLECTIONNÉE -->
-                    <div id="activity-preview" class="activity-preview-box">
-                        <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
-                        <div id="activity-loading" class="activity-preview-loading">Recherche de la photo...</div>
-                        <div id="activity-title" class="activity-preview-title"></div>
-                    </div>
-                </div>
-
-            </aside>
-        </div>
-    </main>
-
-    <!-- MODALE DE MODIFICATION -->
-    <div id="editModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--color-gold); font-family: 'Playfair Display', serif;">Modifier le voyage</h3>
-            <form id="edit-trip-form">
-                <div style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📅 Date Aller</label>
-                    <input type="date" id="edit-date-start" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;" required>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📅 Date Retour</label>
-                    <input type="date" id="edit-date-end" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;" required>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">💶 Budget (€)</label>
-                    <input type="number" id="edit-budget" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;">
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📝 Notes & Description</label>
-                    <textarea id="edit-desc" rows="3" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid #333; color:white; border-radius:4px;"></textarea>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" id="btn-close-edit" style="background: #333; color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Annuler</button>
-                    <button type="submit" style="background: var(--color-torii); color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Sauvegarder</button>
-                </div>
-            </form>
+            <!-- CONTENU DU BANNER HERO -->
+            <div class="hero-content">
+                <h1 id="trip-title">Chargement du voyage...</h1>
+                <p class="trip-dates" id="trip-dates">📅 --/--/---- au --/--/----</p>
+                
+                <!-- Bouton retour repositionné à gauche sous les dates -->
+                <a href="index.html" class="btn-back-left">← Retour à mes Voyages</a>
+            </div>
         </div>
     </div>
 
-    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT NATIVE -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
+    <div class="container">
+        <!-- ZONES DE CONTENU D'ITINÉRAIRE ET DE CARTE -->
+        <main class="voyage-main-layout" id="voyage-content">
+            <!-- Ton code JS chargera dynamiquement l'itinéraire et la carte ici -->
+        </main>
+    </div>
 
-    <script>
-        let map;
-        let activeMarker = null;
-        let placesService = null;
-
-        // INITIALISATION DE LA CARTE (Utilise knownLat/knownLng si disponible)
-        function initGoogleMap(defaultLocation, knownLat, knownLng) {
-            const mapContainer = document.getElementById('map');
-            if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
-
-            function buildMap(centerPos) {
-                map = new google.maps.Map(mapContainer, {
-                    zoom: 11,
-                    center: centerPos,
-                    disableDefaultUI: true,
-                    zoomControl: true,
-                    styles: [
-                        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-                        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-                        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-                    ]
-                });
-
-                placesService = new google.maps.places.PlacesService(map);
-
-                new google.maps.Marker({
-                    position: centerPos,
-                    map: map,
-                    title: defaultLocation,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 8,
-                        fillColor: '#D4AF37',
-                        fillOpacity: 1,
-                        strokeColor: '#0D0B09',
-                        strokeWeight: 2
-                    }
-                });
-            }
-
-            if (typeof knownLat === 'number' && typeof knownLng === 'number' && !isNaN(knownLat) && !isNaN(knownLng)) {
-                buildMap({ lat: knownLat, lng: knownLng });
-                return;
-            }
-
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: defaultLocation }, (results, status) => {
-                let centerPos = { lat: 35.6762, lng: 139.6503 }; // Fallback par défaut
-                if (status === 'OK' && results[0]) {
-                    centerPos = results[0].geometry.location;
-                }
-                buildMap(centerPos);
-            });
-        }
-
-        function buildFallbackImage(activityName) {
-            const initial = (activityName || '?').trim().charAt(0).toUpperCase();
-            const svg = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">
-                    <defs>
-                        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#A63A2B"/>
-                            <stop offset="100%" stop-color="#0D0B09"/>
-                        </linearGradient>
-                    </defs>
-                    <rect width="600" height="400" fill="url(#g)"/>
-                    <text x="50%" y="52%" font-family="Georgia, serif" font-size="120" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
-                </svg>`;
-            return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
-        }
-
-        function selectActivityOnMap(addressQuery, activityName) {
-            if (!addressQuery) return;
-
-            const previewBox = document.getElementById('activity-preview');
-            const previewImg = document.getElementById('activity-img');
-            const previewLoading = document.getElementById('activity-loading');
-            const previewTitle = document.getElementById('activity-title');
-
-            previewBox.style.display = 'block';
-            previewImg.style.display = 'none';
-            previewLoading.style.display = 'flex';
-            previewTitle.textContent = `📍 ${activityName}`;
-
-            const preciseQuery = `${activityName}, ${addressQuery}`;
-
-            function placeMarker(loc) {
-                if (!map) return;
-                map.panTo(loc);
-                map.setZoom(15);
-                if (activeMarker) activeMarker.setMap(null);
-                activeMarker = new google.maps.Marker({
-                    position: loc,
-                    map: map,
-                    title: activityName,
-                    animation: google.maps.Animation.DROP
-                });
-            }
-
-            if (placesService) {
-                placesService.findPlaceFromQuery(
-                    { query: preciseQuery, fields: ['photos', 'name', 'geometry'] },
-                    (results, status) => {
-                        previewLoading.style.display = 'none';
-
-                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-                            const place = results[0];
-
-                            if (place.photos && place.photos.length > 0) {
-                                previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
-                            } else {
-                                previewImg.src = buildFallbackImage(activityName);
-                            }
-                            previewImg.style.display = 'block';
-
-                            if (place.geometry && place.geometry.location) {
-                                placeMarker(place.geometry.location);
-                            } else if (map) {
-                                const geocoder = new google.maps.Geocoder();
-                                geocoder.geocode({ address: preciseQuery }, (gResults, gStatus) => {
-                                    if (gStatus === 'OK' && gResults[0]) placeMarker(gResults[0].geometry.location);
-                                });
-                            }
-                        } else {
-                            previewImg.src = buildFallbackImage(activityName);
-                            previewImg.style.display = 'block';
-
-                            if (map) {
-                                const geocoder = new google.maps.Geocoder();
-                                geocoder.geocode({ address: preciseQuery }, (gResults, gStatus) => {
-                                    if (gStatus === 'OK' && gResults[0]) placeMarker(gResults[0].geometry.location);
-                                });
-                            }
-                        }
-                    }
-                );
-            } else {
-                previewLoading.style.display = 'none';
-                previewImg.src = buildFallbackImage(activityName);
-                previewImg.style.display = 'block';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
-            const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-
-            if (!activeTrip) {
-                alert("Aucun voyage sélectionné.");
-                window.location.href = "index.html";
-                return;
-            }
-
-            if (!activeTrip.checklist) {
-                activeTrip.checklist = [
-                    { id: 1, text: "Passeport / Carte d'identité", done: false },
-                    { id: 2, text: "Billets de réservation", done: false }
-                ];
-            }
-
-            async function saveTrip() {
-                // 1. Mise à jour LocalStorage
-                const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
-                if (idx !== -1) allTrips[idx] = activeTrip;
-                localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
-                localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
-
-                // 2. Synchronisation Supabase Cloud
-                if (typeof supabase !== 'undefined') {
-                    try {
-                        await supabase.from('trips').update({
-                            date_start: activeTrip.dateStart,
-                            date_end: activeTrip.dateEnd,
-                            budget: activeTrip.budget,
-                            desc_text: activeTrip.desc,
-                            checklist: activeTrip.checklist,
-                            itinerary: activeTrip.itinerary
-                        }).eq('id', activeTrip.id);
-                    } catch (e) {
-                        console.warn("Sauvegarde locale uniquement.");
-                    }
-                }
-            }
-
-            const destination = activeTrip.destination || activeTrip.title || "Destination";
-            document.getElementById('trip-main-title').textContent = destination;
-            document.getElementById('trip-main-dates').textContent = `📅 ${activeTrip.dates || ''}`;
-            document.getElementById('trip-main-desc').textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
-
-            if (activeTrip.image) {
-                document.getElementById('trip-cover').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%), url('${activeTrip.image}')`;
-            }
-
-            // Budget
-            let totalB = parseFloat(activeTrip.budget) || 0;
-            let daysCount = (activeTrip.itinerary && activeTrip.itinerary.length) ? activeTrip.itinerary.length : 3;
-            if (totalB <= 0) totalB = daysCount * 150 + 200;
-
-            const flights = Math.round(totalB * 0.30);
-            const hotel = Math.round(totalB * 0.40);
-            const rest = totalB - (flights + hotel);
-
-            document.getElementById('trip-budget-total').textContent = `${totalB} €`;
-            document.getElementById('budget-flights').textContent = `${flights} €`;
-            document.getElementById('budget-hotel').textContent = `${hotel} €`;
-            document.getElementById('budget-rest').textContent = `${rest} €`;
-
-            // Google Flights Link
-            const flightBtn = document.getElementById('btn-google-flights');
-            const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
-            const dest = encodeURIComponent(destination.split(',')[0].trim());
-            flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
-
-            // Initialisation carte (avec conversion float au cas où)
-            const lat = activeTrip.destinationLat ? parseFloat(activeTrip.destinationLat) : null;
-            const lng = activeTrip.destinationLng ? parseFloat(activeTrip.destinationLng) : null;
-            initGoogleMap(destination, lat, lng);
-
-            // Rendu de l'itinéraire
-            const daysContainer = document.getElementById('itinerary-days-container');
-            daysContainer.innerHTML = '';
-
-            if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
-                activeTrip.itinerary.forEach((day) => {
-                    const block = document.createElement('div');
-                    block.className = 'day-block-card';
-                    block.style.cssText = `
-                        background-color: #14110E;
-                        border: 1px solid rgba(212, 175, 55, 0.15);
-                        border-radius: 8px;
-                        padding: 1.2rem;
-                        margin-bottom: 1.5rem;
-                    `;
-
-                    let stepsHTML = '';
-                    if (day.steps) {
-                        day.steps.forEach((step) => {
-                            const loc = step.location || destination;
-                            stepsHTML += `
-                                <div class="step-item" data-location="${loc}" data-activity="${step.activity}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent;">
-                                    <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${step.time || '--:--'}</span>
-                                    <div>
-                                        <div style="color:#F4EFEA; font-weight:600;">${step.activity}</div>
-                                        <div style="color:#8E847A; font-size:0.8rem;">📍 ${loc}</div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    }
-
-                    block.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem;">
-                            <span style="background:#A63A2B; color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem;">${day.day}</span>
-                            <span style="color:#F4EFEA; font-weight:500;">${day.dateText || ''}</span>
-                        </div>
-                        <div>${stepsHTML}</div>
-                    `;
-
-                    block.querySelectorAll('.step-item').forEach(itemEl => {
-                        itemEl.addEventListener('click', () => {
-                            document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active-step'));
-                            itemEl.classList.add('active-step');
-
-                            const locQuery = itemEl.getAttribute('data-location');
-                            const actName = itemEl.getAttribute('data-activity');
-                            selectActivityOnMap(locQuery, actName);
-                        });
-                    });
-
-                    daysContainer.appendChild(block);
-                });
-            }
-
-            // Checklist
-            function renderChecklist() {
-                const container = document.getElementById('checklist-container');
-                container.innerHTML = '';
-                activeTrip.checklist.forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = `checklist-item ${item.done ? 'completed' : ''}`;
-                    li.innerHTML = `
-                        <label>
-                            <input type="checkbox" data-id="${item.id}" ${item.done ? 'checked' : ''}>
-                            <span>${item.text}</span>
-                        </label>
-                        <button class="btn-delete-task" data-id="${item.id}">✖</button>
-                    `;
-
-                    li.querySelector('input').addEventListener('change', async (e) => {
-                        item.done = e.target.checked;
-                        await saveTrip();
-                        renderChecklist();
-                    });
-
-                    li.querySelector('.btn-delete-task').addEventListener('click', async () => {
-                        activeTrip.checklist = activeTrip.checklist.filter(t => t.id !== item.id);
-                        await saveTrip();
-                        renderChecklist();
-                    });
-
-                    container.appendChild(li);
-                });
-            }
-            renderChecklist();
-
-            document.getElementById('add-task-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const input = document.getElementById('new-task-input');
-                if (input.value.trim()) {
-                    activeTrip.checklist.push({ id: Date.now(), text: input.value.trim(), done: false });
-                    await saveTrip();
-                    renderChecklist();
-                    input.value = '';
-                }
-            });
-
-            // Modale
-            const modal = document.getElementById('editModal');
-            document.getElementById('btn-open-edit').addEventListener('click', () => {
-                document.getElementById('edit-date-start').value = activeTrip.dateStart || '';
-                document.getElementById('edit-date-end').value = activeTrip.dateEnd || '';
-                document.getElementById('edit-budget').value = activeTrip.budget || 0;
-                document.getElementById('edit-desc').value = activeTrip.desc || '';
-                modal.style.display = 'flex';
-            });
-
-            document.getElementById('btn-close-edit').addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            document.getElementById('edit-trip-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                activeTrip.dateStart = document.getElementById('edit-date-start').value;
-                activeTrip.dateEnd = document.getElementById('edit-date-end').value;
-                activeTrip.dates = `${activeTrip.dateStart} au ${activeTrip.dateEnd}`;
-                activeTrip.budget = document.getElementById('edit-budget').value;
-                activeTrip.desc = document.getElementById('edit-desc').value;
-                
-                await saveTrip();
-                modal.style.display = 'none';
-                location.reload();
-            });
-        });
-    </script>
+    <!-- SCRIPT DE LOGIQUE DU VOYAGE -->
+    <script src="js/voyage.js"></script>
 </body>
 </html>
