@@ -44,6 +44,7 @@
             line-height: 1.5;
         }
 
+        /* CONTENEUR ÉLARGI ÉCRAN LARGES */
         .container {
             width: 92%;
             max-width: 1550px;
@@ -57,6 +58,7 @@
             min-height: 380px;
             background-size: cover;
             background-position: center;
+            background-color: #14110E;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -67,7 +69,7 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, rgba(13, 11, 9, 0.6), rgba(13, 11, 9, 0.95));
+            background: linear-gradient(to bottom, rgba(13, 11, 9, 0.5), rgba(13, 11, 9, 0.95));
             z-index: 1;
         }
 
@@ -107,6 +109,7 @@
             font-size: 1rem;
         }
 
+        /* BOUTON RETOUR À GAUCHE SOUS LES DATES */
         .btn-back-left {
             display: inline-flex;
             align-items: center;
@@ -133,7 +136,7 @@
             transform: translateX(-3px);
         }
 
-        /* LAYOUT PRINCIPAL */
+        /* GRILLE PRINCIPALE (CARTE & ITINÉRAIRE) */
         .voyage-main-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -159,6 +162,7 @@
             display: block;
         }
 
+        /* RESPONSIVE MOBILE */
         @media (max-width: 992px) {
             .container { width: 100%; padding: 0 1rem; }
             .hero-section { min-height: 320px; padding: 1rem 0 1.5rem 0; }
@@ -171,7 +175,8 @@
 </head>
 <body>
 
-    <div class="hero-section" id="hero-banner">
+    <!-- BANNIÈRE HERO AVEC L'ID "trip-banner" REQUIS PAR LE JS -->
+    <div class="hero-section" id="trip-banner">
         <div class="container">
             <header class="kaido-header">
                 <div class="header-left">
@@ -192,18 +197,17 @@
     </div>
 
     <div class="container">
-        <main class="voyage-main-layout">
-            <!-- SECTION GAUCHE : ITINÉRAIRE -->
-            <section id="itinerary-section"></section>
-
-            <!-- SECTION DROITE : CARTE ET VISIONNEUSE -->
-            <section id="map-section">
+        <!-- RENDER ZONE DE VOYAGE.JS -->
+        <main class="voyage-main-layout" id="voyage-content">
+            <div id="itinerary-container"></div>
+            <div id="map-container">
                 <div id="map" style="width:100%; height:450px; border-radius:6px; border:1px solid var(--border-color);"></div>
                 <div class="activity-preview-box" id="activity-preview"></div>
-            </section>
+            </div>
         </main>
     </div>
 
+    <!-- SCRIPT DE CHARGEMENT DU VOYAGE -->
     <script src="js/voyage.js"></script>
 </body>
 </html>
