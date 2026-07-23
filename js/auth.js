@@ -1,7 +1,7 @@
 // js/auth.js
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Déjection du CSS de la modale d'authentification
+    // 1. Injection du CSS de la modale d'authentification
     const style = document.createElement('style');
     style.textContent = `
         .kaido-auth-modal {
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.head.appendChild(style);
 
-    // 2. Modale HTML
+    // 2. Structure HTML de la Modale
     const modalHTML = `
         <div id="kaidoAuthModal" class="kaido-auth-modal">
             <div class="kaido-auth-card">
@@ -179,55 +179,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    toggleAuthMode.addEventListener('click', () => toggleMode(!isSignUpMode));
-    document.getElementById('closeAuthModal').addEventListener('click', () => modal.style.display = 'none');
+    if (toggleAuthMode) toggleAuthMode.addEventListener('click', () => toggleMode(!isSignUpMode));
+    if (document.getElementById('closeAuthModal')) {
+        document.getElementById('closeAuthModal').addEventListener('click', () => modal.style.display = 'none');
+    }
 
     // 4. Inscription / Connexion Supabase
-    authForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('authEmail').value.trim();
-        const password = document.getElementById('authPassword').value;
+    if (authForm) {
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
 
-        if (typeof supabase === 'undefined') {
-            alert("Supabase indisponible.");
-            return;
-        }
-
-        authSubmitBtn.disabled = true;
-        authSubmitBtn.textContent = "Patientez...";
-
-        try {
-            if (isSignUpMode) {
-                const { data, error } = await supabase.auth.signUp({ email, password });
-                if (error) throw error;
-                alert("Compte créé avec succès ! " + (data.session ? "" : "Vérifiez vos emails pour valider votre compte."));
-            } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
+            const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
+            if (!client) {
+                alert("Supabase indisponible.");
+                return;
             }
-            modal.style.display = 'none';
-            location.reload();
-        } catch (err) {
-            alert("Erreur : " + err.message);
-        } finally {
-            authSubmitBtn.disabled = false;
-            authSubmitBtn.textContent = isSignUpMode ? "Créer mon compte" : "Se connecter";
-        }
-    });
+
+            authSubmitBtn.disabled = true;
+            authSubmitBtn.textContent = "Patientez...";
+
+            try {
+                if (isSignUpMode) {
+                    const { data, error } = await client.auth.signUp({ email, password });
+                    if (error) throw error;
+                    alert("Compte créé avec succès ! " + (data.session ? "" : "Vérifiez vos emails si la confirmation est activée."));
+                } else {
+                    const { data, error } = await client.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                }
+                modal.style.display = 'none';
+                location.reload();
+            } catch (err) {
+                alert("Erreur : " + err.message);
+            } finally {
+                authSubmitBtn.disabled = false;
+                authSubmitBtn.textContent = isSignUpMode ? "Créer mon compte" : "Se connecter";
+            }
+        });
+    }
 
     // 5. Injecter et mettre à jour le bouton dans le Header
     const updateHeaderAuth = async () => {
         let headerRight = document.querySelector('.header-right') || document.querySelector('header nav');
         if (!headerRight) return;
 
+        const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
         let user = null;
-        if (typeof supabase !== 'undefined') {
-           const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
-let user = null;
 
-if (client && client.auth) {
-    const { data } = await client.auth.getUser();
-    user = data?.user || null;
+        if (client && client.auth) {
+            try {
+                const { data } = await client.auth.getUser();
+                user = data?.user || null;
+            } catch (err) {
+                console.warn("Impossible de récupérer l'utilisateur:", err);
+            }
         }
 
         let authBtn = document.getElementById('kaidoHeaderAuthBtn');
@@ -243,7 +250,7 @@ if (client && client.auth) {
             authBtn.title = "Cliquer pour vous déconnecter";
             authBtn.onclick = async () => {
                 if (confirm("Voulez-vous vous déconnecter de Kaido ?")) {
-                    await supabase.auth.signOut();
+                    if (client) await client.auth.signOut();
                     location.reload();
                 }
             };
