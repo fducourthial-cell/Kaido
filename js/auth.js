@@ -222,8 +222,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let user = null;
         if (typeof supabase !== 'undefined') {
-            const { data } = await supabase.auth.getUser();
-            user = data?.user || null;
+           const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
+let user = null;
+
+if (client && client.auth) {
+    const { data } = await client.auth.getUser();
+    user = data?.user || null;
         }
 
         let authBtn = document.getElementById('kaidoHeaderAuthBtn');
