@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes carnets de route - Kaido</title>
@@ -95,10 +94,6 @@
             transform: scale(1.05);
         }
 
-        .header-right {
-            /* Équilibre la grille */
-        }
-
         /* SECTION TITRE */
         .dashboard-title {
             font-family: var(--font-serif);
@@ -142,7 +137,6 @@
             position: relative;
         }
 
-        /* Dégradé sombre sur l'image pour l'élégance */
         .trip-banner::after {
             content: '';
             position: absolute;
@@ -177,7 +171,6 @@
             gap: 5px;
         }
 
-        /* FOOTER DE CARTE : ALIGNEMENT EN BAS */
         .trip-footer {
             display: flex;
             justify-content: space-between;
@@ -199,7 +192,6 @@
             gap: 12px;
         }
 
-        /* BOUTON SUPPRIMER STYLE TORII */
         .btn-delete {
             background: rgba(166, 58, 43, 0.1);
             border: 1px solid rgba(166, 58, 43, 0.25);
@@ -220,7 +212,6 @@
             transform: scale(1.1);
         }
 
-        /* LIEN VOIR L'ITINÉRAIRE */
         .btn-view {
             color: var(--text-muted);
             text-decoration: none;
@@ -235,7 +226,6 @@
             color: var(--color-gold);
         }
 
-        /* ZONE FIXE CRÉER UN VOYAGE */
         .create-trip-zone {
             border: 2px dashed rgba(212, 175, 55, 0.15);
             background: rgba(20, 17, 14, 0.4);
@@ -273,7 +263,7 @@
 <body>
 
     <div class="container">
-        <!-- BARRE DE NAVIGATION RENOUVELÉE ET ÉQUILIBRÉE -->
+        <!-- BARRE DE NAVIGATION -->
         <header class="kaido-header">
             <div class="header-left">
                 <a href="index.html" class="brand-name">KAIDO</a>
@@ -303,17 +293,54 @@
         </section>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT ROBUSTE ET RAPIDE -->
+    <!-- 1. SDK CLIENT SUPABASE & FICHIER DE CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
+    <!-- 2. LOGIQUE DE RENDU -->
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         const grid = document.getElementById('trips-grid');
         
         if (grid) {
-            const renderTrips = () => {
+            const renderTrips = async () => {
                 const dynamicCards = grid.querySelectorAll('.dynamic-trip');
                 dynamicCards.forEach(card => card.remove());
 
-                const customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+
+                // Si Supabase est connecté, on tente de récupérer les voyages Cloud
+                if (typeof supabase !== 'undefined') {
+                    try {
+                        const { data: cloudTrips, error } = await supabase
+                            .from('trips')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        if (!error && cloudTrips && cloudTrips.length > 0) {
+                            // Transformation du format Supabase vers le format local
+                            customTrips = cloudTrips.map(ct => ({
+                                id: ct.id,
+                                title: ct.title,
+                                destination: ct.destination,
+                                departure: ct.departure,
+                                dateStart: ct.date_start,
+                                dateEnd: ct.date_end,
+                                dates: `${ct.date_start || ''} au ${ct.date_end || ''}`,
+                                budget: ct.budget,
+                                desc: ct.desc_text,
+                                image: ct.image,
+                                destinationLat: ct.destination_lat,
+                                destinationLng: ct.destination_lng,
+                                itinerary: ct.itinerary,
+                                checklist: ct.checklist
+                            }));
+                        }
+                    } catch (e) {
+                        console.warn("Utilisation de la sauvegarde locale.");
+                    }
+                }
+
                 const createZone = grid.querySelector('.create-trip-zone');
 
                 customTrips.forEach(trip => {
@@ -376,35 +403,44 @@
 
                 const deleteButtons = grid.querySelectorAll('.btn-delete');
                 deleteButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
+                    button.addEventListener('click', async (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const tripId = parseInt(button.getAttribute('data-id'));
+                        const tripId = button.getAttribute('data-id');
                         if (confirm("Êtes-vous sûr de vouloir supprimer cet itinéraire de Kaido ?")) {
-                            deleteTrip(tripId);
+                            await deleteTrip(tripId);
                         }
                     });
                 });
             };
 
-            const deleteTrip = (id) => {
+            const deleteTrip = async (id) => {
+                // Supprimer sur Supabase si ID UUID
+                if (typeof supabase !== 'undefined') {
+                    try {
+                        await supabase.from('trips').delete().eq('id', id);
+                    } catch (err) {
+                        console.warn("Suppression locale uniquement.");
+                    }
+                }
+
+                // Supprimer en local
                 let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                customTrips = customTrips.filter(trip => trip.id !== id);
+                customTrips = customTrips.filter(trip => String(trip.id) !== String(id));
                 localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
                 
                 const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
-                if (activeTrip && activeTrip.id === id) {
+                if (activeTrip && String(activeTrip.id) === String(id)) {
                     localStorage.removeItem('kaido_active_trip');
                     localStorage.removeItem('currentTrip');
                 }
                 
-                renderTrips();
+                await renderTrips();
             };
 
-            renderTrips();
+            await renderTrips();
         }
     });
     </script>
-    <script src="js/supabase.js"></script>
 </body>
 </html>
