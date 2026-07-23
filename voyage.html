@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Voyage - Kaido</title>
+    <title>Mon Itinéraire - Kaido</title>
     <link rel="icon" type="image/png" href="image/logo kaido V4.png">
     
     <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -29,11 +28,7 @@
             --font-serif: 'Playfair Display', serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg-dark);
@@ -43,102 +38,68 @@
             line-height: 1.5;
         }
 
-        .container {
-            width: 92%;
-            max-width: 1550px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
+        header {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 20;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(13, 11, 9, 0.8) 0%, rgba(13, 11, 9, 0) 100%);
         }
 
-        .hero-banner {
+        header nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        }
+
+        header nav a:hover { color: var(--color-gold); }
+
+        .trip-header-visual {
             height: 380px;
             background-size: cover;
             background-position: center;
             position: relative;
             display: flex;
             align-items: flex-end;
-            padding-bottom: 2.5rem;
+            padding: 3rem 2rem 2.5rem 2rem;
+            box-shadow: inset 0 -120px 90px rgba(13, 11, 9, 0.95);
+            background-color: #1a1714;
         }
 
-        .hero-banner::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, var(--bg-dark), transparent 80%);
-        }
+        .trip-header-title { position: relative; z-index: 2; }
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .kaido-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            padding: 1.5rem 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-logo {
-            height: 150px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        .nav-link-left {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 1rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            padding: 0.45rem 0.9rem;
-            background: rgba(20, 17, 14, 0.6);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 4px;
-            backdrop-filter: blur(4px);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link-left:hover {
-            color: var(--color-gold);
-            border-color: var(--color-gold);
-            background: rgba(20, 17, 14, 0.9);
-            transform: translateX(-3px);
-        }
-
-        h1 {
+        .trip-header-title h2 {
             font-family: var(--font-serif);
-            font-size: 3rem;
-            font-weight: 400;
-            color: var(--text-main);
-            margin-bottom: 0.5rem;
+            font-size: 2.8rem;
+            margin-bottom: 0.4rem;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
         }
 
-        .trip-dates {
+        .trip-header-title p {
             color: var(--color-gold);
-            font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
         }
 
-        .voyage-layout {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .voyage-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2.5rem;
-            margin: 3rem 0;
+            margin-top: 2rem;
         }
 
         .activity-preview-box {
@@ -148,14 +109,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             overflow: hidden;
-            position: relative;
             margin-top: 1.5rem;
-        }
-
-        .activity-preview-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .checklist-box {
@@ -166,58 +120,73 @@
             margin-top: 1.5rem;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0.4; }
-            to { opacity: 1; }
+        .btn-flights {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.8rem 1.2rem;
+            background: var(--color-torii);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
         }
 
         @media (max-width: 992px) {
-            .container { width: 100%; padding: 0 1rem; }
-            .hero-banner { height: 320px; }
-            .header-logo { height: 90px !important; }
-            h1 { font-size: 2rem; }
-            .voyage-layout { grid-template-columns: 1fr; gap: 1.8rem; }
-            .activity-preview-box { height: 220px; }
+            .voyage-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="hero-banner" id="trip-banner">
-        <div class="container">
-            <header class="kaido-header">
-                <a href="index.html">
-                    <img src="image/logo kaido V4.png" alt="KAIDO" class="header-logo">
-                </a>
-                <div class="header-right"></div>
-            </header>
+    <header>
+        <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
+            <img src="image/logo kaido V4.png" alt="Kaido Logo" style="height: 50px; width: auto; object-fit: contain;">
+        </a>
+        <nav><a href="index.html">← Retour à mes Voyages</a></nav>
+    </header>
 
-            <div class="hero-content">
-                <h1 id="trip-title">Chargement du voyage...</h1>
-                <p class="trip-dates" id="trip-dates">📅 --/--/---- au --/--/----</p>
-                <a href="index.html" class="nav-link-left">← Retour à mes Voyages</a>
-            </div>
+    <section class="trip-header-visual" id="trip-cover">
+        <div class="trip-header-title">
+            <h2 id="trip-title">Chargement du voyage...</h2>
+            <p id="trip-dates">📅 --/--/----</p>
         </div>
-    </div>
+    </section>
 
     <div class="container">
-        <main class="voyage-layout">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 1.2rem 1.5rem; border-radius: 6px; border: 1px solid var(--border-color);">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">Budget estimé :</span>
+                <strong id="budget-value" style="color: var(--color-gold); font-size: 1.2rem; margin-left: 8px;">0 €</strong>
+            </div>
+            <a id="btn-google-flights" href="#" target="_blank" class="btn-flights">✈️ Rechercher les Vols sur Google Flights</a>
+        </div>
+
+        <p id="trip-main-desc" style="margin-top: 1.5rem; color: var(--text-muted); font-style: italic;"></p>
+
+        <main class="voyage-grid">
             <!-- SECTION ITINÉRAIRE -->
-            <section id="itinerary-container"></section>
-            
-            <!-- SECTION CARTE, VISIONNEUSE ET CHECKLIST -->
-            <section id="map-container">
-                <div id="map" style="width: 100%; height: 450px; border-radius: 6px; border: 1px solid var(--border-color);"></div>
+            <section id="itinerary-days-container"></section>
+
+            <!-- SECTION CARTE, VISIONNEUSE & CHECKLIST -->
+            <section>
+                <div id="map" style="width: 100%; height: 400px; border-radius: 6px; border: 1px solid var(--border-color);"></div>
                 <div class="activity-preview-box" id="activity-preview"></div>
-                <div class="checklist-box" id="checklist-container">
+
+                <div class="checklist-box">
                     <h3 style="font-family: var(--font-serif); color: var(--color-gold); margin-bottom: 1rem;">Checklist & Bagages</h3>
-                    <div id="checklist-items"></div>
+                    <ul id="checklist-list" style="list-style: none;"></ul>
+                    <form id="add-task-form" style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <input type="text" id="new-task-input" placeholder="Ajouter un élément..." style="flex: 1; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
+                        <button type="submit" style="padding: 0.6rem 1rem; background: var(--color-gold); color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">+</button>
+                    </form>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- API Google Maps synchrone pour éviter tout conflit de chargement -->
+    <!-- API Google Maps & Voyage Script -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places"></script>
     <script src="js/voyage.js"></script>
 </body>
