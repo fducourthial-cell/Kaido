@@ -438,12 +438,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 // SAUVEGARDE DANS LE LOCALSTORAGE
-                localStorage.setItem('currentTrip', JSON.stringify(tripData));
-                localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
+               // Exemple d'insertion Supabase dans creer.html
+const { data, error } = await supabase
+  .from('trips')
+  .insert([
+    {
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+      title: destination,
+      destination: destination,
+      departure: departure,
+      date_start: dateStart,
+      date_end: dateEnd,
+      budget: budget,
+      desc_text: desc,
+      image: coverImage,
+      destination_lat: destinationInfo.lat,
+      destination_lng: destinationInfo.lng,
+      itinerary: formattedItinerary,
+      checklist: formattedChecklist
+    }
+  ]);
 
-                const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                currentTrips.push(tripData);
-                localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
+if (error) {
+    console.error("Erreur de sauvegarde Cloud :", error);
+} else {
+    window.location.href = 'voyage.html';
+}
 
                 // REDIRECTION EXPLICITE VERS VOYAGE.HTML
                 window.location.href = 'voyage.html';
