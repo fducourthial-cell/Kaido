@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracer une nouvelle route - Kaido</title>
+    <title>Mon Voyage - Kaido</title>
     <link rel="icon" type="image/png" href="image/logo kaido V4.png">
- 
-    <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
+    
+    <!-- SDK SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
- 
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
- 
+
     <style>
         :root {
             --bg-dark: #0D0B09;
@@ -28,519 +28,178 @@
             --font-kaido: 'Plus Jakarta Sans', sans-serif;
             --font-serif: 'Playfair Display', serif;
         }
- 
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
- 
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: var(--font-kaido);
             min-height: 100vh;
-            overflow-x: hidden;
             line-height: 1.5;
         }
- 
-        /* CONTENEUR ÉLARGI SUR ÉCRAN GEANT */
+
         .container {
             width: 92%;
-            max-width: 1200px;
+            max-width: 1550px;
             margin: 0 auto;
             padding: 0 1.5rem;
         }
- 
+
+        .hero-banner {
+            height: 380px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 2.5rem;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, var(--bg-dark), transparent 80%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         .kaido-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
             padding: 1.5rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
- 
-        .kaido-header .brand-name {
-            display: flex;
+
+        .header-logo {
+            height: 150px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-link-left {
+            display: inline-flex;
             align-items: center;
-            text-decoration: none;
-        }
- 
-        .kaido-header nav a {
+            gap: 8px;
+            margin-top: 1rem;
             color: var(--text-muted);
             text-decoration: none;
             font-size: 0.85rem;
             font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            transition: color 0.3s ease;
-        }
- 
-        .kaido-header nav a:hover {
-            color: var(--color-gold);
-        }
- 
-        .create-hero {
-            padding: 3.5rem 0 2.5rem 0;
-            text-align: center;
-        }
- 
-        .create-hero h1 {
-            font-family: var(--font-serif);
-            font-size: 2.5rem;
-            font-weight: 400;
-            margin-bottom: 0.8rem;
-            color: var(--text-main);
-        }
- 
-        .create-hero p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            font-weight: 300;
-            max-width: 550px;
-            margin: 0 auto;
-        }
- 
-        /* FORMULAIRE BIEN CADRÉ */
-        .kaido-form-box {
-            max-width: 800px;
-            margin: 0 auto 5rem auto;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 2.8rem;
-            border-radius: 6px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-        }
- 
-        .form-group {
-            margin-bottom: 1.8rem;
-        }
- 
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--color-gold);
-            margin-bottom: 0.6rem;
-        }
- 
-        .form-control {
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-bottom: 2px solid rgba(214, 175, 55, 0.2);
-            padding: 0.9rem 1rem;
-            color: var(--text-main);
-            font-family: var(--font-kaido);
-            font-size: 1rem;
+            text-transform: uppercase;
+            padding: 0.45rem 0.9rem;
+            background: rgba(20, 17, 14, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 4px;
+            backdrop-filter: blur(4px);
             transition: all 0.3s ease;
         }
- 
-        .form-control:focus {
-            outline: none;
-            background-color: rgba(255, 255, 255, 0.04);
-            border-color: rgba(214, 175, 55, 0.4);
-            border-bottom-color: var(--color-gold);
+
+        .nav-link-left:hover {
+            color: var(--color-gold);
+            border-color: var(--color-gold);
+            background: rgba(20, 17, 14, 0.9);
+            transform: translateX(-3px);
         }
- 
-        .form-row {
+
+        h1 {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .trip-dates {
+            color: var(--color-gold);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .voyage-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            gap: 2.5rem;
+            margin: 3rem 0;
         }
- 
-        .kaido-submit-btn {
+
+        .activity-preview-box {
             width: 100%;
-            background: linear-gradient(135deg, var(--color-torii), #82271B);
-            color: white;
-            border: 1px solid rgba(214, 175, 55, 0.15);
-            padding: 1.1rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(166, 58, 43, 0.15);
-            transition: all 0.3s ease;
-            margin-top: 1rem;
+            height: 250px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 1.5rem;
         }
- 
-        .kaido-submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(166, 58, 43, 0.35);
-            border-color: var(--color-gold);
-        }
- 
-        gmp-place-autocomplete {
+
+        .activity-preview-box img {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
- 
-        gmp-place-autocomplete::part(input) {
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.02) !important;
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            border-bottom: 2px solid rgba(214, 175, 55, 0.2) !important;
-            padding: 0.9rem 1rem !important;
-            color: var(--text-main) !important;
-            font-family: var(--font-kaido) !important;
-            font-size: 1rem !important;
-            border-radius: 4px !important;
-        }
- 
-        /* ===================================================
-           OPTIMISATION SMARTPHONE (MOBILE CSS)
-           =================================================== */
-        @media (max-width: 768px) {
-            .container {
-                width: 100%;
-                padding: 0 1rem;
-            }
- 
-            .kaido-header {
-                padding: 1rem 0;
-            }
- 
-            .kaido-header .brand-name img {
-                height: 38px !important;
-            }
- 
-            .create-hero {
-                padding: 2rem 0 1.5rem 0;
-            }
- 
-            .create-hero h1 {
-                font-size: 1.8rem;
-            }
- 
-            .create-hero p {
-                font-size: 0.95rem;
-            }
- 
-            .kaido-form-box {
-                padding: 1.5rem 1.2rem;
-                margin-bottom: 2.5rem;
-            }
- 
-            /* Passage en 1 seule colonne pour les dates */
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
- 
-            .kaido-submit-btn {
-                padding: 1rem 0.8rem;
-                font-size: 0.82rem;
-            }
+
+        @media (max-width: 992px) {
+            .container { width: 100%; padding: 0 1rem; }
+            .hero-banner { height: 320px; }
+            .header-logo { height: 90px !important; }
+            h1 { font-size: 2rem; }
+            .voyage-layout { grid-template-columns: 1fr; gap: 1.8rem; }
+            .activity-preview-box { height: 220px; }
         }
     </style>
 </head>
 <body>
- 
+
+    <div class="hero-banner" id="trip-banner">
+        <div class="container">
+            <header class="kaido-header">
+                <a href="index.html">
+                    <img src="image/logo kaido V4.png" alt="KAIDO" class="header-logo">
+                </a>
+                <div class="header-right"></div>
+            </header>
+
+            <div class="hero-content">
+                <h1 id="trip-title">Chargement du voyage...</h1>
+                <p class="trip-dates" id="trip-dates">📅 --/--/---- au --/--/----</p>
+                <a href="index.html" class="nav-link-left">← Retour à mes Voyages</a>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <header class="kaido-header">
-            <a href="index.html" class="brand-name">
-                <img src="image/logo kaido V4.png" alt="KAIDO" style="height: 45px; width: auto; object-fit: contain;">
-            </a>
-            <nav>
-                <a href="index.html">Mes Voyages</a>
-            </nav>
-        </header>
- 
-        <section class="create-hero">
-            <h1>Tracer une nouvelle route</h1>
-            <p>Laissez l'intelligence de Kaido concevoir votre carnet de voyage sur-mesure.</p>
-        </section>
- 
-        <main class="kaido-form-box">
-            <form id="create-trip-form">
- 
-                <div class="form-group">
-                    <label for="trip-departure">🛫 Ville de départ</label>
-                    <input type="text" id="trip-departure" class="form-control" placeholder="Ex: Paris, Édimbourg, Lyon..." required>
-                </div>
- 
-                <div class="form-group">
-                    <label for="trip-destination-modern">📍 Destination de vos rêves</label>
-                    <gmp-place-autocomplete id="trip-destination-modern" placeholder="Ex: Écosse, Tokyo, Islande, Toscane..."></gmp-place-autocomplete>
-                </div>
- 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="trip-date-start">📅 Date Aller</label>
-                        <input type="date" id="trip-date-start" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="trip-date-end">📅 Date Retour</label>
-                        <input type="date" id="trip-date-end" class="form-control" required>
-                    </div>
-                </div>
- 
-                <div class="form-group">
-                    <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
-                    <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1500" min="0">
-                </div>
- 
-                <div class="form-group">
-                    <label for="trip-notes">📝 Notes, mode de transport & envies de voyage</label>
-                    <textarea id="trip-notes" class="form-control" rows="4" placeholder="Ex: Road trip en voiture de location sur 5 jours pour visiter les distilleries de whisky, randonnée nature dans les Highlands et lieux iconiques..."></textarea>
-                </div>
- 
-                <button type="submit" class="kaido-submit-btn">
-                    ✨ Concevoir mon itinéraire sur-mesure
-                </button>
- 
-            </form>
+        <main class="voyage-layout">
+            <section id="itinerary-container"></section>
+            
+            <section id="map-container">
+                <div id="map" style="width: 100%; height: 450px; border-radius: 6px; border: 1px solid var(--border-color);"></div>
+                <div class="activity-preview-box" id="activity-preview"></div>
+            </section>
         </main>
     </div>
- 
-    <!-- Helper div invisible requis pour instancier le PlacesService -->
-    <div id="hidden-places-helper" style="display:none;"></div>
- 
-    <!-- API GOOGLE MAPS & PLACES -->
+
+    <!-- Google Maps API & App Script -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
- 
-    <!-- LOGIQUE METIER KAIDO -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('create-trip-form');
-        const modernField = document.getElementById('trip-destination-modern');
- 
-        // ENDPOINT NETLIFY SERVERLESS
-        const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
- 
-        let selectedDestinationName = "";
-        let placesService = null;
- 
-        function getPlacesService() {
-            if (!placesService && typeof google !== 'undefined' && google.maps && google.maps.places) {
-                placesService = new google.maps.places.PlacesService(document.getElementById('hidden-places-helper'));
-            }
-            return placesService;
-        }
- 
-        function buildFallbackImage(name) {
-            const initial = (name || '?').trim().charAt(0).toUpperCase();
-            const svg = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600">
-                    <defs>
-                        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#A63A2B"/>
-                            <stop offset="100%" stop-color="#0D0B09"/>
-                        </linearGradient>
-                    </defs>
-                    <rect width="1200" height="600" fill="url(#g)"/>
-                    <text x="50%" y="52%" font-family="Georgia, serif" font-size="220" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
-                </svg>`;
-            return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
-        }
- 
-        // Récupère à la fois la photo HD et les coordonnées exactes (Lat/Lng)
-        function getDestinationInfo(destinationName) {
-            return new Promise((resolve) => {
-                const service = getPlacesService();
-                if (!service || !destinationName) {
-                    resolve({ image: buildFallbackImage(destinationName), lat: null, lng: null });
-                    return;
-                }
- 
-                service.findPlaceFromQuery(
-                    { query: destinationName, fields: ['photos', 'name', 'geometry'] },
-                    (results, status) => {
-                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-                            const place = results[0];
-                            const image = (place.photos && place.photos.length > 0)
-                                ? place.photos[0].getUrl({ maxWidth: 1200, maxHeight: 600 })
-                                : buildFallbackImage(destinationName);
-                            const lat = (place.geometry && place.geometry.location) ? place.geometry.location.lat() : null;
-                            const lng = (place.geometry && place.geometry.location) ? place.geometry.location.lng() : null;
-                            resolve({ image, lat, lng });
-                        } else {
-                            resolve({ image: buildFallbackImage(destinationName), lat: null, lng: null });
-                        }
-                    }
-                );
-            });
-        }
- 
-        if (modernField) {
-            modernField.addEventListener('gmp-placeselect', (event) => {
-                const place = event.detail.place;
-                if (place) {
-                    selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
-                }
-            });
-        }
- 
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
- 
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
- 
-                try {
-                    let destination = selectedDestinationName;
-                    if (!destination && modernField) {
-                        const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
-                        if (innerInput && innerInput.value) {
-                            destination = innerInput.value.trim();
-                        }
-                    }
- 
-                    if (!destination || destination.trim() === "") {
-                        destination = "Écosse";
-                    }
- 
-                    const departureInput = document.getElementById('trip-departure');
-                    const departure = departureInput ? departureInput.value : 'Paris';
-                    const dateStart = document.getElementById('trip-date-start').value;
-                    const dateEnd = document.getElementById('trip-date-end').value;
-                    const budgetInput = document.getElementById('trip-budget-input');
-                    const budget = budgetInput ? budgetInput.value : 0;
-                    const notesInput = document.getElementById('trip-notes');
-                    const desc = notesInput ? notesInput.value : '';
- 
-                    if (!dateStart || !dateEnd) {
-                        alert("Veuillez renseigner les dates aller et retour.");
-                        return;
-                    }
- 
-                    if (submitBtn) {
-                        submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire sur-mesure...";
-                        submitBtn.disabled = true;
-                    }
- 
-                    const start = new Date(dateStart);
-                    const end = new Date(dateEnd);
- 
-                    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                        throw new Error("Le format des dates n'est pas valide.");
-                    }
- 
-                    const timeDiff = end.getTime() - start.getTime();
-                    const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
- 
-                    if (totalDays <= 0) {
-                        alert("La date de retour doit être après la date de départ !");
-                        if (submitBtn) {
-                            submitBtn.textContent = originalBtnText;
-                            submitBtn.disabled = false;
-                        }
-                        return;
-                    }
- 
-                    // Recherche d'infos média en parallèle de l'IA
-                    const destInfoPromise = getDestinationInfo(destination);
- 
-                    // APPEL NETLIFY AI
-                    const response = await fetch(NETLIFY_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            destination: destination,
-                            departure: departure,
-                            totalDays: totalDays,
-                            descText: desc
-                        })
-                    });
- 
-                    if (!response.ok) {
-                        const errData = await response.json().catch(() => ({}));
-                        throw new Error(errData.error || `Erreur serveur (${response.status})`);
-                    }
- 
-                    const aiData = await response.json();
-                    const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
- 
-                    const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
-                        const currentDate = new Date(start);
-                        currentDate.setDate(start.getDate() + index);
-                        return {
-                            day: dayObj.day || `Jour ${index + 1}`,
-                            dateText: formatDate(currentDate),
-                            steps: dayObj.steps || []
-                        };
-                    });
- 
-                    const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
-                    const destInfo = await destInfoPromise;
- 
-                    // Objet voyage unifié
-                    const tripData = {
-                        id: Date.now(),
-                        title: destination,
-                        destination: destination,
-                        departure: departure,
-                        dateStart: dateStart,
-                        dateEnd: dateEnd,
-                        start: dateStart,
-                        end: dateEnd,
-                        dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
-                        budget: budget,
-                        desc: desc,
-                        image: destInfo.image,
-                        destinationLat: destInfo.lat,
-                        destinationLng: destInfo.lng,
-                        itinerary: formattedItinerary,
-                        checklist: formattedChecklist
-                    };
- 
-                    // 1. SAUVEGARDE DANS LE LOCALSTORAGE (Accès ultra-rapide)
-                    localStorage.setItem('currentTrip', JSON.stringify(tripData));
-                    localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
- 
-                    const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                    currentTrips.push(tripData);
-                    localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
- 
-                    // 2. SAUVEGARDE DANS LE CLOUD SUPABASE (Si configuré)
-                    if (typeof supabase !== 'undefined') {
-                        try {
-                            const userRes = await supabase.auth.getUser();
-                            const userId = userRes.data?.user?.id || null;
- 
-                            await supabase.from('trips').insert([
-                                {
-                                    user_id: userId,
-                                    title: destination,
-                                    destination: destination,
-                                    departure: departure,
-                                    date_start: dateStart,
-                                    date_end: dateEnd,
-                                    budget: budget,
-                                    desc_text: desc,
-                                    image: destInfo.image,
-                                    destination_lat: destInfo.lat,
-                                    destination_lng: destInfo.lng,
-                                    itinerary: formattedItinerary,
-                                    checklist: formattedChecklist
-                                }
-                            ]);
-                        } catch (sbErr) {
-                            console.warn("Note: Voyage sauvegardé en local (Supabase indisponible ou hors-ligne).", sbErr);
-                        }
-                    }
- 
-                    // REDIRECTION VERS L'ITINÉRAIRE
-                    window.location.href = 'voyage.html';
- 
-                } catch (error) {
-                    console.error("Erreur de génération :", error);
-                    alert("Erreur lors de la création : " + error.message);
-                    if (submitBtn) {
-                        submitBtn.textContent = originalBtnText;
-                        submitBtn.disabled = false;
-                    }
-                }
-            });
-        }
-    });
-       <!-- ✅ NOUVELLE LIGNE CORRIGÉE -->
-<script src="js/app.js"></script> 
-    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
