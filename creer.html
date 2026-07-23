@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracer une nouvelle route - Kaido</title>
@@ -248,238 +247,252 @@
         </main>
     </div>
 
-    <!-- Div invisible requis pour instancier le PlacesService (aucun affichage de carte nécessaire) -->
+    <!-- Helper div invisible requis pour instancier le PlacesService -->
     <div id="hidden-places-helper" style="display:none;"></div>
 
+    <!-- 1. SDK SUPABASE & FICHIER CONFIGURATION DE BASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
+    <!-- 2. API GOOGLE MAPS & PLACES -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
+    <!-- 3. LOGIQUE METIER KAIDO -->
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('create-trip-form');
-    const modernField = document.getElementById('trip-destination-modern');
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('create-trip-form');
+        const modernField = document.getElementById('trip-destination-modern');
 
-    // ENDPOINT NETLIFY SERVERLESS
-    const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
+        // ENDPOINT NETLIFY SERVERLESS
+        const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
 
-    let selectedDestinationName = "";
-    let placesService = null;
+        let selectedDestinationName = "";
+        let placesService = null;
 
-    // Le PlacesService a besoin d'un élément (map ou simple div) pour être instancié
-    function getPlacesService() {
-        if (!placesService && typeof google !== 'undefined' && google.maps && google.maps.places) {
-            placesService = new google.maps.places.PlacesService(document.getElementById('hidden-places-helper'));
+        function getPlacesService() {
+            if (!placesService && typeof google !== 'undefined' && google.maps && google.maps.places) {
+                placesService = new google.maps.places.PlacesService(document.getElementById('hidden-places-helper'));
+            }
+            return placesService;
         }
-        return placesService;
-    }
 
-    // Génère une image de secours propre (dégradé + initiale) quand aucune photo n'est trouvée
-    function buildFallbackImage(name) {
-        const initial = (name || '?').trim().charAt(0).toUpperCase();
-        const svg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600">
-                <defs>
-                    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#A63A2B"/>
-                        <stop offset="100%" stop-color="#0D0B09"/>
-                    </linearGradient>
-                </defs>
-                <rect width="1200" height="600" fill="url(#g)"/>
-                <text x="50%" y="52%" font-family="Georgia, serif" font-size="220" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
-            </svg>`;
-        return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
-    }
+        function buildFallbackImage(name) {
+            const initial = (name || '?').trim().charAt(0).toUpperCase();
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600">
+                    <defs>
+                        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#A63A2B"/>
+                            <stop offset="100%" stop-color="#0D0B09"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="1200" height="600" fill="url(#g)"/>
+                    <text x="50%" y="52%" font-family="Georgia, serif" font-size="220" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
+                </svg>`;
+            return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+        }
 
-    // Cherche une vraie photo de la destination via Google Places. Retourne une Promise<string>.
-    function getDestinationPhoto(destinationName) {
-        return new Promise((resolve) => {
-            const service = getPlacesService();
-            if (!service || !destinationName) {
-                resolve(buildFallbackImage(destinationName));
-                return;
-            }
-
-            service.findPlaceFromQuery(
-                { query: destinationName, fields: ['photos', 'name'] },
-                (results, status) => {
-                    if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0] && results[0].photos && results[0].photos.length > 0) {
-                        resolve(results[0].photos[0].getUrl({ maxWidth: 1200, maxHeight: 600 }));
-                    } else {
-                        resolve(buildFallbackImage(destinationName));
-                    }
-                }
-            );
-        });
-    }
-
-    if (modernField) {
-        modernField.addEventListener('gmp-placeselect', (event) => {
-            const place = event.detail.place;
-            if (place) {
-                selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
-            }
-        });
-    }
-
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            // STOPPE LE RAFRAÎCHISSEMENT PAR DÉFAUT DU NAVIGATEUR
-            e.preventDefault();
-
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
-
-            try {
-                let destination = selectedDestinationName;
-                if (!destination && modernField) {
-                    const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
-                    if (innerInput && innerInput.value) {
-                        destination = innerInput.value.trim();
-                    }
-                }
-
-                if (!destination || destination.trim() === "") {
-                    destination = "Écosse";
-                }
-
-                const departureInput = document.getElementById('trip-departure');
-                const departure = departureInput ? departureInput.value : 'Paris';
-                const dateStart = document.getElementById('trip-date-start').value;
-                const dateEnd = document.getElementById('trip-date-end').value;
-                const budgetInput = document.getElementById('trip-budget-input');
-                const budget = budgetInput ? budgetInput.value : 0;
-                const notesInput = document.getElementById('trip-notes');
-                const desc = notesInput ? notesInput.value : '';
-
-                if (!dateStart || !dateEnd) {
-                    alert("Veuillez renseigner les dates aller et retour.");
+        // Récupère à la fois la photo HD et les coordonnées exactes (Lat/Lng)
+        function getDestinationInfo(destinationName) {
+            return new Promise((resolve) => {
+                const service = getPlacesService();
+                if (!service || !destinationName) {
+                    resolve({ image: buildFallbackImage(destinationName), lat: null, lng: null });
                     return;
                 }
 
-                if (submitBtn) {
-                    submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire sur-mesure...";
-                    submitBtn.disabled = true;
+                service.findPlaceFromQuery(
+                    { query: destinationName, fields: ['photos', 'name', 'geometry'] },
+                    (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+                            const place = results[0];
+                            const image = (place.photos && place.photos.length > 0)
+                                ? place.photos[0].getUrl({ maxWidth: 1200, maxHeight: 600 })
+                                : buildFallbackImage(destinationName);
+                            const lat = (place.geometry && place.geometry.location) ? place.geometry.location.lat() : null;
+                            const lng = (place.geometry && place.geometry.location) ? place.geometry.location.lng() : null;
+                            resolve({ image, lat, lng });
+                        } else {
+                            resolve({ image: buildFallbackImage(destinationName), lat: null, lng: null });
+                        }
+                    }
+                );
+            });
+        }
+
+        if (modernField) {
+            modernField.addEventListener('gmp-placeselect', (event) => {
+                const place = event.detail.place;
+                if (place) {
+                    selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
                 }
+            });
+        }
 
-                const start = new Date(dateStart);
-                const end = new Date(dateEnd);
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                    throw new Error("Le format des dates n'est pas valide.");
-                }
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
 
-                const timeDiff = end.getTime() - start.getTime();
-                const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+                try {
+                    let destination = selectedDestinationName;
+                    if (!destination && modernField) {
+                        const innerInput = modernField.querySelector('input') || modernField.shadowRoot?.querySelector('input') || modernField;
+                        if (innerInput && innerInput.value) {
+                            destination = innerInput.value.trim();
+                        }
+                    }
 
-                if (totalDays <= 0) {
-                    alert("La date de retour doit être après la date de départ !");
+                    if (!destination || destination.trim() === "") {
+                        destination = "Écosse";
+                    }
+
+                    const departureInput = document.getElementById('trip-departure');
+                    const departure = departureInput ? departureInput.value : 'Paris';
+                    const dateStart = document.getElementById('trip-date-start').value;
+                    const dateEnd = document.getElementById('trip-date-end').value;
+                    const budgetInput = document.getElementById('trip-budget-input');
+                    const budget = budgetInput ? budgetInput.value : 0;
+                    const notesInput = document.getElementById('trip-notes');
+                    const desc = notesInput ? notesInput.value : '';
+
+                    if (!dateStart || !dateEnd) {
+                        alert("Veuillez renseigner les dates aller et retour.");
+                        return;
+                    }
+
+                    if (submitBtn) {
+                        submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire sur-mesure...";
+                        submitBtn.disabled = true;
+                    }
+
+                    const start = new Date(dateStart);
+                    const end = new Date(dateEnd);
+
+                    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                        throw new Error("Le format des dates n'est pas valide.");
+                    }
+
+                    const timeDiff = end.getTime() - start.getTime();
+                    const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+                    if (totalDays <= 0) {
+                        alert("La date de retour doit être après la date de départ !");
+                        if (submitBtn) {
+                            submitBtn.textContent = originalBtnText;
+                            submitBtn.disabled = false;
+                        }
+                        return;
+                    }
+
+                    // Recherche d'infos média en parallèle de l'IA
+                    const destInfoPromise = getDestinationInfo(destination);
+
+                    // APPEL NETLIFY AI
+                    const response = await fetch(NETLIFY_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            destination: destination,
+                            departure: departure,
+                            totalDays: totalDays,
+                            descText: desc
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error || `Erreur serveur (${response.status})`);
+                    }
+
+                    const aiData = await response.json();
+                    const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+                    const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + index);
+                        return {
+                            day: dayObj.day || `Jour ${index + 1}`,
+                            dateText: formatDate(currentDate),
+                            steps: dayObj.steps || []
+                        };
+                    });
+
+                    const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
+                    const destInfo = await destInfoPromise;
+
+                    // Objet voyage unifié
+                    const tripData = {
+                        id: Date.now(),
+                        title: destination,
+                        destination: destination,
+                        departure: departure,
+                        dateStart: dateStart,
+                        dateEnd: dateEnd,
+                        start: dateStart,
+                        end: dateEnd,
+                        dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
+                        budget: budget,
+                        desc: desc,
+                        image: destInfo.image,
+                        destinationLat: destInfo.lat,
+                        destinationLng: destInfo.lng,
+                        itinerary: formattedItinerary,
+                        checklist: formattedChecklist
+                    };
+
+                    // 1. SAUVEGARDE DANS LE LOCALSTORAGE (Accès ultra-rapide)
+                    localStorage.setItem('currentTrip', JSON.stringify(tripData));
+                    localStorage.setItem('kaido_active_trip', JSON.stringify(tripData));
+
+                    const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                    currentTrips.push(tripData);
+                    localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
+
+                    // 2. SAUVEGARDE DANS LE CLOUD SUPABASE (Si configuré)
+                    if (typeof supabase !== 'undefined') {
+                        try {
+                            const userRes = await supabase.auth.getUser();
+                            const userId = userRes.data?.user?.id || null;
+
+                            await supabase.from('trips').insert([
+                                {
+                                    user_id: userId,
+                                    title: destination,
+                                    destination: destination,
+                                    departure: departure,
+                                    date_start: dateStart,
+                                    date_end: dateEnd,
+                                    budget: budget,
+                                    desc_text: desc,
+                                    image: destInfo.image,
+                                    destination_lat: destInfo.lat,
+                                    destination_lng: destInfo.lng,
+                                    itinerary: formattedItinerary,
+                                    checklist: formattedChecklist
+                                }
+                            ]);
+                        } catch (sbErr) {
+                            console.warn("Note: Voyage sauvegardé en local (Supabase indisponible ou hors-ligne).", sbErr);
+                        }
+                    }
+
+                    // REDIRECTION VERS L'ITINÉRAIRE
+                    window.location.href = 'voyage.html';
+
+                } catch (error) {
+                    console.error("Erreur de génération :", error);
+                    alert("Erreur lors de la création : " + error.message);
                     if (submitBtn) {
                         submitBtn.textContent = originalBtnText;
                         submitBtn.disabled = false;
                     }
-                    return;
                 }
-
-                // Lance la recherche de la photo de destination EN PARALLÈLE de l'appel IA
-                const photoPromise = getDestinationPhoto(destination);
-
-                // APPEL AU BACKEND NETLIFY
-                const response = await fetch(NETLIFY_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({
-                        destination: destination,
-                        departure: departure,
-                        totalDays: totalDays,
-                        descText: desc
-                    })
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error || `Erreur serveur (${response.status})`);
-                }
-
-                const aiData = await response.json();
-
-                const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-
-                const formattedItinerary = aiData.itinerary.map((dayObj, index) => {
-                    const currentDate = new Date(start);
-                    currentDate.setDate(start.getDate() + index);
-                    return {
-                        day: dayObj.day || `Jour ${index + 1}`,
-                        dateText: formatDate(currentDate),
-                        steps: dayObj.steps || []
-                    };
-                });
-
-                const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({ id: Date.now() + idx, text: item, done: false }));
-
-                // Récupère la vraie photo de la destination (ou le dégradé de secours)
-                const coverImage = await photoPromise;
-
-                const tripData = {
-                    id: Date.now(),
-                    title: destination,
-                    destination: destination,
-                    departure: departure,
-                    dateStart: dateStart,
-                    dateEnd: dateEnd,
-                    start: dateStart,
-                    end: dateEnd,
-                    dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
-                    budget: budget,
-                    desc: desc,
-                    image: coverImage, 
-                    itinerary: formattedItinerary,
-                    checklist: formattedChecklist
-                };
-
-                // SAUVEGARDE DANS LE LOCALSTORAGE
-               // Exemple d'insertion Supabase dans creer.html
-const { data, error } = await supabase
-  .from('trips')
-  .insert([
-    {
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      title: destination,
-      destination: destination,
-      departure: departure,
-      date_start: dateStart,
-      date_end: dateEnd,
-      budget: budget,
-      desc_text: desc,
-      image: coverImage,
-      destination_lat: destinationInfo.lat,
-      destination_lng: destinationInfo.lng,
-      itinerary: formattedItinerary,
-      checklist: formattedChecklist
-    }
-  ]);
-
-if (error) {
-    console.error("Erreur de sauvegarde Cloud :", error);
-} else {
-    window.location.href = 'voyage.html';
-}
-
-                // REDIRECTION EXPLICITE VERS VOYAGE.HTML
-                window.location.href = 'voyage.html';
-
-            } catch (error) {
-                console.error("Erreur de génération :", error);
-                alert("Erreur lors de la création : " + error.message);
-                if (submitBtn) {
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.disabled = false;
-                }
-            }
-        });
-    }
-});
-</script>
-<script src="js/supabase.js"></script>
+            });
+        }
+    });
+    </script>
 </body>
 </html>
