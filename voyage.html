@@ -158,6 +158,19 @@
             object-fit: cover;
         }
 
+        .checklist-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
         @media (max-width: 992px) {
             .container { width: 100%; padding: 0 1rem; }
             .hero-banner { height: 320px; }
@@ -189,17 +202,23 @@
 
     <div class="container">
         <main class="voyage-layout">
+            <!-- SECTION ITINÉRAIRE -->
             <section id="itinerary-container"></section>
             
+            <!-- SECTION CARTE, VISIONNEUSE ET CHECKLIST -->
             <section id="map-container">
                 <div id="map" style="width: 100%; height: 450px; border-radius: 6px; border: 1px solid var(--border-color);"></div>
                 <div class="activity-preview-box" id="activity-preview"></div>
+                <div class="checklist-box" id="checklist-container">
+                    <h3 style="font-family: var(--font-serif); color: var(--color-gold); margin-bottom: 1rem;">Checklist & Bagages</h3>
+                    <div id="checklist-items"></div>
+                </div>
             </section>
         </main>
     </div>
 
-    <!-- Google Maps API & App Script -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
+    <!-- API Google Maps synchrone pour éviter tout conflit de chargement -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places"></script>
     <script src="js/voyage.js"></script>
 </body>
 </html>
