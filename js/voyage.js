@@ -10,7 +10,7 @@ function initGoogleMap(destinationName) {
     const geocoder = new google.maps.Geocoder();
     
     geocoder.geocode({ address: destinationName }, (results, status) => {
-        let initialPos = { lat: 35.6762, lng: 139.6503 }; // Fallback Tokyo si échec
+        let initialPos = { lat: 35.6762, lng: 139.6503 }; // Fallback Tokyo
 
         if (status === 'OK' && results[0]) {
             initialPos = results[0].geometry.location;
@@ -29,6 +29,13 @@ function initGoogleMap(destinationName) {
                 { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
                 { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
             ]
+        });
+
+        // Marqueur initial de la destination
+        activeMarker = new google.maps.Marker({
+            position: initialPos,
+            map: map,
+            title: destinationName
         });
 
         placesService = new google.maps.places.PlacesService(map);
@@ -51,8 +58,9 @@ function buildFallbackImage(activityName) {
     return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 }
 
+// FONCTION DE MISE À JOUR DE LA CARTE & PHOTO AU CLIC SUR UNE ACTIVITÉ
 function selectActivityOnMap(addressQuery, activityName) {
-    if (!addressQuery) return;
+    if (!addressQuery && !activityName) return;
 
     const previewBox = document.getElementById('activity-preview');
     const previewImg = document.getElementById('activity-img');
@@ -64,6 +72,7 @@ function selectActivityOnMap(addressQuery, activityName) {
     if (previewLoading) previewLoading.style.display = 'flex';
     if (previewTitle) previewTitle.textContent = `📍 ${activityName}`;
 
+    // 1. Mise à jour de l'image via Google Places
     if (placesService) {
         const query = `${activityName}, ${addressQuery}`;
         placesService.findPlaceFromQuery(
@@ -73,6 +82,12 @@ function selectActivityOnMap(addressQuery, activityName) {
 
                 if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
                     const place = results[0];
+
+                    // Si Places trouve la position exacte, on recentre direct
+                    if (place.geometry && place.geometry.location && map) {
+                        updateMapMarker(place.geometry.location, activityName);
+                    }
+
                     if (previewImg) {
                         if (place.photos && place.photos.length > 0) {
                             previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
@@ -82,6 +97,8 @@ function selectActivityOnMap(addressQuery, activityName) {
                         previewImg.style.display = 'block';
                     }
                 } else {
+                    // Fallback par adresse si le nom exact échoue
+                    geocodeAddressAndCenter(addressQuery, activityName);
                     if (previewImg) {
                         previewImg.src = buildFallbackImage(activityName);
                         previewImg.style.display = 'block';
@@ -90,32 +107,39 @@ function selectActivityOnMap(addressQuery, activityName) {
             }
         );
     } else {
+        geocodeAddressAndCenter(addressQuery, activityName);
         if (previewLoading) previewLoading.style.display = 'none';
         if (previewImg) {
             previewImg.src = buildFallbackImage(activityName);
             previewImg.style.display = 'block';
         }
     }
+}
 
-    if (map && typeof google !== 'undefined' && google.maps) {
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ address: addressQuery }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-                const loc = results[0].geometry.location;
-                map.panTo(loc);
-                map.setZoom(15);
+// Recentrer la carte et déplacer le marqueur
+function updateMapMarker(location, title) {
+    if (!map || typeof google === 'undefined' || !google.maps) return;
+    map.panTo(location);
+    map.setZoom(14);
 
-                if (activeMarker) activeMarker.setMap(null);
+    if (activeMarker) activeMarker.setMap(null);
 
-                activeMarker = new google.maps.Marker({
-                    position: loc,
-                    map: map,
-                    title: activityName,
-                    animation: google.maps.Animation.DROP
-                });
-            }
-        });
-    }
+    activeMarker = new google.maps.Marker({
+        position: location,
+        map: map,
+        title: title,
+        animation: google.maps.Animation.DROP
+    });
+}
+
+function geocodeAddressAndCenter(addressQuery, title) {
+    if (!map || typeof google === 'undefined' || !google.maps || !addressQuery) return;
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: addressQuery }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+            updateMapMarker(results[0].geometry.location, title);
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -141,7 +165,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
         localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
 
-        // Synchro Supabase si disponible
         if (typeof supabase !== 'undefined') {
             try {
                 await supabase.from('trips').update({
@@ -158,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Informatives du voyage
+    // Infos du voyage
     const destination = activeTrip.destination || activeTrip.title || "Japon";
     const titleEl = document.getElementById('trip-main-title');
     const datesEl = document.getElementById('trip-main-dates');
@@ -170,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (descEl) descEl.textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
 
     if (coverEl && activeTrip.image) {
-        coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${activeTrip.image}')`;
+        coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url('${activeTrip.image}')`;
     }
 
     // Budget
@@ -200,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
     }
 
-    // Initialisation carte
+    // Initialisation de la carte
     initGoogleMap(destination);
 
     // Rendu de l'itinéraire
