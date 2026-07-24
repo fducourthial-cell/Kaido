@@ -1,64 +1,126 @@
 let map;
-let activeMarker = null;
+let activeMarkers = []; // Tableau pour stocker tous les marqueurs de la journée
+let routePolyline = null; // Ligne reliant les activités
 let placesService = null;
 
-// INITIALISATION DYNAMIQUE DE LA CARTE SUR LA DESTINATION ACTIVE
-function initGoogleMap(destinationName) {
+// Initialisation de la carte sur la destination exacte du voyage
+function initGoogleMap(destinationName, lat, lng) {
     const mapContainer = document.getElementById('map');
     if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
 
-    const geocoder = new google.maps.Geocoder();
-    
-    geocoder.geocode({ address: destinationName }, (results, status) => {
-        let initialPos = { lat: 35.6762, lng: 139.6503 }; // Fallback Tokyo
+    let initialPos = { lat: 48.8566, lng: 2.3522 }; // Fallback Paris
+    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        initialPos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+    }
 
-        if (status === 'OK' && results[0]) {
-            initialPos = results[0].geometry.location;
-        }
-
-        map = new google.maps.Map(mapContainer, {
-            zoom: 11,
-            center: initialPos,
-            disableDefaultUI: true,
-            zoomControl: true,
-            styles: [
-                { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-                { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-                { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-                { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-                { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-            ]
-        });
-
-        // Marqueur initial de la destination
-        activeMarker = new google.maps.Marker({
-            position: initialPos,
-            map: map,
-            title: destinationName
-        });
-
-        placesService = new google.maps.places.PlacesService(map);
+    map = new google.maps.Map(mapContainer, {
+        zoom: 12,
+        center: initialPos,
+        disableDefaultUI: true,
+        zoomControl: true,
+        styles: [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+        ]
     });
+
+    placesService = new google.maps.places.PlacesService(map);
+
+    // Si aucune coordonnée GPS n'est fournie, géocoder le nom de la destination
+    if (!lat || !lng) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: destinationName }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                map.setCenter(results[0].geometry.location);
+            }
+        });
+    }
 }
 
-function buildFallbackImage(activityName) {
-    const initial = (activityName || '?').trim().charAt(0).toUpperCase();
-    const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">
-            <defs>
-                <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#A63A2B"/>
-                    <stop offset="100%" stop-color="#0D0B09"/>
-                </linearGradient>
-            </defs>
-            <rect width="600" height="400" fill="url(#g)"/>
-            <text x="50%" y="52%" font-family="Georgia, serif" font-size="120" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
-        </svg>`;
-    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+// Nettoyer la carte (marqueurs + ligne)
+function clearMapOverlays() {
+    activeMarkers.forEach(m => m.setMap(null));
+    activeMarkers = [];
+    if (routePolyline) {
+        routePolyline.setMap(null);
+        routePolyline = null;
+    }
 }
 
-// FONCTION DE MISE À JOUR DE LA CARTE & PHOTO AU CLIC SUR UNE ACTIVITÉ
+// Afficher toutes les étapes d'une journée et les relier entre elles
+async function displayDayOnMap(steps, mainDestination) {
+    clearMapOverlays();
+    if (!steps || steps.length === 0 || !map) return;
+
+    const geocoder = new google.maps.Geocoder();
+    const bounds = new google.maps.LatLngBounds();
+    const pathCoordinates = [];
+
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const locQuery = step.location ? `${step.location}, ${mainDestination}` : `${step.activity}, ${mainDestination}`;
+        
+        await new Promise((resolve) => {
+            geocoder.geocode({ address: locQuery }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    const loc = results[0].geometry.location;
+                    bounds.extend(loc);
+                    pathCoordinates.push(loc);
+
+                    // Création du marqueur numéroté pour chaque étape
+                    const marker = new google.maps.Marker({
+                        position: loc,
+                        map: map,
+                        title: `${i + 1}. ${step.activity || step.title}`,
+                        label: {
+                            text: `${i + 1}`,
+                            color: "#0D0B09",
+                            fontWeight: "bold",
+                            fontSize: "12px"
+                        },
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 12,
+                            fillColor: "#D4AF37",
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: "#FFFFFF"
+                        }
+                    });
+
+                    activeMarkers.push(marker);
+                }
+                resolve();
+            });
+        });
+    }
+
+    // Tracer la ligne entre les étapes s'il y a au moins 2 points
+    if (pathCoordinates.length > 1) {
+        routePolyline = new google.maps.Polyline({
+            path: pathCoordinates,
+            geodesic: true,
+            strokeColor: "#A63A2B", // Rouge Torii Kaido
+            strokeOpacity: 0.9,
+            strokeWeight: 4
+        });
+        routePolyline.setMap(map);
+    }
+
+    // Ajuster le zoom pour englober tous les points de la journée
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds);
+        if (pathCoordinates.length === 1) {
+            map.setZoom(14);
+        }
+    }
+}
+
+// Afficher une seule activité spécifique lors d'un clic individuel
 function selectActivityOnMap(addressQuery, activityName) {
     if (!addressQuery && !activityName) return;
 
@@ -72,7 +134,6 @@ function selectActivityOnMap(addressQuery, activityName) {
     if (previewLoading) previewLoading.style.display = 'flex';
     if (previewTitle) previewTitle.textContent = `📍 ${activityName}`;
 
-    // 1. Mise à jour de l'image via Google Places
     if (placesService) {
         const query = `${activityName}, ${addressQuery}`;
         placesService.findPlaceFromQuery(
@@ -82,64 +143,29 @@ function selectActivityOnMap(addressQuery, activityName) {
 
                 if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
                     const place = results[0];
-
-                    // Si Places trouve la position exacte, on recentre direct
                     if (place.geometry && place.geometry.location && map) {
-                        updateMapMarker(place.geometry.location, activityName);
+                        clearMapOverlays();
+                        const marker = new google.maps.Marker({
+                            position: place.geometry.location,
+                            map: map,
+                            title: activityName,
+                            animation: google.maps.Animation.DROP
+                        });
+                        activeMarkers.push(marker);
+                        map.panTo(place.geometry.location);
+                        map.setZoom(15);
                     }
 
                     if (previewImg) {
                         if (place.photos && place.photos.length > 0) {
                             previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
-                        } else {
-                            previewImg.src = buildFallbackImage(activityName);
                         }
-                        previewImg.style.display = 'block';
-                    }
-                } else {
-                    // Fallback par adresse si le nom exact échoue
-                    geocodeAddressAndCenter(addressQuery, activityName);
-                    if (previewImg) {
-                        previewImg.src = buildFallbackImage(activityName);
                         previewImg.style.display = 'block';
                     }
                 }
             }
         );
-    } else {
-        geocodeAddressAndCenter(addressQuery, activityName);
-        if (previewLoading) previewLoading.style.display = 'none';
-        if (previewImg) {
-            previewImg.src = buildFallbackImage(activityName);
-            previewImg.style.display = 'block';
-        }
     }
-}
-
-// Recentrer la carte et déplacer le marqueur
-function updateMapMarker(location, title) {
-    if (!map || typeof google === 'undefined' || !google.maps) return;
-    map.panTo(location);
-    map.setZoom(14);
-
-    if (activeMarker) activeMarker.setMap(null);
-
-    activeMarker = new google.maps.Marker({
-        position: location,
-        map: map,
-        title: title,
-        animation: google.maps.Animation.DROP
-    });
-}
-
-function geocodeAddressAndCenter(addressQuery, title) {
-    if (!map || typeof google === 'undefined' || !google.maps || !addressQuery) return;
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: addressQuery }, (results, status) => {
-        if (status === 'OK' && results[0]) {
-            updateMapMarker(results[0].geometry.location, title);
-        }
-    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -182,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Infos du voyage
-    const destination = activeTrip.destination || activeTrip.title || "Japon";
+    const destination = activeTrip.destination || activeTrip.title || "Destination";
     const titleEl = document.getElementById('trip-main-title');
     const datesEl = document.getElementById('trip-main-dates');
     const descEl = document.getElementById('trip-main-desc');
@@ -205,17 +231,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hotel = Math.round(totalB * 0.40);
     const rest = totalB - (flights + hotel);
 
-    const totalEl = document.getElementById('trip-budget-total');
-    const flightsEl = document.getElementById('budget-flights');
-    const hotelEl = document.getElementById('budget-hotel');
-    const restEl = document.getElementById('budget-rest');
+    if (document.getElementById('trip-budget-total')) document.getElementById('trip-budget-total').textContent = `${totalB} €`;
+    if (document.getElementById('budget-flights')) document.getElementById('budget-flights').textContent = `${flights} €`;
+    if (document.getElementById('budget-hotel')) document.getElementById('budget-hotel').textContent = `${hotel} €`;
+    if (document.getElementById('budget-rest')) document.getElementById('budget-rest').textContent = `${rest} €`;
 
-    if (totalEl) totalEl.textContent = `${totalB} €`;
-    if (flightsEl) flightsEl.textContent = `${flights} €`;
-    if (hotelEl) hotelEl.textContent = `${hotel} €`;
-    if (restEl) restEl.textContent = `${rest} €`;
-
-    // Google Flights Link
+    // Lien Google Flights
     const flightBtn = document.getElementById('btn-google-flights');
     if (flightBtn) {
         const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
@@ -223,8 +244,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
     }
 
-    // Initialisation de la carte
-    initGoogleMap(destination);
+    // Initialisation exacte de la carte selon la destination du voyage créé
+    initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
 
     // Rendu de l'itinéraire
     const daysContainer = document.getElementById('itinerary-days-container');
@@ -251,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const timeStr = step.time || '--:--';
 
                         stepsHTML += `
-                            <div class="step-item" data-location="${loc}" data-activity="${actName}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent;">
+                            <div class="step-item" data-location="${loc}" data-activity="${actName}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent; cursor:pointer;">
                                 <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${timeStr}</span>
                                 <div>
                                     <div style="color:#F4EFEA; font-weight:600;">${actName}</div>
@@ -263,15 +284,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 block.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem;">
+                    <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem; cursor:pointer;" title="Cliquez pour afficher l'itinéraire de la journée sur la carte">
                         <span style="background:#A63A2B; color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem;">${day.day}</span>
                         <span style="color:#F4EFEA; font-weight:500;">${day.dateText || ''}</span>
+                        <span style="margin-left:auto; color:#D4AF37; font-size:0.8rem;">📍 Voir la journée sur la carte</span>
                     </div>
                     <div>${stepsHTML}</div>
                 `;
 
+                // CLIC SUR LA JOURNÉE : Affiche toutes les étapes reliées entre elles
+                block.querySelector('.day-header').addEventListener('click', () => {
+                    displayDayOnMap(day.steps, destination);
+                });
+
+                // CLIC SUR UNEseule ACTIVITÉ
                 block.querySelectorAll('.step-item').forEach(itemEl => {
-                    itemEl.addEventListener('click', () => {
+                    itemEl.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Évite de déclencher le clic parent du jour
                         document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active-step'));
                         itemEl.classList.add('active-step');
 
@@ -333,7 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Gestion de la Modale
+    // Modale d'édition
     const modal = document.getElementById('editModal');
     const openBtn = document.getElementById('btn-open-edit');
     const closeBtn = document.getElementById('btn-close-edit');
@@ -350,9 +379,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (closeBtn && modal) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+        closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
     }
 
     if (editForm && modal) {
