@@ -50,6 +50,12 @@
             background: linear-gradient(to bottom, rgba(13, 11, 9, 0.8) 0%, rgba(13, 11, 9, 0) 100%);
         }
 
+        header nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
         header nav a {
             color: var(--text-main);
             text-decoration: none;
@@ -60,6 +66,22 @@
         }
 
         header nav a:hover { color: var(--color-gold); }
+
+        .user-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(20, 17, 14, 0.7);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            color: var(--color-gold);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            backdrop-filter: blur(4px);
+        }
 
         .trip-header-visual {
             height: 380px;
@@ -123,7 +145,6 @@
 
         .btn-flights {
             display: inline-block;
-            margin-top: 1rem;
             padding: 0.8rem 1.2rem;
             background: var(--color-torii);
             color: white;
@@ -145,7 +166,13 @@
         <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
             <img src="image/logo kaido V4.png" alt="Kaido Logo" style="height: 50px; width: auto; object-fit: contain;">
         </a>
-        <nav><a href="index.html">← Retour à mes Voyages</a></nav>
+        <nav>
+            <a href="index.html">← Retour à mes Voyages</a>
+            <div id="user-display" class="user-btn">
+                <span>👤</span>
+                <span id="user-name">Florian</span>
+            </div>
+        </nav>
     </header>
 
     <section class="trip-header-visual" id="trip-cover">
@@ -187,7 +214,7 @@
         </main>
     </div>
 
-    <!-- API Google Maps & Voyage Script -->
+    <!-- API Google Maps avec la librairie Places -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places"></script>
     <script src="js/voyage.js"></script>
 </body>
