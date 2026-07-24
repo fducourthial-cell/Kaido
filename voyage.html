@@ -35,46 +35,58 @@
             margin: 0; padding: 0; line-height: 1.5;
         }
 
-        /* HEADER SUPERPOSÉ SUR L'IMAGE */
+        /* HEADER UNIFORME & TRANSPARENT SUR LA PHOTO */
         header {
             position: absolute;
             top: 0; left: 0; right: 0;
             z-index: 20;
-            padding: 1.5rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to bottom, rgba(13, 11, 9, 0.85) 0%, rgba(13, 11, 9, 0) 100%);
+            background: transparent; /* Transparence totale sans fond noir */
+            border-bottom: none;
         }
 
-        header nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        header nav a {
-            color: var(--text-main);
+        /* LIEN EN ROUGE À GAUCHE */
+        .header-link-red {
+            color: var(--color-torii);
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: opacity 0.2s;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+        }
+        .header-link-red:hover {
+            opacity: 0.85;
+            color: #c94332;
         }
 
-        header nav a:hover { color: var(--color-gold); }
+        /* LOGO CENTRÉ À 100PX */
+        .header-logo-center {
+            height: 100px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+        }
 
-        /* BANNIÈRE DE COUVERTURE IMMERSIVE */
+        /* BANNIÈRE COUVERTURE NETTE ET OPTIMISÉE */
         .trip-header-visual {
-            height: 380px;
+            height: 360px;
             background-size: cover;
             background-position: center;
             position: relative;
             display: flex;
             align-items: flex-end;
-            padding: 3rem 2rem 2.5rem 2rem;
-            box-shadow: inset 0 -120px 90px rgba(13, 11, 9, 0.95);
+            padding: 2.5rem 2rem;
+            /* Ombre légère uniquement sur le bas pour la lisibilité du titre */
+            box-shadow: inset 0 -90px 60px rgba(13, 11, 9, 0.85);
             background-color: #1a1714;
+            /* Rendu d'image optimisé pour éviter l'effet flou */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
         .trip-header-title { position: relative; z-index: 2; }
@@ -84,7 +96,7 @@
             font-size: 2.8rem;
             margin: 0 0 0.4rem 0;
             color: #ffffff;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
         }
 
         .trip-header-title p {
@@ -92,7 +104,7 @@
             color: var(--color-gold);
             font-weight: 600;
             font-size: 1.05rem;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
         }
 
         .container {
@@ -251,14 +263,27 @@
 </head>
 <body>
 
-    <!-- HEADER FLOTTANT SUR L'IMAGE -->
+    <!-- HEADER UNIFORME -->
     <header>
-        <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="image/logo kaido V4.png" alt="Kaido Logo" style="height: 130px; width: auto; object-fit: contain;">
-        </a>
+        <!-- 1. GAUCHE : Lien en rouge -->
+        <div>
+            <a href="index.html" class="header-link-red">← Mes Voyages</a>
+        </div>
+
+        <!-- 2. CENTRE : Logo KAIDO de 100px -->
+        <div>
+            <a href="index.html" style="display: flex; align-items: center; justify-content: center;">
+                <img src="image/logo kaido V4.png" alt="Kaido Logo" class="header-logo-center">
+            </a>
+        </div>
+
+        <!-- 3. DROITE : Bouton utilisateur (injecté dynamiquement par auth.js) -->
+        <nav id="nav-right">
+            <!-- auth.js y place le bouton de connexion/profil -->
+        </nav>
     </header>
 
-    <!-- GRANDE COUVERTURE IMMERSIVE (AVEC HEADER AU-DESSUS) -->
+    <!-- BANNIÈRE COUVERTURE -->
     <section class="trip-header-visual" id="trip-cover">
         <div class="trip-header-title">
             <h2 id="trip-main-title">Chargement...</h2>
