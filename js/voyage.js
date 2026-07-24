@@ -2,12 +2,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     let allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
     let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
 
+    const titleEl = document.getElementById('trip-title');
+    const datesEl = document.getElementById('trip-dates');
+    const descEl = document.getElementById('trip-main-desc');
+    const coverEl = document.getElementById('trip-cover');
+    const budgetValueEl = document.getElementById('budget-value');
+    const flightBtn = document.getElementById('btn-google-flights');
+    const daysContainer = document.getElementById('itinerary-days-container');
+    const mapEl = document.getElementById('map');
+    const previewEl = document.getElementById('activity-preview');
+    const checklistList = document.getElementById('checklist-list');
+
     if (!activeTrip) {
-        document.getElementById('trip-title').textContent = "Aucun voyage sélectionné";
+        if (titleEl) titleEl.textContent = "Aucun voyage sélectionné";
         return;
     }
 
-    // 1. Sauvegarde unifiée LocalStorage + Supabase Cloud
+    const destination = activeTrip.destination || activeTrip.title || "Destination";
+
+    // -------------------------------------------------------------
+    // 1. SAUVEGARDE SYNCHRONISÉE (LOCAL & CLOUD SUPABASE)
+    // -------------------------------------------------------------
     async function saveTrip() {
         const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
         if (idx !== -1) allTrips[idx] = activeTrip;
@@ -30,74 +45,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    const destination = activeTrip.destination || activeTrip.title || "Destination";
-
-    // 2. Mise à jour de l'en-tête (Titre, Dates, Couverture)
-    const titleEl = document.getElementById('trip-title');
-    const datesEl = document.getElementById('trip-dates');
-    const descEl = document.getElementById('trip-main-desc');
-    const coverEl = document.getElementById('trip-cover');
-
+    // -------------------------------------------------------------
+    // 2. HEADER & MÉTADONNÉES
+    // -------------------------------------------------------------
     if (titleEl) titleEl.textContent = destination;
     if (datesEl) datesEl.textContent = `📅 ${activeTrip.dates || ''}`;
     if (descEl) descEl.textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
+    if (budgetValueEl) budgetValueEl.textContent = `${parseFloat(activeTrip.budget) || 0} €`;
 
     if (coverEl && activeTrip.image) {
         coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%), url('${activeTrip.image}')`;
     }
 
-    // 3. Budget
-    const budgetValueEl = document.getElementById('budget-value');
-    if (budgetValueEl) {
-        let totalB = parseFloat(activeTrip.budget) || 0;
-        budgetValueEl.textContent = `${totalB} €`;
-    }
-
-    // 4. Lien Google Flights
-    const flightBtn = document.getElementById('btn-google-flights');
     if (flightBtn) {
         const dep = encodeURIComponent((activeTrip.departure || 'Paris').trim());
         const dest = encodeURIComponent(destination.split(',')[0].trim());
         flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
     }
 
-    // 5. Initialisation Google Maps
+    // -------------------------------------------------------------
+    // 3. INITIALISATION CARTE & PLACES SERVICE
+    // -------------------------------------------------------------
+    let map = null;
+    let mainMarker = null;
+    let activityMarker = null;
+    let placesService = null;
+
     const lat = activeTrip.destinationLat ? parseFloat(activeTrip.destinationLat) : null;
     const lng = activeTrip.destinationLng ? parseFloat(activeTrip.destinationLng) : null;
 
-    if (typeof google !== 'undefined' && google.maps && !isNaN(lat) && !isNaN(lng)) {
-        const mapEl = document.getElementById('map');
-        if (mapEl) {
-            const map = new google.maps.Map(mapEl, {
-                center: { lat, lng },
-                zoom: 11,
-                styles: [
-                    { elementType: "geometry", stylers: [{ color: "#14110E" }] },
-                    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-                    { elementType: "labels.text.fill", stylers: [{ color: "#8E847A" }] },
-                    { elementType: "labels.text.stroke", stylers: [{ color: "#0D0B09" }] },
-                    { featureType: "water", elementType: "geometry", stylers: [{ color: "#0D0B09" }] }
-                ]
-            });
+    if (mapEl && typeof google !== 'undefined' && google.maps) {
+        const defaultCenter = (!isNaN(lat) && !isNaN(lng)) ? { lat, lng } : { lat: 48.8566, lng: 2.3522 };
 
-            new google.maps.Marker({
-                position: { lat, lng },
-                map: map,
-                title: destination
-            });
-        }
+        map = new google.maps.Map(mapEl, {
+            center: defaultCenter,
+            zoom: 11,
+            styles: [
+                { elementType: "geometry", stylers: [{ color: "#14110E" }] },
+                { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+                { elementType: "labels.text.fill", stylers: [{ color: "#8E847A" }] },
+                { elementType: "labels.text.stroke", stylers: [{ color: "#0D0B09" }] },
+                { featureType: "water", elementType: "geometry", stylers: [{ color: "#0D0B09" }] }
+            ]
+        });
+
+        mainMarker = new google.maps.Marker({
+            position: defaultCenter,
+            map: map,
+            title: destination,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: "#D4AF37",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#FFFFFF"
+            }
+        });
+
+        placesService = new google.maps.places.PlacesService(map);
     }
 
-    // 6. Rendu des jours et étapes d'itinéraire avec visionneuse interactive
-    const daysContainer = document.getElementById('itinerary-days-container');
-    const previewEl = document.getElementById('activity-preview');
-
+    // Photo de couverture par défaut dans la visionneuse
     if (previewEl && activeTrip.image) {
-        previewEl.innerHTML = `<img src="${activeTrip.image}" style="width:100%; height:100%; object-fit:cover;">`;
+        previewEl.innerHTML = `<img src="${activeTrip.image}" style="width:100%; height:100%; object-fit:cover; transition: opacity 0.3s ease;">`;
     }
 
+    // -------------------------------------------------------------
+    // 4. RENDU ITINÉRAIRE + INTERACTIONS CLIQUABLES (PHOTO + MAP)
+    // -------------------------------------------------------------
     if (daysContainer && activeTrip.itinerary) {
         daysContainer.innerHTML = '';
+
         activeTrip.itinerary.forEach((dayObj) => {
             const dayCard = document.createElement('div');
             dayCard.className = 'day-card';
@@ -105,24 +124,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let stepsHTML = '';
             if (dayObj.steps && dayObj.steps.length > 0) {
-                stepsHTML = dayObj.steps.map(step => {
-                    let stepTitle = typeof step === 'string' ? step : (step.title || step.time || step.name || 'Étape');
+                stepsHTML = dayObj.steps.map((step) => {
+                    let stepTitle = typeof step === 'string' ? step : (step.title || step.name || 'Étape');
                     let stepDesc = typeof step === 'object' ? (step.desc || step.description || '') : '';
-                    let stepTime = (step.time && step.title) ? `<span style="color: var(--color-gold); font-weight: bold; margin-right: 8px;">${step.time}</span>` : '';
-                    let stepImg = (typeof step === 'object' && step.image) ? step.image : (activeTrip.image || '');
+                    let stepTime = (typeof step === 'object' && step.time) ? `<span style="color: var(--color-gold); font-weight: bold; margin-right: 8px;">${step.time}</span>` : '';
+                    let stepImg = (typeof step === 'object' && step.image) ? step.image : '';
 
                     return `
-                        <div class="step-item" data-img="${stepImg}" style="margin-top: 1rem; padding-left: 1rem; border-left: 2px solid var(--color-gold); cursor: pointer;">
-                            <h4 style="color: var(--text-main); font-size: 1rem; font-weight: 600;">${stepTime}${stepTitle}</h4>
-                            ${stepDesc ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">${stepDesc}</p>` : ''}
+                        <div class="step-item" data-title="${stepTitle}" data-img="${stepImg}" style="margin-top: 1rem; padding: 0.8rem 1rem; border-left: 3px solid var(--color-gold); background: rgba(255,255,255,0.02); border-radius: 0 4px 4px 0; cursor: pointer; transition: all 0.2s ease;">
+                            <h4 style="color: var(--text-main); font-size: 0.98rem; font-weight: 600;">${stepTime}${stepTitle}</h4>
+                            ${stepDesc ? `<p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem;">${stepDesc}</p>` : ''}
                         </div>
                     `;
                 }).join('');
             }
 
             dayCard.innerHTML = `
-                <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); font-size: 1.25rem; font-weight: 400; margin-bottom: 0.5rem;">
-                    ${dayObj.day} - <span style="font-size: 0.9rem; color: var(--text-muted);">${dayObj.dateText || ''}</span>
+                <h3 style="font-family: var(--font-serif); color: var(--color-gold); font-size: 1.25rem; font-weight: 400; margin-bottom: 0.5rem;">
+                    ${dayObj.day} - <span style="font-size: 0.9rem; color: var(--text-muted); font-family: var(--font-kaido);">${dayObj.dateText || ''}</span>
                 </h3>
                 ${stepsHTML}
             `;
@@ -130,20 +149,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             daysContainer.appendChild(dayCard);
         });
 
-        // Interactive image preview on activity click
-        const steps = daysContainer.querySelectorAll('.step-item');
-        steps.forEach(s => {
-            s.addEventListener('click', () => {
-                const img = s.getAttribute('data-img');
-                if (previewEl && img) {
-                    previewEl.innerHTML = `<img src="${img}" style="width:100%; height:100%; object-fit:cover;">`;
+        // ÉCOUTEURS DE CLIC ET SURVOL SUR CHAQUE ACTIVITÉ
+        const stepItems = daysContainer.querySelectorAll('.step-item');
+        stepItems.forEach(item => {
+            // Effet survol
+            item.addEventListener('mouseenter', () => {
+                item.style.background = 'rgba(212, 175, 55, 0.08)';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.background = 'rgba(255,255,255,0.02)';
+            });
+
+            // Clic sur l'activité : recherche lieu, update image + centrage map
+            item.addEventListener('click', () => {
+                const title = item.getAttribute('data-title');
+                const customImg = item.getAttribute('data-img');
+                const query = `${title}, ${destination}`;
+
+                // 1. Mise à jour visionneuse d'image
+                if (customImg && previewEl) {
+                    previewEl.innerHTML = `<img src="${customImg}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+
+                // 2. Recherche du lieu exact via Places API pour cibler la carte et récupérer la photo
+                if (placesService && map) {
+                    placesService.findPlaceFromQuery({
+                        query: query,
+                        fields: ['name', 'geometry', 'photos']
+                    }, (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+                            const place = results[0];
+                            const location = place.geometry.location;
+
+                            // Recentrer la carte avec zoom sur l'activité
+                            map.panTo(location);
+                            map.setZoom(14);
+
+                            // Marqueur d'activité spécifique (Rouge Torii)
+                            if (activityMarker) activityMarker.setMap(null);
+                            activityMarker = new google.maps.Marker({
+                                position: location,
+                                map: map,
+                                title: place.name || title,
+                                animation: google.maps.Animation.DROP
+                            });
+
+                            // Si pas d'image custom fournie, utiliser la photo Google Place
+                            if (!customImg && place.photos && place.photos.length > 0 && previewEl) {
+                                const photoUrl = place.photos[0].getUrl({ maxWidth: 800, maxHeight: 500 });
+                                previewEl.innerHTML = `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+                            }
+                        }
+                    });
                 }
             });
         });
     }
 
-    // 7. Rendu et gestion de la Checklist Bagages
-    const checklistList = document.getElementById('checklist-list');
+    // -------------------------------------------------------------
+    // 5. CHECKLIST & BAGAGES
+    // -------------------------------------------------------------
     function renderChecklist() {
         if (!checklistList || !activeTrip.checklist) return;
         checklistList.innerHTML = '';
@@ -177,7 +242,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderChecklist();
 
-    // Formulaire d'ajout de tâche à la checklist
     const addTaskForm = document.getElementById('add-task-form');
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', async (e) => {
@@ -190,22 +254,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderChecklist();
                 input.value = '';
             }
-        });
-    }
-
-    // Formulaire d'édition du voyage
-    const editForm = document.getElementById('edit-trip-form');
-    if (editForm) {
-        editForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            activeTrip.dateStart = document.getElementById('edit-date-start').value;
-            activeTrip.dateEnd = document.getElementById('edit-date-end').value;
-            activeTrip.dates = `${activeTrip.dateStart} au ${activeTrip.dateEnd}`;
-            activeTrip.budget = document.getElementById('edit-budget').value;
-            activeTrip.desc = document.getElementById('edit-desc').value;
-
-            await saveTrip();
-            location.reload();
         });
     }
 });
