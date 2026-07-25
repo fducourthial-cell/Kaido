@@ -372,61 +372,29 @@
     </div>
 
     <!-- LOGIQUE DE RENDU -->
+    <!-- LOGIQUE DE RENDU CORRIGÉE ET BLINDÉE -->
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const grid = document.getElementById('trips-grid');
         
         if (grid) {
-            const renderTrips = async () => {
+            const createZone = grid.querySelector('.create-trip-zone');
+
+            // Fonction pour dessiner les cartes dans la grille
+            const drawCards = (trips) => {
+                // Supprimer les cartes existantes pour éviter les doublons
                 const dynamicCards = grid.querySelectorAll('.dynamic-trip');
                 dynamicCards.forEach(card => card.remove());
 
-                let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-
-                // Si Supabase est connecté, on tente de récupérer les voyages Cloud
-                if (typeof supabase !== 'undefined') {
-                    try {
-                        const { data: cloudTrips, error } = await supabase
-                            .from('trips')
-                            .select('*')
-                            .order('created_at', { ascending: false });
-
-                        if (!error && cloudTrips && cloudTrips.length > 0) {
-                            // Transformation du format Supabase vers le format local
-                            customTrips = cloudTrips.map(ct => ({
-                                id: ct.id,
-                                title: ct.title,
-                                destination: ct.destination,
-                                departure: ct.departure,
-                                dateStart: ct.date_start,
-                                dateEnd: ct.date_end,
-                                dates: `${ct.date_start || ''} au ${ct.date_end || ''}`,
-                                budget: ct.budget,
-                                desc: ct.desc_text,
-                                image: ct.image,
-                                destinationLat: ct.destination_lat,
-                                destinationLng: ct.destination_lng,
-                                itinerary: ct.itinerary,
-                                checklist: ct.checklist
-                            }));
-                        }
-                    } catch (e) {
-                        console.warn("Utilisation de la sauvegarde locale.");
-                    }
-                }
-
-                const createZone = grid.querySelector('.create-trip-zone');
-
-                customTrips.forEach(trip => {
+                trips.forEach(trip => {
                     const card = document.createElement('article');
                     card.className = 'trip-card dynamic-trip';
                     
                     const cityName = trip.destination || trip.title || 'Destination';
                     const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
-                    // --- CALCUL DU BUDGET ESTIMATIF POUR LA CARTE ---
+                    // Budget estimatif
                     let displayBudget = parseFloat(trip.budget) || 0;
-
                     if (displayBudget <= 0) {
                         let daysCount = 3;
                         if (trip.itinerary && trip.itinerary.length > 0) {
@@ -437,7 +405,6 @@
                             const diff = end.getTime() - start.getTime();
                             daysCount = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)) + 1);
                         }
-                        
                         displayBudget = (daysCount * 150) + 200;
                     }
 
@@ -460,6 +427,7 @@
                         </div>
                     `;
 
+                    // Clic pour sélectionner le voyage actif
                     const viewLink = card.querySelector('.btn-view');
                     if (viewLink) {
                         viewLink.addEventListener('click', () => {
@@ -475,6 +443,7 @@
                     }
                 });
 
+                // Écouteurs pour la suppression
                 const deleteButtons = grid.querySelectorAll('.btn-delete');
                 deleteButtons.forEach(button => {
                     button.addEventListener('click', async (e) => {
@@ -488,17 +457,67 @@
                 });
             };
 
+            // Chargement principal
+            const renderTrips = async () => {
+                // 1. AFFICHAGE INSTANTANÉ DU CACHE LOCAL (Rien ne disparaît !)
+                let localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                drawCards(localTrips);
+
+                // 2. SYNCHRONISATION EN ARRIÈRE-PLAN AVEC SUPABASE
+                if (typeof supabase !== 'undefined') {
+                    try {
+                        const { data: cloudTrips, error } = await supabase
+                            .from('trips')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        if (!error && cloudTrips) {
+                            const formattedCloud = cloudTrips.map(ct => ({
+                                id: ct.id,
+                                title: ct.title,
+                                destination: ct.destination,
+                                departure: ct.departure,
+                                dateStart: ct.date_start,
+                                dateEnd: ct.date_end,
+                                dates: `${ct.date_start || ''} au ${ct.date_end || ''}`,
+                                budget: ct.budget,
+                                desc: ct.desc_text,
+                                image: ct.image,
+                                destinationLat: ct.destination_lat,
+                                destinationLng: ct.destination_lng,
+                                itinerary: ct.itinerary,
+                                checklist: ct.checklist
+                            }));
+
+                            // Fusion sans perte : on garde les locaux + cloud sans doublons d'ID
+                            const mergedMap = new Map();
+                            localTrips.forEach(t => mergedMap.set(String(t.id), t));
+                            formattedCloud.forEach(t => mergedMap.set(String(t.id), t));
+
+                            const mergedTrips = Array.from(mergedMap.values());
+                            
+                            // Sauvegarde du résultat fusionné
+                            localStorage.setItem('kaido_trips', JSON.stringify(mergedTrips));
+                            
+                            // Redessine avec les cartes à jour
+                            drawCards(mergedTrips);
+                        }
+                    } catch (e) {
+                        console.warn("Maintien de l'affichage local (mode hors-ligne actif).");
+                    }
+                }
+            };
+
+            // Fonction de suppression
             const deleteTrip = async (id) => {
-                // Supprimer sur Supabase si ID UUID
                 if (typeof supabase !== 'undefined') {
                     try {
                         await supabase.from('trips').delete().eq('id', id);
                     } catch (err) {
-                        console.warn("Suppression locale uniquement.");
+                        console.warn("Suppression Cloud échouée, suppression locale effectuée.");
                     }
                 }
 
-                // Supprimer en local
                 let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
                 customTrips = customTrips.filter(trip => String(trip.id) !== String(id));
                 localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
