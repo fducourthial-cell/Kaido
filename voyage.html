@@ -137,7 +137,7 @@
         }
 
         /* --- BARRE DE NAVIGATION (TABS / BOTTOM NAV) --- */
-       /* --- BARRE DE NAVIGATION FIXE ET RESPONSIVE --- */
+      /* --- BARRE DE NAVIGATION FIXE ET RESPONSIVE --- */
         .trip-nav-tabs {
             display: flex;
             justify-content: space-between;
@@ -148,14 +148,18 @@
             bottom: 0;
             left: 0;
             right: 0;
+            width: 100%;
+            box-sizing: border-box; /* Garantit que tout rentre dans les 100% */
             z-index: 1000;
-            padding: 0.4rem 0.2rem;
+            padding: 0.3rem 0;
             box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
         }
 
         .tab-btn {
-            flex: 1; /* Chaque bouton prend exactement 25% de la largeur */
+            flex: 1 1 0; /* Force les 4 boutons à faire exactement 25% chacun sans débordement */
+            min-width: 0; /* Empêche les boutons de dépasser de leur conteneur */
+            box-sizing: border-box;
             background: none;
             border: none;
             color: var(--text-muted);
@@ -163,8 +167,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            font-size: 0.68rem; /* Texte ajusté pour smartphone */
+            gap: 1px;
+            font-size: 0.65rem; /* Ajusté pour petits écrans */
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -173,7 +177,13 @@
         }
 
         .tab-btn .tab-icon {
-            font-size: 1.1rem; /* Icône proportionnée */
+            font-size: 1rem; /* Taille icône adaptée */
+        }
+
+        .tab-btn span:not(.tab-icon) {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         .tab-btn.active, .tab-btn:hover {
@@ -187,6 +197,7 @@
                 bottom: auto;
                 left: auto;
                 right: auto;
+                width: auto;
                 background: rgba(20, 17, 14, 0.6);
                 border-top: none;
                 border: 1px solid var(--border-color);
@@ -199,10 +210,11 @@
             }
 
             .tab-btn {
-                flex: initial; /* Taille naturelle au contenu sur PC */
+                flex: initial;
+                min-width: auto;
                 flex-direction: row;
                 gap: 8px;
-                font-size: 0.95rem; /* Texte plus grand sur PC */
+                font-size: 0.95rem;
                 padding: 0.6rem 1.2rem;
                 background: rgba(255, 255, 255, 0.03);
                 border: 1px solid rgba(212, 175, 55, 0.1);
