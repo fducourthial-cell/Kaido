@@ -592,13 +592,16 @@
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Dépenses sur place</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Suivi du budget consommé</p>
 
-                        <div style="margin-bottom: 1rem;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
-                                <span>Dépensé: <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></span>
-                                <span style="color: var(--text-muted);">Budget: <span id="expenses-target-budget">0 €</span></span>
-                            </div>
-                            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
+                       <div style="margin-bottom: 1rem;">
+                            <!-- BARRE DE PROGRESSION EN HAUT -->
+                            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; margin-bottom: 0.6rem;">
                                 <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
+                            </div>
+                            
+                            <!-- MONTANTS EN DESSOUS (EN COLONNE / FLEX COMPACT) -->
+                            <div style="display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem;">
+                                <div>Dépensé : <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem;">Budget max : <span id="expenses-target-budget">0 €</span></div>
                             </div>
                         </div>
 
@@ -606,10 +609,10 @@
                             <span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense enregistrée.</span>
                         </div>
 
-                        <form id="add-expense-form" style="display: flex; gap: 6px;">
-                            <input type="text" id="expense-title-input" placeholder="Ex: Restaurant, Essence..." style="flex: 2; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
-                            <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
-                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">+</button>
+                        <form id="add-expense-form" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <input type="text" id="expense-title-input" placeholder="Ex: Restaurant..." style="flex: 2; min-width: 120px; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.5rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; min-width: 70px; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.5rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 0.9rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">+</button>
                         </form>
                     </div>
                 </div>
