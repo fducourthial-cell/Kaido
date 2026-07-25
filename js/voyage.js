@@ -132,9 +132,10 @@ async function displayDayOnMap(steps, mainDestination) {
     }
 }
 
-// Sélectionner une seule activité au clic individuel (avec aperçu image)
+// Sélectionner une seule activité au clic individuel (avec aperçu image & géocodage robuste)
 function selectActivityOnMap(step, addressQuery, mainDestination) {
     const actName = step ? (step.activity || step.title || 'Activité') : 'Activité';
+    const locationName = step ? (step.location || addressQuery || mainDestination) : (addressQuery || mainDestination);
     
     const previewBox = document.getElementById('activity-preview');
     const previewImg = document.getElementById('activity-img');
@@ -157,25 +158,42 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
         });
         activeMarkers.push(marker);
         map.panTo(location);
-        map.setZoom(15);
+        map.setZoom(13);
     };
 
-    // Placement du marqueur via lat/lng ou Geocoder de secours
-    if (step && step.lat && step.lng && map) {
+    // 1. Placement du marqueur via lat/lng si présents
+    if (step && step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng) && map) {
         placeMarkerAt({ lat: parseFloat(step.lat), lng: parseFloat(step.lng) });
-    } else if (addressQuery && map) {
+    } 
+    // 2. Géocodage ciblé (priorité au lieu exact plutôt qu'au titre poétique)
+    else if (map) {
         const geocoder = new google.maps.Geocoder();
-        const fullQuery = addressQuery.includes(mainDestination) ? addressQuery : `${addressQuery}, ${mainDestination}`;
-        geocoder.geocode({ address: fullQuery }, (results, status) => {
+        
+        let cleanQuery = locationName;
+        if (!cleanQuery.toLowerCase().includes(mainDestination.toLowerCase())) {
+            cleanQuery = `${locationName}, ${mainDestination}`;
+        }
+
+        geocoder.geocode({ address: cleanQuery }, (results, status) => {
             if (status === 'OK' && results[0]) {
                 placeMarkerAt(results[0].geometry.location);
+            } else {
+                // Recherche de secours si la première tentative échoue
+                const fallbackQuery = `${actName}, ${mainDestination}`;
+                geocoder.geocode({ address: fallbackQuery }, (resFallback, statusFallback) => {
+                    if (statusFallback === 'OK' && resFallback[0]) {
+                        placeMarkerAt(resFallback[0].geometry.location);
+                    } else {
+                        console.warn("Impossible de géolocaliser :", cleanQuery);
+                    }
+                });
             }
         });
     }
 
     // Recherche de la photo d'illustration via Google Places
     if (placesService) {
-        const query = `${actName}, ${addressQuery || mainDestination}`;
+        const query = `${actName}, ${locationName}`;
         placesService.findPlaceFromQuery(
             { query: query, fields: ['photos'] },
             (results, status) => {
