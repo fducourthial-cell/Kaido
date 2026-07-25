@@ -102,24 +102,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             color: #8E847A; font-size: 1.4rem;
             cursor: pointer;
         }
-        .btn-header-auth {
-            background: rgba(212, 175, 55, 0.08);
-            border: 1px solid rgba(212, 175, 55, 0.25);
-            color: #D4AF37;
-            padding: 0.45rem 0.9rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        .btn-header-auth:hover {
-            background: #D4AF37;
-            color: #0D0B09;
-        }
     `;
     document.head.appendChild(style);
 
@@ -220,10 +202,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Injecter et mettre à jour le bouton dans le Header
+    // 5. Mettre à jour notre bouton existant dans le Header (sans en créer un en double)
     const updateHeaderAuth = async () => {
-        let headerRight = document.querySelector('.header-right') || document.querySelector('header nav');
-        if (!headerRight) return;
+        const authBtn = document.getElementById('user-profile-link');
+        const nameSpan = document.getElementById('user-display-name');
+        if (!authBtn || !nameSpan) return;
 
         const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
         let user = null;
@@ -237,26 +220,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        let authBtn = document.getElementById('kaidoHeaderAuthBtn');
-        if (!authBtn) {
-            authBtn = document.createElement('button');
-            authBtn.id = 'kaidoHeaderAuthBtn';
-            authBtn.className = 'btn-header-auth';
-            headerRight.appendChild(authBtn);
-        }
-
         if (user) {
-            authBtn.textContent = `👤 ${user.email.split('@')[0]}`;
-            authBtn.title = "Cliquer pour vous déconnecter";
-            authBtn.onclick = async () => {
+            const userName = user.user_metadata?.full_name || user.email.split('@')[0].toUpperCase();
+            nameSpan.textContent = userName;
+            authBtn.title = "Connecté - Cliquer pour vous déconnecter";
+            authBtn.onclick = async (e) => {
+                e.preventDefault();
                 if (confirm("Voulez-vous vous déconnecter de Kaido ?")) {
                     if (client) await client.auth.signOut();
                     location.reload();
                 }
             };
         } else {
-            authBtn.textContent = "🔑 Connexion";
-            authBtn.onclick = () => {
+            nameSpan.textContent = "Connexion";
+            authBtn.title = "Se connecter";
+            authBtn.onclick = (e) => {
+                e.preventDefault();
                 toggleMode(false);
                 modal.style.display = 'flex';
             };
