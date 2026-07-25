@@ -282,7 +282,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             // Récupère le nom complet depuis Google ou les métadonnées, ou l'email, et isole uniquement le PRÉNOM
             const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
-            const firstName = fullName.trim().split(' ')[0].toUpperCase();
+            const rawFirstName = fullName.trim().split(' ')[0];
+            // Met uniquement la 1ère lettre en majuscule et le reste en minuscules
+            const firstName = rawFirstName.charAt(0).toUpperCase() + rawFirstName.slice(1).toLowerCase();
 
             nameSpan.textContent = firstName;
             authBtn.title = "Connecté - Cliquer pour vous déconnecter";
