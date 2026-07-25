@@ -1,14 +1,15 @@
 let map;
-let activeMarkers = []; // Tableau pour stocker tous les marqueurs de la journée
-let routePolyline = null; // Ligne reliant les activités
+let activeMarkers = []; // Tableau pour stocker tous les marqueurs affichés
+let routePolyline = null; // Ligne reliant les activités du jour
 let placesService = null;
 
-// Initialisation de la carte sur la destination exacte du voyage
+// Initialisation de la carte basée en priorité sur les coordonnées GPS enregistrées
 function initGoogleMap(destinationName, lat, lng) {
     const mapContainer = document.getElementById('map');
     if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
 
     let initialPos = { lat: 48.8566, lng: 2.3522 }; // Fallback Paris
+
     if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
         initialPos = { lat: parseFloat(lat), lng: parseFloat(lng) };
     }
@@ -30,7 +31,7 @@ function initGoogleMap(destinationName, lat, lng) {
 
     placesService = new google.maps.places.PlacesService(map);
 
-    // Si aucune coordonnée GPS n'est fournie, géocoder le nom de la destination
+    // Si aucune coordonnée GPS n'était stockée, fallback géocodage unique
     if (!lat || !lng) {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address: destinationName }, (results, status) => {
@@ -41,7 +42,7 @@ function initGoogleMap(destinationName, lat, lng) {
     }
 }
 
-// Nettoyer la carte (marqueurs + ligne)
+// Nettoyer les marqueurs et lignes de la carte
 function clearMapOverlays() {
     activeMarkers.forEach(m => m.setMap(null));
     activeMarkers = [];
@@ -51,67 +52,60 @@ function clearMapOverlays() {
     }
 }
 
-// Afficher toutes les étapes d'une journée et les relier entre elles
-async function displayDayOnMap(steps, mainDestination) {
+// OPTION A : Affichage instantané et gratuit de la journée grâce aux coordonnées déjà en mémoire
+function displayDayOnMap(steps, mainDestination) {
     clearMapOverlays();
     if (!steps || steps.length === 0 || !map) return;
 
-    const geocoder = new google.maps.Geocoder();
     const bounds = new google.maps.LatLngBounds();
     const pathCoordinates = [];
 
-    for (let i = 0; i < steps.length; i++) {
-        const step = steps[i];
-        const locQuery = step.location ? `${step.location}, ${mainDestination}` : `${step.activity}, ${mainDestination}`;
-        
-        await new Promise((resolve) => {
-            geocoder.geocode({ address: locQuery }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    const loc = results[0].geometry.location;
-                    bounds.extend(loc);
-                    pathCoordinates.push(loc);
+    steps.forEach((step, index) => {
+        // Verification si lat/lng ont été enregistrés à la création
+        if (step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng)) {
+            const loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
+            
+            bounds.extend(loc);
+            pathCoordinates.push(loc);
 
-                    // Création du marqueur numéroté pour chaque étape
-                    const marker = new google.maps.Marker({
-                        position: loc,
-                        map: map,
-                        title: `${i + 1}. ${step.activity || step.title}`,
-                        label: {
-                            text: `${i + 1}`,
-                            color: "#0D0B09",
-                            fontWeight: "bold",
-                            fontSize: "12px"
-                        },
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 12,
-                            fillColor: "#D4AF37",
-                            fillOpacity: 1,
-                            strokeWeight: 2,
-                            strokeColor: "#FFFFFF"
-                        }
-                    });
-
-                    activeMarkers.push(marker);
+            // Marqueur numéroté (1, 2, 3...)
+            const marker = new google.maps.Marker({
+                position: loc,
+                map: map,
+                title: `${index + 1}. ${step.activity || step.title}`,
+                label: {
+                    text: `${index + 1}`,
+                    color: "#0D0B09",
+                    fontWeight: "bold",
+                    fontSize: "12px"
+                },
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 13,
+                    fillColor: "#D4AF37",
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: "#FFFFFF"
                 }
-                resolve();
             });
-        });
-    }
 
-    // Tracer la ligne entre les étapes s'il y a au moins 2 points
+            activeMarkers.push(marker);
+        }
+    });
+
+    // Tracé de la ligne reliant les activités
     if (pathCoordinates.length > 1) {
         routePolyline = new google.maps.Polyline({
             path: pathCoordinates,
             geodesic: true,
-            strokeColor: "#A63A2B", // Rouge Torii Kaido
+            strokeColor: "#A63A2B", // Rouge Torii
             strokeOpacity: 0.9,
             strokeWeight: 4
         });
         routePolyline.setMap(map);
     }
 
-    // Ajuster le zoom pour englober tous les points de la journée
+    // Ajustement automatique du zoom et du centrage pour englober tout le trajet du jour
     if (!bounds.isEmpty()) {
         map.fitBounds(bounds);
         if (pathCoordinates.length === 1) {
@@ -120,10 +114,10 @@ async function displayDayOnMap(steps, mainDestination) {
     }
 }
 
-// Afficher une seule activité spécifique lors d'un clic individuel
-function selectActivityOnMap(addressQuery, activityName) {
-    if (!addressQuery && !activityName) return;
-
+// Sélectionner une seule activité au clic individuel (avec aperçu image)
+function selectActivityOnMap(step, addressQuery, mainDestination) {
+    const actName = step.activity || step.title || 'Activité';
+    
     const previewBox = document.getElementById('activity-preview');
     const previewImg = document.getElementById('activity-img');
     const previewLoading = document.getElementById('activity-loading');
@@ -132,34 +126,35 @@ function selectActivityOnMap(addressQuery, activityName) {
     if (previewBox) previewBox.style.display = 'block';
     if (previewImg) previewImg.style.display = 'none';
     if (previewLoading) previewLoading.style.display = 'flex';
-    if (previewTitle) previewTitle.textContent = `📍 ${activityName}`;
+    if (previewTitle) previewTitle.textContent = `📍 ${actName}`;
 
+    // Si on a les coordonnées GPS
+    if (step.lat && step.lng && map) {
+        clearMapOverlays();
+        const loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
+        const marker = new google.maps.Marker({
+            position: loc,
+            map: map,
+            title: actName,
+            animation: google.maps.Animation.DROP
+        });
+        activeMarkers.push(marker);
+        map.panTo(loc);
+        map.setZoom(15);
+    }
+
+    // Recherche de la photo d'illustration via Google Places
     if (placesService) {
-        const query = `${activityName}, ${addressQuery}`;
+        const query = `${actName}, ${addressQuery || mainDestination}`;
         placesService.findPlaceFromQuery(
-            { query: query, fields: ['photos', 'name', 'geometry'] },
+            { query: query, fields: ['photos'] },
             (results, status) => {
                 if (previewLoading) previewLoading.style.display = 'none';
 
                 if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
                     const place = results[0];
-                    if (place.geometry && place.geometry.location && map) {
-                        clearMapOverlays();
-                        const marker = new google.maps.Marker({
-                            position: place.geometry.location,
-                            map: map,
-                            title: activityName,
-                            animation: google.maps.Animation.DROP
-                        });
-                        activeMarkers.push(marker);
-                        map.panTo(place.geometry.location);
-                        map.setZoom(15);
-                    }
-
-                    if (previewImg) {
-                        if (place.photos && place.photos.length > 0) {
-                            previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
-                        }
+                    if (previewImg && place.photos && place.photos.length > 0) {
+                        previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
                         previewImg.style.display = 'block';
                     }
                 }
@@ -244,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
     }
 
-    // Initialisation exacte de la carte selon la destination du voyage créé
+    // Initialisation exacte de la carte
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
 
     // Rendu de l'itinéraire
@@ -266,13 +261,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 let stepsHTML = '';
                 if (day.steps) {
-                    day.steps.forEach((step) => {
+                    day.steps.forEach((step, idx) => {
                         const loc = step.location || destination;
                         const actName = step.activity || step.title || step.name || 'Étape';
                         const timeStr = step.time || '--:--';
 
                         stepsHTML += `
-                            <div class="step-item" data-location="${loc}" data-activity="${actName}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent; cursor:pointer;">
+                            <div class="step-item" data-idx="${idx}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent; cursor:pointer;">
                                 <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${timeStr}</span>
                                 <div>
                                     <div style="color:#F4EFEA; font-weight:600;">${actName}</div>
@@ -292,21 +287,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div>${stepsHTML}</div>
                 `;
 
-                // CLIC SUR LA JOURNÉE : Affiche toutes les étapes reliées entre elles
+                // CLIC SUR LA JOURNÉE : Affichage instantané sur la carte
                 block.querySelector('.day-header').addEventListener('click', () => {
                     displayDayOnMap(day.steps, destination);
                 });
 
-                // CLIC SUR UNEseule ACTIVITÉ
-                block.querySelectorAll('.step-item').forEach(itemEl => {
+                // CLIC SUR UNE ACTIVITÉ
+                block.querySelectorAll('.step-item').forEach((itemEl) => {
                     itemEl.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Évite de déclencher le clic parent du jour
+                        e.stopPropagation();
                         document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active-step'));
                         itemEl.classList.add('active-step');
 
-                        const locQuery = itemEl.getAttribute('data-location');
-                        const actName = itemEl.getAttribute('data-activity');
-                        selectActivityOnMap(locQuery, actName);
+                        const stepIndex = parseInt(itemEl.getAttribute('data-idx'));
+                        const stepData = day.steps[stepIndex];
+                        selectActivityOnMap(stepData, stepData.location, destination);
                     });
                 });
 
