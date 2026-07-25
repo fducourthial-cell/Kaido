@@ -5,7 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes carnets de route - Kaido</title>
     <link rel="icon" type="image/png" href="image/logo kaido V4.png">
-    
+
+    <!-- CONFIGURATION PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0D0B09">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="image/logo kaido V4.png">
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((reg) => console.log('✅ Service Worker enregistré avec succès !', reg.scope))
+            .catch((err) => console.error('❌ Échec enregistrement Service Worker:', err));
+        });
+      }
+    </script>
+
     <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
