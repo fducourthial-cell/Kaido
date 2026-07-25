@@ -53,6 +53,11 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0; padding: 0; line-height: 1.5;
+            padding-bottom: 70px; /* Espace réservé pour la barre mobile en bas */
+        }
+
+        @media (min-width: 992px) {
+            body { padding-bottom: 0; }
         }
 
         /* HEADER UNIFORME & TRANSPARENT SUR LA PHOTO */
@@ -129,6 +134,78 @@
             max-width: 1550px;
             margin: 0 auto;
             padding: 0 1.5rem 4rem 1.5rem;
+        }
+
+        /* --- BARRE DE NAVIGATION (TABS / BOTTOM NAV) --- */
+        .trip-nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #14110E;
+            border-top: 1px solid var(--border-color);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0.5rem 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .tab-btn .tab-icon {
+            font-size: 1.3rem;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            color: var(--color-gold);
+        }
+
+        /* Adaptations pour Écran PC (Desktop Tabs) */
+        @media (min-width: 992px) {
+            .trip-nav-tabs {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                background: transparent;
+                border-top: none;
+                border-bottom: 1px solid var(--border-color);
+                justify-content: flex-start;
+                gap: 1.5rem;
+                margin-top: 1.5rem;
+                padding: 0 0 0.8rem 0;
+                box-shadow: none;
+            }
+
+            .tab-btn {
+                flex-direction: row;
+                font-size: 0.95rem;
+                padding: 0.6rem 1.2rem;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid transparent;
+            }
+
+            .tab-btn.active {
+                background: var(--bg-card);
+                border-color: var(--border-color);
+                color: var(--color-gold);
+            }
         }
 
         .edit-modal {
@@ -310,6 +387,27 @@
     </section>
 
     <main class="container">
+
+        <!-- 🔥 BARRE D'ONGLETS / BOTTOM NAVIGATION (NOUVEAU) 🔥 -->
+        <nav class="trip-nav-tabs">
+            <button class="tab-btn active" data-tab="tab-itinerary">
+                <span class="tab-icon">🗺️</span>
+                <span>Itinéraire</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-budget">
+                <span class="tab-icon">💶</span>
+                <span>Budget & Dépenses</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-logistics">
+                <span class="tab-icon">🎒</span>
+                <span>Logistique & Météo</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-map">
+                <span class="tab-icon">📍</span>
+                <span>Carte</span>
+            </button>
+        </nav>
+
         <div class="trip-layout" style="display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
             
             <!-- SECTION PRINCIPALE : ITINÉRAIRE -->
@@ -329,7 +427,6 @@
             </section>
 
             <!-- SIDEBAR LOGISTIQUE -->
-           <!-- SIDEBAR LOGISTIQUE -->
             <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
                 
                 <!-- 1. CARTE BUDGET & ESTIMATION -->
