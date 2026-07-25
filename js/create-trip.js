@@ -85,34 +85,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // 3. RECHERCHE DES LIEUX À VISITER
+                // 3. RECHERCHE DES LIEUX À VISITER AVEC COORDONNÉES GPS
                 let spots = [];
                 try {
                     spots = await fetchTopPlacesSafe(cleanDestination);
                 } catch (placesError) {
                     console.warn("Google Places indisponible. Utilisation de la liste de secours.", placesError);
                     spots = [
-                        "Le centre historique et ses monuments incontournables",
-                        "Le grand parc de la ville et ses espaces de détente",
-                        "Le musée d'art et d'histoire locale",
-                        "Le quartier animé et ses ruelles commerçantes",
-                        "Le belvédère principal pour une vue panoramique",
-                        "Le grand marché traditionnel local"
+                        { name: "Le centre historique et ses monuments incontournables", lat: null, lng: null },
+                        { name: "Le grand parc de la ville et ses espaces de détente", lat: null, lng: null },
+                        { name: "Le musée d'art et d'histoire locale", lat: null, lng: null },
+                        { name: "Le quartier animé et ses ruelles commerçantes", lat: null, lng: null },
+                        { name: "Le belvédère principal pour une vue panoramique", lat: null, lng: null },
+                        { name: "Le grand marché traditionnel local", lat: null, lng: null }
                     ];
                 }
 
                 const itinerary = generateItinerary(start, totalDays, spots);
+
+                // Coordonnées de la destination principale pour le centrage de la carte
+                const mainLat = (spots.length > 0 && spots[0].lat) ? spots[0].lat : null;
+                const mainLng = (spots.length > 0 && spots[0].lng) ? spots[0].lng : null;
                 
-                // 4. RÉCUPÉRATION DE L'IMAGE PEXELS ENVOYÉE AVEC LE TEXTE PROPRE
+                // 4. RÉCUPÉRATION DE L'IMAGE PEXELS
                 console.log("🖼️ Appel Pexels pour :", cleanDestination);
                 const finalImage = await fetchPexelsImage(cleanDestination);
                 console.log("✅ Image retenue :", finalImage);
 
-                // 5. ENREGISTREMENT DU VOYAGE
+                // 5. ENREGISTREMENT DU VOYAGE (AVEC LAT ET LNG)
                 const newTrip = {
                     id: Date.now(),
                     title: cleanDestination,
                     destination: cleanDestination,
+                    destinationLat: mainLat,
+                    destinationLng: mainLng,
                     departure: departure,
                     dates: `${formatDate(start)} au ${formatDate(end)}`,
                     dateStart: dateStart,
@@ -147,11 +153,10 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchPexelsImage(cityName) {
     const PEXELS_API_KEY = 'BpsLfTN2eMhAXARbFKs0oVPAMhjaIiOIQEN1YlxRpbB0LuJ2XMMYgQpi';
     try {
-        // Nettoyage agressif : extraire UNIQUEMENT le nom de la ville (ex: "Dubaï" au lieu de "Dubaï - Émirats...")
         let cleanCity = String(cityName)
-            .split(',')[0]        // Coupe à la virgule
-            .split('–')[0]        // Coupe au tiret cadratin
-            .split('-')[0]        // Coupe au tiret simple
+            .split(',')[0]
+            .split('–')[0]
+            .split('-')[0]
             .trim();
 
         console.log("🔍 Mot-clé exact envoyé à Pexels :", cleanCity);
@@ -175,10 +180,10 @@ async function fetchPexelsImage(cityName) {
         console.warn("⚠️ Erreur lors de la récupération Pexels :", error);
     }
 
-    // Image de secours si vraiment rien n'est trouvé
     return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
 
+// EXTRACTION DES LIEUX AVEC NOMS + COORDONNÉES GPS (LAT / LNG)
 function fetchTopPlacesSafe(destinationName) {
     return new Promise((resolve, reject) => {
         if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
@@ -192,12 +197,20 @@ function fetchTopPlacesSafe(destinationName) {
 
             const request = {
                 query: `attractions touristiques à ${destinationName}`,
-                fields: ['name']
+                fields: ['name', 'geometry'] // <-- On demande explicitement geometry pour récupérer lat/lng
             };
 
             service.textSearch(request, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                    const topSpots = results.filter(place => place.name).slice(0, 10).map(place => place.name);
+                    const topSpots = results
+                        .filter(place => place.name && place.geometry && place.geometry.location)
+                        .slice(0, 10)
+                        .map(place => ({
+                            name: place.name,
+                            lat: place.geometry.location.lat(),
+                            lng: place.geometry.location.lng()
+                        }));
+
                     if (topSpots.length > 0) resolve(topSpots);
                     else reject("Aucun lieu trouvé.");
                 } else {
@@ -210,6 +223,7 @@ function fetchTopPlacesSafe(destinationName) {
     });
 }
 
+// GÉNÉRATION D'ITINÉRAIRE INTÉGRANT LAT ET LNG À CHAQUE ÉTAPE
 function generateItinerary(startDate, totalDays, spots) {
     const itinerary = [];
     let spotIndex = 0;
@@ -223,16 +237,20 @@ function generateItinerary(startDate, totalDays, spots) {
         const spotMatin = spots[spotIndex % spots.length];
         daySteps.push({
             time: "10:00",
-            activity: `Visite et exploration : ${spotMatin}`,
-            location: spotMatin
+            activity: `Visite et exploration : ${spotMatin.name}`,
+            location: spotMatin.name,
+            lat: spotMatin.lat,
+            lng: spotMatin.lng
         });
         spotIndex++;
 
         const spotAprem = spots[spotIndex % spots.length];
         daySteps.push({
             time: "15:00",
-            activity: `Découverte incontournable : ${spotAprem}`,
-            location: spotAprem
+            activity: `Découverte incontournable : ${spotAprem.name}`,
+            location: spotAprem.name,
+            lat: spotAprem.lat,
+            lng: spotAprem.lng
         });
         spotIndex++;
 
