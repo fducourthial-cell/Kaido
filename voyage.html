@@ -138,6 +138,7 @@
 
         /* --- BARRE DE NAVIGATION (TABS / BOTTOM NAV) --- */
       /* --- BARRE DE NAVIGATION FIXE ET RESPONSIVE --- */
+       /* --- BARRE DE NAVIGATION FIXE ET RESPONSIVE --- */
         .trip-nav-tabs {
             display: flex;
             justify-content: space-between;
@@ -149,7 +150,7 @@
             left: 0;
             right: 0;
             width: 100%;
-            box-sizing: border-box; /* Garantit que tout rentre dans les 100% */
+            box-sizing: border-box;
             z-index: 1000;
             padding: 0.3rem 0;
             box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.6);
@@ -157,8 +158,8 @@
         }
 
         .tab-btn {
-            flex: 1 1 0; /* Force les 4 boutons à faire exactement 25% chacun sans débordement */
-            min-width: 0; /* Empêche les boutons de dépasser de leur conteneur */
+            flex: 1 1 0;
+            min-width: 0;
             box-sizing: border-box;
             background: none;
             border: none;
@@ -168,7 +169,7 @@
             align-items: center;
             justify-content: center;
             gap: 1px;
-            font-size: 0.65rem; /* Ajusté pour petits écrans */
+            font-size: 0.65rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -177,7 +178,7 @@
         }
 
         .tab-btn .tab-icon {
-            font-size: 1rem; /* Taille icône adaptée */
+            font-size: 1rem;
         }
 
         .tab-btn span:not(.tab-icon) {
@@ -190,16 +191,57 @@
             color: var(--color-gold);
         }
 
-        /* --- ADAPTATION GRAND ÉCRAN / PC --- */
+        /* 📲 ADAPTATION MODE PAYSAGE SUR SMARTPHONE (ORIENTATION HORIZONTALE) */
+        @media (orientation: landscape) and (max-width: 991px) {
+            body {
+                padding-bottom: 0 !important;
+                padding-left: 65px; /* Espace réservé à gauche pour la barre verticale */
+            }
+
+            .trip-nav-tabs {
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: auto;
+                width: 65px;
+                height: 100vh;
+                flex-direction: column;
+                justify-content: center;
+                gap: 1.2rem;
+                border-top: none;
+                border-right: 1px solid var(--border-color);
+                padding: 1rem 0.2rem;
+            }
+
+            .tab-btn {
+                flex: initial;
+                width: 100%;
+                font-size: 0.58rem;
+            }
+
+            .tab-btn .tab-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* 💻 ADAPTATION GRAND ÉCRAN / PC */
         @media (min-width: 992px) {
+            body {
+                padding-left: 0 !important;
+            }
+
             .trip-nav-tabs {
                 position: relative;
+                top: auto;
                 bottom: auto;
                 left: auto;
                 right: auto;
                 width: auto;
+                height: auto;
+                flex-direction: row;
                 background: rgba(20, 17, 14, 0.6);
                 border-top: none;
+                border-right: none;
                 border: 1px solid var(--border-color);
                 border-radius: 8px;
                 justify-content: flex-start;
