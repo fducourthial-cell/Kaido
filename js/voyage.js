@@ -438,4 +438,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             location.reload();
         });
     }
+
+    // --- GESTION DE L'EXPORT PDF ---
+    const exportBtn = document.getElementById('btn-export-pdf');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            if (typeof html2pdf === 'undefined') {
+                alert("La bibliothèque d'exportation PDF est en cours de chargement. Veuillez réespacer d'ici quelques secondes.");
+                return;
+            }
+
+            // Masquer temporairement les éléments d'interface non pertinents sur le document PDF
+            const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights');
+            elementsToHide.forEach(el => el.style.display = 'none');
+
+            // Zone du contenu à capturer
+            const element = document.querySelector('main.container');
+
+            const fileName = `Kaido_Itineraire_${(activeTrip.destination || 'Voyage').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+            const opt = {
+                margin:       [0.4, 0.4, 0.4, 0.4],
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            const originalText = exportBtn.textContent;
+            exportBtn.textContent = "⏳ Génération...";
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                elementsToHide.forEach(el => el.style.display = '');
+                exportBtn.textContent = originalText;
+            }).catch(err => {
+                console.error("Erreur lors de la génération du PDF :", err);
+                elementsToHide.forEach(el => el.style.display = '');
+                exportBtn.textContent = originalText;
+            });
+        });
+    }
 });
