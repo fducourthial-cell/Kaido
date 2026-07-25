@@ -65,7 +65,7 @@ async function displayDayOnMap(steps, mainDestination) {
         const step = steps[i];
         let loc = null;
 
-        // 1. Si on a déjà les coordonnées GPS (Nouveaux voyages)
+        // 1. Si on a déjà les coordonnées GPS
         if (step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng)) {
             loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
         } 
@@ -193,6 +193,69 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
     }
 }
 
+// --- FONCTION MÉTÉO (API OPEN-METEO) ---
+async function fetchAndRenderWeather(lat, lng) {
+    const container = document.getElementById('weather-container');
+    const subtitle = document.getElementById('weather-subtitle');
+    if (!container || !lat || !lng) return;
+
+    const weatherCodes = {
+        0: '☀️ Ensoleillé',
+        1: '🌤️ Peu nuageux',
+        2: '⛅ Partiellement nuageux',
+        3: '☁️ Couvert',
+        45: '🌫️ Brouillard',
+        51: '🌧️ Bruine légère',
+        61: '🌧️ Pluie',
+        71: '❄️ Neige',
+        80: '🌦️ Averses',
+        95: '🌩️ Orage'
+    };
+
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data && data.daily) {
+            container.innerHTML = '';
+            const daysLimit = Math.min(data.daily.time.length, 5);
+            
+            for (let i = 0; i < daysLimit; i++) {
+                const dateRaw = data.daily.time[i];
+                const dateFormatted = new Date(dateRaw).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+                const code = data.daily.weathercode[i];
+                const weatherText = weatherCodes[code] || '⛅ Variable';
+                const tempMax = Math.round(data.daily.temperature_2m_max[i]);
+                const tempMin = Math.round(data.daily.temperature_2m_min[i]);
+
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: rgba(255, 255, 255, 0.02);
+                    padding: 0.5rem 0.8rem;
+                    border-radius: 6px;
+                    border: 1px solid rgba(212, 175, 55, 0.1);
+                    font-size: 0.85rem;
+                `;
+
+                item.innerHTML = `
+                    <span style="color: var(--text-main); font-weight: 500; text-transform: capitalize;">${dateFormatted}</span>
+                    <span>${weatherText}</span>
+                    <span style="color: var(--color-gold); font-weight: 600;">${tempMin}° / ${tempMax}°C</span>
+                `;
+                container.appendChild(item);
+            }
+            if (subtitle) subtitle.textContent = "Prévisions en direct (Open-Meteo)";
+        }
+    } catch (err) {
+        console.warn("Impossible de charger la météo :", err);
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Météo non disponible pour ces coordonnées.</span>`;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
     const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
@@ -203,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // --- DECODAGE SYSTEMATIQUE DE SUPABASE (SI REÇU SOUS FORME DE CHAÎNE TEXTE) ---
+    // --- DECODAGE SYSTEMATIQUE DE SUPABASE ---
     if (typeof activeTrip.itinerary === 'string') {
         try {
             activeTrip.itinerary = JSON.parse(activeTrip.itinerary);
@@ -219,7 +282,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Erreur de conversion de la checklist :", e);
         }
     }
-    // --------------------------------------------------------------------------
 
     if (!activeTrip.checklist) {
         activeTrip.checklist = [
@@ -287,8 +349,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
     }
 
-    // Initialisation exacte de la carte
+    // Initialisation Carte & Météo
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
+    
+    // 🔥 Lancement de la météo 🔥
+    if (activeTrip.destinationLat && activeTrip.destinationLng) {
+        fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng);
+    }
 
     // Rendu de l'itinéraire
     const daysContainer = document.getElementById('itinerary-days-container');
@@ -439,22 +506,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- GESTION DE L'EXPORT PDF ---
+    // --- EXPORT PDF ---
     const exportBtn = document.getElementById('btn-export-pdf');
     if (exportBtn) {
         exportBtn.addEventListener('click', () => {
             if (typeof html2pdf === 'undefined') {
-                alert("La bibliothèque d'exportation PDF est en cours de chargement. Veuillez réespacer d'ici quelques secondes.");
+                alert("La bibliothèque d'exportation PDF est en cours de chargement.");
                 return;
             }
 
-            // Masquer temporairement les éléments d'interface non pertinents sur le document PDF
             const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights');
             elementsToHide.forEach(el => el.style.display = 'none');
 
-            // Zone du contenu à capturer
             const element = document.querySelector('main.container');
-
             const fileName = `Kaido_Itineraire_${(activeTrip.destination || 'Voyage').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
 
             const opt = {
