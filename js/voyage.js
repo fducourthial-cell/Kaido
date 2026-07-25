@@ -134,7 +134,7 @@ async function displayDayOnMap(steps, mainDestination) {
 
 // Sélectionner une seule activité au clic individuel (avec aperçu image)
 function selectActivityOnMap(step, addressQuery, mainDestination) {
-    const actName = step.activity || step.title || 'Activité';
+    const actName = step ? (step.activity || step.title || 'Activité') : 'Activité';
     
     const previewBox = document.getElementById('activity-preview');
     const previewImg = document.getElementById('activity-img');
@@ -165,7 +165,8 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
         placeMarkerAt({ lat: parseFloat(step.lat), lng: parseFloat(step.lng) });
     } else if (addressQuery && map) {
         const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ address: `${actName}, ${addressQuery}` }, (results, status) => {
+        const fullQuery = addressQuery.includes(mainDestination) ? addressQuery : `${addressQuery}, ${mainDestination}`;
+        geocoder.geocode({ address: fullQuery }, (results, status) => {
             if (status === 'OK' && results[0]) {
                 placeMarkerAt(results[0].geometry.location);
             }
@@ -201,6 +202,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = "index.html";
         return;
     }
+
+    // --- DECODAGE SYSTEMATIQUE DE SUPABASE (SI REÇU SOUS FORME DE CHAÎNE TEXTE) ---
+    if (typeof activeTrip.itinerary === 'string') {
+        try {
+            activeTrip.itinerary = JSON.parse(activeTrip.itinerary);
+        } catch (e) {
+            console.error("Erreur de conversion de l'itinéraire :", e);
+        }
+    }
+
+    if (typeof activeTrip.checklist === 'string') {
+        try {
+            activeTrip.checklist = JSON.parse(activeTrip.checklist);
+        } catch (e) {
+            console.error("Erreur de conversion de la checklist :", e);
+        }
+    }
+    // --------------------------------------------------------------------------
 
     if (!activeTrip.checklist) {
         activeTrip.checklist = [
@@ -330,7 +349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         const stepIndex = parseInt(itemEl.getAttribute('data-idx'));
                         const stepData = day.steps[stepIndex];
-                        selectActivityOnMap(stepData, stepData.location, destination);
+                        selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination);
                     });
                 });
 
