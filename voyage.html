@@ -455,8 +455,7 @@
 
     <main class="container">
 
-        <!-- 🔥 BARRE D'ONGLETS / BOTTOM NAVIGATION (NOUVEAU) 🔥 -->
-      <!-- BARRE D'ONGLETS OPTIMISÉE -->
+        <!-- BARRE D'ONGLETS OPTIMISÉE -->
         <nav class="trip-nav-tabs">
             <button class="tab-btn active" data-tab="tab-itinerary">
                 <span class="tab-icon">🗺️</span>
@@ -476,10 +475,11 @@
             </button>
         </nav>
 
-        <div class="trip-layout" style="display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
-            
-            <!-- SECTION PRINCIPALE : ITINÉRAIRE -->
-            <section class="timeline-itinerary" style="flex: 2; min-width: 320px;">
+        <!-- CONTENU DES ONGLETS -->
+        <div class="trip-tab-wrapper" style="margin-top: 2rem;">
+
+            <!-- ONGLET 1 : ITINÉRAIRE -->
+            <div id="tab-itinerary" class="tab-content active-content">
                 <div class="card-box" style="padding: 1.5rem; margin-bottom: 2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h3 style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Notes de voyage</h3>
@@ -492,97 +492,102 @@
                 </div>
 
                 <div id="itinerary-days-container"></div>
-            </section>
+            </div>
 
-            <!-- SIDEBAR LOGISTIQUE -->
-            <aside class="sidebar-logistique" style="flex: 1; min-width: 300px;">
-                
-                <!-- 1. CARTE BUDGET & ESTIMATION -->
-                <div class="card-box budget-card" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;">Budget & Estimation</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Estimation globale du séjour</p>
-                    
-                    <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.15); margin-bottom: 1.2rem; text-align: center;">
-                        <span id="trip-budget-total" style="color: var(--color-gold); font-size: 2rem; font-weight: bold; display: block;">0 €</span>
-                        <span style="color: var(--text-muted); font-size: 0.8rem;">Budget Total Estimé</span>
+            <!-- ONGLET 2 : BUDGET & DÉPENSES -->
+            <div id="tab-budget" class="tab-content" style="display: none;">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    <!-- Carte Budget -->
+                    <div class="card-box budget-card" style="flex: 1; min-width: 300px; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;">Budget & Estimation</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Estimation globale du séjour</p>
+                        
+                        <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.15); margin-bottom: 1.2rem; text-align: center;">
+                            <span id="trip-budget-total" style="color: var(--color-gold); font-size: 2rem; font-weight: bold; display: block;">0 €</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Budget Total Estimé</span>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.2rem; font-size: 0.88rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>✈️ Transports & Vols</span>
+                                <span id="budget-flights" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>🏨 Hébergement</span>
+                                <span id="budget-hotel" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>🍽️ Repas & Activités</span>
+                                <span id="budget-rest" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                            </div>
+                        </div>
+
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
+                        
+                        <a id="btn-google-flights" href="#" target="_blank" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white; padding: 0.8rem; border-radius: 4px; font-weight: 500;">
+                            ✈️ Voir les vols sur Google Flights
+                        </a>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.2rem; font-size: 0.88rem;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>✈️ Transports & Vols</span>
-                            <span id="budget-flights" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                    <!-- Carte Dépenses Réelles -->
+                    <div class="card-box expenses-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Dépenses sur place</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Suivi du budget consommé</p>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                                <span>Dépensé: <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></span>
+                                <span style="color: var(--text-muted);">Budget: <span id="expenses-target-budget">0 €</span></span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
+                                <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
+                            </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>🏨 Hébergement</span>
-                            <span id="budget-hotel" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+
+                        <div id="expenses-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense enregistrée.</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>🍽️ Repas & Activités</span>
-                            <span id="budget-rest" style="color: var(--color-gold); font-weight: 600;">0 €</span>
-                        </div>
-                    </div>
 
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
-                    
-                    <a id="btn-google-flights" href="#" target="_blank" style="display: block; text-align: center; text-decoration: none; background-color: #1a73e8; color: white; padding: 0.8rem; border-radius: 4px; font-weight: 500;">
-                        ✈️ Voir les vols sur Google Flights
-                    </a>
-                </div>
-
-                <!-- 1.5. CARTE SUIVI DES DÉPENSES RÉELLES -->
-                <div class="card-box expenses-card" style="margin-top: 1.5rem; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Dépenses sur place</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Suivi du budget consommé</p>
-
-                    <!-- Barre de progression -->
-                    <div style="margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
-                            <span>Dépensé: <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></span>
-                            <span style="color: var(--text-muted);">Budget: <span id="expenses-target-budget">0 €</span></span>
-                        </div>
-                        <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
-                            <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Liste des dépenses enregistrées -->
-                    <div id="expenses-list" style="max-height: 180px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense enregistrée.</span>
-                    </div>
-
-                    <!-- Formulaire d'ajout rapide -->
-                    <form id="add-expense-form" style="display: flex; gap: 6px;">
-                        <input type="text" id="expense-title-input" placeholder="Ex: Restaurant, Essence..." style="flex: 2; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
-                        <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
-                        <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">+</button>
-                    </form>
-                </div>
-
-                <!-- 2. CHECK-LIST DE VOYAGE -->
-                <div class="checklist-card">
-                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">À ne pas oublier</p>
-                    <ul class="checklist-items" id="checklist-container"></ul>
-                    <form class="checklist-form" id="add-task-form">
-                        <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
-                        <button type="submit" class="btn-add-task">+</button>
-                    </form>
-                </div>
-
-                <!-- 2.5. WIDGET MÉTÉO -->
-                <div class="card-box weather-card" style="margin-top: 1.5rem; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🌤️ Météo prévue</h3>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" id="weather-subtitle">Prévisions sur place</p>
-                    <div id="weather-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
-                        <span style="color: var(--text-muted); font-size: 0.85rem;">Chargement de la météo...</span>
+                        <form id="add-expense-form" style="display: flex; gap: 6px;">
+                            <input type="text" id="expense-title-input" placeholder="Ex: Restaurant, Essence..." style="flex: 2; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; background: var(--bg-dark); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">+</button>
+                        </form>
                     </div>
                 </div>
+            </div>
 
-                <!-- 3. CARTE INTERACTIVE -->
-                <div class="map-card">
+            <!-- ONGLET 3 : LOGISTIQUE & MÉTÉO -->
+            <div id="tab-logistics" class="tab-content" style="display: none;">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    <!-- Check-list -->
+                    <div class="checklist-card" style="flex: 1; min-width: 300px; margin-top: 0;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">À ne pas oublier</p>
+                        <ul class="checklist-items" id="checklist-container"></ul>
+                        <form class="checklist-form" id="add-task-form">
+                            <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
+                            <button type="submit" class="btn-add-task">+</button>
+                        </form>
+                    </div>
+
+                    <!-- Météo -->
+                    <div class="card-box weather-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🌤️ Météo prévue</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" id="weather-subtitle">Prévisions sur place</p>
+                        <div id="weather-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Chargement de la météo...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONGLET 4 : CARTE INTERACTIVE -->
+            <div id="tab-map" class="tab-content" style="display: none;">
+                <div class="map-card" style="margin-top: 0; position: relative; top: 0;">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
-                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité pour la localiser</p>
-                    <div id="map"></div>
+                    <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité dans l'itinéraire pour la localiser</p>
+                    <div id="map" style="height: 400px;"></div>
                     
                     <div id="activity-preview" class="activity-preview-box">
                         <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
@@ -590,8 +595,8 @@
                         <div id="activity-title" class="activity-preview-title"></div>
                     </div>
                 </div>
+            </div>
 
-            </aside>
         </div>
     </main>
 
