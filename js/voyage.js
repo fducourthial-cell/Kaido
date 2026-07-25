@@ -331,7 +331,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     budget: activeTrip.budget,
                     desc_text: activeTrip.desc,
                     checklist: activeTrip.checklist,
-                    itinerary: activeTrip.itinerary
+                    itinerary: activeTrip.itinerary,
+                    expenses: activeTrip.expenses || []
                 }).eq('id', activeTrip.id);
             } catch (e) {
                 console.warn("Sauvegarde locale uniquement.");
