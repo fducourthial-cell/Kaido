@@ -52,29 +52,47 @@ function clearMapOverlays() {
     }
 }
 
-// OPTION A : Affichage instantané et gratuit de la journée grâce aux coordonnées déjà en mémoire
-function displayDayOnMap(steps, mainDestination) {
+// Affichage hybride de la journée : direct si lat/lng existent, fallback geocoder sinon
+async function displayDayOnMap(steps, mainDestination) {
     clearMapOverlays();
     if (!steps || steps.length === 0 || !map) return;
 
     const bounds = new google.maps.LatLngBounds();
     const pathCoordinates = [];
+    const geocoder = new google.maps.Geocoder();
 
-    steps.forEach((step, index) => {
-        // Verification si lat/lng ont été enregistrés à la création
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        let loc = null;
+
+        // 1. Si on a déjà les coordonnées GPS (Nouveaux voyages)
         if (step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng)) {
-            const loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
-            
+            loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
+        } 
+        // 2. Fallback par Géocodage si c'est un ancien voyage
+        else {
+            const query = step.location ? `${step.location}, ${mainDestination}` : `${step.activity || step.title}, ${mainDestination}`;
+            await new Promise((resolve) => {
+                geocoder.geocode({ address: query }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        loc = results[0].geometry.location;
+                    }
+                    resolve();
+                });
+            });
+        }
+
+        // Si la position est valide, création du marqueur
+        if (loc) {
             bounds.extend(loc);
             pathCoordinates.push(loc);
 
-            // Marqueur numéroté (1, 2, 3...)
             const marker = new google.maps.Marker({
                 position: loc,
                 map: map,
-                title: `${index + 1}. ${step.activity || step.title}`,
+                title: `${i + 1}. ${step.activity || step.title}`,
                 label: {
-                    text: `${index + 1}`,
+                    text: `${i + 1}`,
                     color: "#0D0B09",
                     fontWeight: "bold",
                     fontSize: "12px"
@@ -91,7 +109,7 @@ function displayDayOnMap(steps, mainDestination) {
 
             activeMarkers.push(marker);
         }
-    });
+    }
 
     // Tracé de la ligne reliant les activités
     if (pathCoordinates.length > 1) {
@@ -128,19 +146,30 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
     if (previewLoading) previewLoading.style.display = 'flex';
     if (previewTitle) previewTitle.textContent = `📍 ${actName}`;
 
-    // Si on a les coordonnées GPS
-    if (step.lat && step.lng && map) {
+    // Helper pour placer le marqueur
+    const placeMarkerAt = (location) => {
         clearMapOverlays();
-        const loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
         const marker = new google.maps.Marker({
-            position: loc,
+            position: location,
             map: map,
             title: actName,
             animation: google.maps.Animation.DROP
         });
         activeMarkers.push(marker);
-        map.panTo(loc);
+        map.panTo(location);
         map.setZoom(15);
+    };
+
+    // Placement du marqueur via lat/lng ou Geocoder de secours
+    if (step && step.lat && step.lng && map) {
+        placeMarkerAt({ lat: parseFloat(step.lat), lng: parseFloat(step.lng) });
+    } else if (addressQuery && map) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: `${actName}, ${addressQuery}` }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                placeMarkerAt(results[0].geometry.location);
+            }
+        });
     }
 
     // Recherche de la photo d'illustration via Google Places
@@ -287,7 +316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div>${stepsHTML}</div>
                 `;
 
-                // CLIC SUR LA JOURNÉE : Affichage instantané sur la carte
+                // CLIC SUR LA JOURNÉE
                 block.querySelector('.day-header').addEventListener('click', () => {
                     displayDayOnMap(day.steps, destination);
                 });
