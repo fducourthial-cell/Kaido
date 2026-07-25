@@ -319,6 +319,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof activeTrip.expenses === 'string') {
         try { activeTrip.expenses = JSON.parse(activeTrip.expenses); } catch (e) { activeTrip.expenses = []; }
     }
+    // Décodage optionnel si budgetDetails est stocké en chaîne JSON
+    if (typeof activeTrip.budgetDetails === 'string') {
+        try { activeTrip.budgetDetails = JSON.parse(activeTrip.budgetDetails); } catch (e) {}
+    }
 
     if (!activeTrip.checklist) {
         activeTrip.checklist = [
@@ -366,14 +370,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url('${activeTrip.image}')`;
     }
 
-    // Budget global
+    // --- BUDGET GLOBAL INTELLIGENT ---
     let totalB = parseFloat(activeTrip.budget) || 0;
     let daysCount = (activeTrip.itinerary && activeTrip.itinerary.length) ? activeTrip.itinerary.length : 3;
     if (totalB <= 0) totalB = daysCount * 150 + 200;
 
-    const flights = Math.round(totalB * 0.30);
-    const hotel = Math.round(totalB * 0.40);
-    const rest = totalB - (flights + hotel);
+    // Récupération des sous-totaux intelligents ou ventilation proportionnelle de secours
+    const flights = activeTrip.budgetDetails ? activeTrip.budgetDetails.flights : Math.round(totalB * 0.30);
+    const hotel = activeTrip.budgetDetails ? activeTrip.budgetDetails.hotel : Math.round(totalB * 0.40);
+    const rest = activeTrip.budgetDetails ? activeTrip.budgetDetails.rest : (totalB - (flights + hotel));
 
     if (document.getElementById('trip-budget-total')) document.getElementById('trip-budget-total').textContent = `${totalB} €`;
     if (document.getElementById('budget-flights')) document.getElementById('budget-flights').textContent = `${flights} €`;
