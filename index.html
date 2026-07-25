@@ -373,167 +373,203 @@
 
     <!-- LOGIQUE DE RENDU -->
     <!-- LOGIQUE DE RENDU CORRIGÉE ET BLINDÉE -->
-    <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const grid = document.getElementById('trips-grid');
-        
-        if (grid) {
-            const createZone = grid.querySelector('.create-trip-zone');
+ <script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const grid = document.getElementById('trips-grid');
+    
+    if (grid) {
+        const createZone = grid.querySelector('.create-trip-zone');
 
-            // Fonction pour dessiner les cartes dans la grille
-            const drawCards = (trips) => {
-                // Supprimer les cartes existantes pour éviter les doublons
-                const dynamicCards = grid.querySelectorAll('.dynamic-trip');
-                dynamicCards.forEach(card => card.remove());
+        // Fonction pour dessiner les cartes dans la grille
+        const drawCards = (trips) => {
+            // Supprimer les cartes existantes pour éviter les doublons
+            const dynamicCards = grid.querySelectorAll('.dynamic-trip');
+            dynamicCards.forEach(card => card.remove());
 
-                trips.forEach(trip => {
-                    const card = document.createElement('article');
-                    card.className = 'trip-card dynamic-trip';
-                    
-                    const cityName = trip.destination || trip.title || 'Destination';
-                    const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
+            trips.forEach(trip => {
+                const card = document.createElement('article');
+                card.className = 'trip-card dynamic-trip';
+                
+                const cityName = trip.destination || trip.title || 'Destination';
+                const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
-                    // Budget estimatif
-                    let displayBudget = parseFloat(trip.budget) || 0;
-                    if (displayBudget <= 0) {
-                        let daysCount = 3;
-                        if (trip.itinerary && trip.itinerary.length > 0) {
-                            daysCount = trip.itinerary.length;
-                        } else if (trip.dateStart && trip.dateEnd) {
-                            const start = new Date(trip.dateStart);
-                            const end = new Date(trip.dateEnd);
-                            const diff = end.getTime() - start.getTime();
-                            daysCount = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)) + 1);
-                        }
-                        displayBudget = (daysCount * 150) + 200;
+                // Budget estimatif
+                let displayBudget = parseFloat(trip.budget) || 0;
+                if (displayBudget <= 0) {
+                    let daysCount = 3;
+                    if (trip.itinerary && trip.itinerary.length > 0) {
+                        daysCount = trip.itinerary.length;
+                    } else if (trip.dateStart && trip.dateEnd) {
+                        const start = new Date(trip.dateStart);
+                        const end = new Date(trip.dateEnd);
+                        const diff = end.getTime() - start.getTime();
+                        daysCount = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)) + 1);
                     }
+                    displayBudget = (daysCount * 150) + 200;
+                }
 
-                    card.innerHTML = `
-                        <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
-                        <div class="trip-details">
-                            <div>
-                                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #F4EFEA; margin-bottom: 0.5rem;">${cityName}</h3>
-                                <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
-                                ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
-                            </div>
-                            
-                            <div class="trip-footer">
-                                <span class="trip-budget">~ ${displayBudget} €</span>
-                                <div class="trip-actions">
-                                    <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
-                                    <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
-                                </div>
+                card.innerHTML = `
+                    <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
+                    <div class="trip-details">
+                        <div>
+                            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #F4EFEA; margin-bottom: 0.5rem;">${cityName}</h3>
+                            <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
+                            ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
+                        </div>
+                        
+                        <div class="trip-footer">
+                            <span class="trip-budget">~ ${displayBudget} €</span>
+                            <div class="trip-actions">
+                                <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
+                                <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
                             </div>
                         </div>
-                    `;
+                    </div>
+                `;
 
-                    // Clic pour sélectionner le voyage actif
-                    const viewLink = card.querySelector('.btn-view');
-                    if (viewLink) {
-                        viewLink.addEventListener('click', () => {
-                            localStorage.setItem('currentTrip', JSON.stringify(trip));
-                            localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
-                        });
-                    }
-                    
-                    if (createZone) {
-                        grid.insertBefore(card, createZone);
-                    } else {
-                        grid.appendChild(card);
-                    }
-                });
-
-                // Écouteurs pour la suppression
-                const deleteButtons = grid.querySelectorAll('.btn-delete');
-                deleteButtons.forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const tripId = button.getAttribute('data-id');
-                        if (confirm("Êtes-vous sûr de vouloir supprimer cet itinéraire de Kaido ?")) {
-                            await deleteTrip(tripId);
-                        }
+                // Clic pour sélectionner le voyage actif
+                const viewLink = card.querySelector('.btn-view');
+                if (viewLink) {
+                    viewLink.addEventListener('click', () => {
+                        localStorage.setItem('currentTrip', JSON.stringify(trip));
+                        localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
                     });
+                }
+                
+                if (createZone) {
+                    grid.insertBefore(card, createZone);
+                } else {
+                    grid.appendChild(card);
+                }
+            });
+
+            // Écouteurs pour la suppression
+            const deleteButtons = grid.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const tripId = button.getAttribute('data-id');
+                    if (confirm("Êtes-vous sûr de vouloir supprimer cet itinéraire de Kaido ?")) {
+                        await deleteTrip(tripId);
+                    }
                 });
-            };
+            });
+        };
 
-            // Chargement principal
-            const renderTrips = async () => {
-                // 1. AFFICHAGE INSTANTANÉ DU CACHE LOCAL (Rien ne disparaît !)
-                let localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                drawCards(localTrips);
+        // Chargement principal avec Synchro Bidirectionnelle (Push local vers Supabase)
+        const renderTrips = async () => {
+            // 1. AFFICHAGE INSTANTANÉ DU CACHE LOCAL
+            let localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+            drawCards(localTrips);
 
-                // 2. SYNCHRONISATION EN ARRIÈRE-PLAN AVEC SUPABASE
-                if (typeof supabase !== 'undefined') {
-                    try {
-                        const { data: cloudTrips, error } = await supabase
-                            .from('trips')
-                            .select('*')
-                            .order('created_at', { ascending: false });
+            // 2. SYNCHRONISATION EN ARRIÈRE-PLAN AVEC SUPABASE
+            if (typeof supabase !== 'undefined') {
+                try {
+                    // Récupération de l'utilisateur connecté
+                    const { data: { user } } = await supabase.auth.getUser();
 
-                        if (!error && cloudTrips) {
-                            const formattedCloud = cloudTrips.map(ct => ({
-                                id: ct.id,
-                                title: ct.title,
-                                destination: ct.destination,
-                                departure: ct.departure,
-                                dateStart: ct.date_start,
-                                dateEnd: ct.date_end,
-                                dates: `${ct.date_start || ''} au ${ct.date_end || ''}`,
-                                budget: ct.budget,
-                                desc: ct.desc_text,
-                                image: ct.image,
-                                destinationLat: ct.destination_lat,
-                                destinationLng: ct.destination_lng,
-                                itinerary: ct.itinerary,
-                                checklist: ct.checklist
-                            }));
+                    const { data: cloudTrips, error } = await supabase
+                        .from('trips')
+                        .select('*')
+                        .order('created_at', { ascending: false });
 
-                            // Fusion sans perte : on garde les locaux + cloud sans doublons d'ID
-                            const mergedMap = new Map();
-                            localTrips.forEach(t => mergedMap.set(String(t.id), t));
-                            formattedCloud.forEach(t => mergedMap.set(String(t.id), t));
+                    if (!error && cloudTrips) {
+                        const cloudIds = new Set(cloudTrips.map(ct => String(ct.id)));
 
-                            const mergedTrips = Array.from(mergedMap.values());
-                            
-                            // Sauvegarde du résultat fusionné
-                            localStorage.setItem('kaido_trips', JSON.stringify(mergedTrips));
-                            
-                            // Redessine avec les cartes à jour
-                            drawCards(mergedTrips);
+                        // 🔥 DÉTECTION ET PUSH DES VOYAGES LOCAUX MANQUANTS DANS SUPABASE 🔥
+                        if (user) {
+                            for (const localTrip of localTrips) {
+                                if (!cloudIds.has(String(localTrip.id))) {
+                                    console.log("Envoi du voyage local vers Supabase :", localTrip.destination);
+                                    
+                                    const { data: inserted, error: insertErr } = await supabase
+                                        .from('trips')
+                                        .insert([{
+                                            user_id: user.id,
+                                            title: localTrip.destination || localTrip.title,
+                                            destination: localTrip.destination || localTrip.title,
+                                            departure: localTrip.departure || 'Paris',
+                                            date_start: localTrip.dateStart || null,
+                                            date_end: localTrip.dateEnd || null,
+                                            budget: localTrip.budget || 0,
+                                            desc_text: localTrip.desc || '',
+                                            image: localTrip.image || '',
+                                            destination_lat: localTrip.destinationLat || null,
+                                            destination_lng: localTrip.destinationLng || null,
+                                            itinerary: localTrip.itinerary || [],
+                                            checklist: localTrip.checklist || []
+                                        }])
+                                        .select();
+
+                                    if (!insertErr && inserted && inserted[0]) {
+                                        // On met à jour l'ID local avec le véritable ID Supabase généré
+                                        localTrip.id = inserted[0].id;
+                                    }
+                                }
+                            }
                         }
-                    } catch (e) {
-                        console.warn("Maintien de l'affichage local (mode hors-ligne actif).");
+
+                        // Mise à jour de la liste Cloud formatée
+                        const formattedCloud = cloudTrips.map(ct => ({
+                            id: ct.id,
+                            title: ct.title,
+                            destination: ct.destination,
+                            departure: ct.departure,
+                            dateStart: ct.date_start,
+                            dateEnd: ct.date_end,
+                            dates: `${ct.date_start || ''} au ${ct.date_end || ''}`,
+                            budget: ct.budget,
+                            desc: ct.desc_text,
+                            image: ct.image,
+                            destinationLat: ct.destination_lat,
+                            destinationLng: ct.destination_lng,
+                            itinerary: ct.itinerary,
+                            checklist: ct.checklist
+                        }));
+
+                        // Fusion sans doublons d'ID
+                        const mergedMap = new Map();
+                        localTrips.forEach(t => mergedMap.set(String(t.id), t));
+                        formattedCloud.forEach(t => mergedMap.set(String(t.id), t));
+
+                        const mergedTrips = Array.from(mergedMap.values());
+                        
+                        localStorage.setItem('kaido_trips', JSON.stringify(mergedTrips));
+                        drawCards(mergedTrips);
                     }
+                } catch (e) {
+                    console.warn("Maintien de l'affichage local (mode hors-ligne actif).", e);
                 }
-            };
+            }
+        };
 
-            // Fonction de suppression
-            const deleteTrip = async (id) => {
-                if (typeof supabase !== 'undefined') {
-                    try {
-                        await supabase.from('trips').delete().eq('id', id);
-                    } catch (err) {
-                        console.warn("Suppression Cloud échouée, suppression locale effectuée.");
-                    }
+        // Fonction de suppression
+        const deleteTrip = async (id) => {
+            if (typeof supabase !== 'undefined') {
+                try {
+                    await supabase.from('trips').delete().eq('id', id);
+                } catch (err) {
+                    console.warn("Suppression Cloud échouée, suppression locale effectuée.");
                 }
+            }
 
-                let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                customTrips = customTrips.filter(trip => String(trip.id) !== String(id));
-                localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
-                
-                const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
-                if (activeTrip && String(activeTrip.id) === String(id)) {
-                    localStorage.removeItem('kaido_active_trip');
-                    localStorage.removeItem('currentTrip');
-                }
-                
-                await renderTrips();
-            };
-
+            let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+            customTrips = customTrips.filter(trip => String(trip.id) !== String(id));
+            localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
+            
+            const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
+            if (activeTrip && String(activeTrip.id) === String(id)) {
+                localStorage.removeItem('kaido_active_trip');
+                localStorage.removeItem('currentTrip');
+            }
+            
             await renderTrips();
-        }
-    });
-    </script>
+        };
+
+        await renderTrips();
+    }
+});
+</script>
 </body>
 </html>
