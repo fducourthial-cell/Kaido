@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.head.appendChild(style);
 
-    // 2. Structure HTML de la Modale (avec le bouton Google)
+    // 2. Structure HTML de la Modale
     const modalHTML = `
         <div id="kaidoAuthModal" class="kaido-auth-modal">
             <div class="kaido-auth-card">
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Mettre à jour notre bouton existant dans le Header (Extraction du prénom)
+    // 5. Mettre à jour notre bouton existant dans le Header (Extraction ultra-précise du Prénom)
     const updateHeaderAuth = async () => {
         const authBtn = document.getElementById('user-profile-link');
         const nameSpan = document.getElementById('user-display-name');
@@ -280,9 +280,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (user) {
-            // Récupère le nom complet depuis Google ou les métadonnées, ou l'email, et isole uniquement le PRÉNOM
-            const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
-            const rawFirstName = fullName.trim().split(' ')[0];
+            // Cherche en priorité le prénom isolé par Google (given_name), sinon prend le nom complet ou l'email
+            const rawSource = user.user_metadata?.given_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+            
+            // Extrait strictement le premier mot
+            const rawFirstName = String(rawSource).trim().split(/\s+/)[0];
+            
             // Met uniquement la 1ère lettre en majuscule et le reste en minuscules
             const firstName = rawFirstName.charAt(0).toUpperCase() + rawFirstName.slice(1).toLowerCase();
 
