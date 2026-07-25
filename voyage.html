@@ -373,7 +373,14 @@
                         <button type="submit" class="btn-add-task">+</button>
                     </form>
                 </div>
-
+<!-- 2.5. WIDGET MÉTÉO -->
+<div class="card-box weather-card" style="margin-top: 1.5rem; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🌤️ Météo prévue</h3>
+    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" id="weather-subtitle">Prévisions sur place</p>
+    <div id="weather-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Chargement de la météo...</span>
+    </div>
+</div>
                 <!-- 3. CARTE INTERACTIVE -->
                 <div class="map-card">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
