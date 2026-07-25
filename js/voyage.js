@@ -421,13 +421,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 📌 CLIC SUR LA JOURNÉE ENTIÈRE
                 block.querySelector('.day-header').addEventListener('click', () => {
-                    const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
-                    if (mapTabBtn) mapTabBtn.click(); // 1. Ouvre l'onglet Carte
+                    if (window.innerWidth < 992) {
+                        const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
+                        if (mapTabBtn) mapTabBtn.click();
+                    }
 
                     setTimeout(() => {
                         if (map) google.maps.event.trigger(map, 'resize');
-                        displayDayOnMap(day.steps, destination); // 2. Affiche les étapes de la journée
-                    }, 150);
+                        displayDayOnMap(day.steps, destination);
+                    }, 100);
                 });
 
                 // 📌 CLIC SUR UNE ACTIVITÉ
@@ -440,13 +442,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const stepIndex = parseInt(itemEl.getAttribute('data-idx'));
                         const stepData = day.steps[stepIndex];
                         
-                        const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
-                        if (mapTabBtn) mapTabBtn.click(); // 1. Ouvre l'onglet Carte
+                        if (window.innerWidth < 992) {
+                            const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
+                            if (mapTabBtn) mapTabBtn.click();
+                        }
 
                         setTimeout(() => {
                             if (map) google.maps.event.trigger(map, 'resize');
-                            selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination); // 2. Affiche le marqueur
-                        }, 150);
+                            selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination);
+                        }, 100);
                     });
                 });
 
@@ -615,9 +619,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- BASCULE DES ONGLETS (TABS) ---
+    // --- BASCULE DES ONGLETS (TABS) & ADAPTATION MOBILE DE LA CARTE ---
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
+    const mapCardBox = document.querySelector('.map-card');
+    const itineraryMapCol = document.querySelector('.itinerary-map-col');
+    const tabMapContainer = document.getElementById('tab-map');
+
+    // Fonction de déplacement du bloc carte selon le mode d'affichage
+    const handleResponsiveMapPlacement = () => {
+        if (!mapCardBox) return;
+
+        if (window.innerWidth < 992) {
+            // Sur mobile : place la carte dans l'onglet dédié 'tab-map'
+            if (tabMapContainer && !tabMapContainer.contains(mapCardBox)) {
+                tabMapContainer.appendChild(mapCardBox);
+            }
+        } else {
+            // Sur PC : replace la carte à côté de l'itinéraire
+            if (itineraryMapCol && !itineraryMapCol.contains(mapCardBox)) {
+                itineraryMapCol.appendChild(mapCardBox);
+            }
+        }
+    };
+
+    handleResponsiveMapPlacement();
+    window.addEventListener('resize', handleResponsiveMapPlacement);
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -634,7 +661,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            if (targetTabId === 'tab-map' && map) {
+            if ((targetTabId === 'tab-map' || targetTabId === 'tab-itinerary') && map) {
                 setTimeout(() => {
                     google.maps.event.trigger(map, 'resize');
                 }, 100);
