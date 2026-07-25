@@ -253,6 +253,47 @@
                 font-size: 0.82rem;
             }
         }
+        /* --- OVERLAY DE CHARGEMENT KAIDO --- */
+        #kaido-loader-overlay {
+            display: none; /* Masqué par défaut */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(13, 11, 9, 0.9);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .loader-logo-spin {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+            animation: kaidoSpin 2s linear infinite; /* Rotation fluide en 2 secondes */
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+        }
+
+        @keyframes kaidoSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-text-title {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--color-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .loader-text-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
     </style>
 </head>
 <body>
@@ -428,6 +469,11 @@
                         submitBtn.textContent = "🧠 Kaido conçoit votre itinéraire sur-mesure...";
                         submitBtn.disabled = true;
                     }
+                    // 🌟 AFFICHER L'OVERLAY DE CHARGEMENT ROTATIF
+                    const loaderOverlay = document.getElementById('kaido-loader-overlay');
+                    if (loaderOverlay) {
+                        loaderOverlay.style.display = 'flex';
+                    }
 
                     const start = new Date(dateStart);
                     const end = new Date(dateEnd);
@@ -555,5 +601,11 @@
         }
     });
     </script>
+    <!-- OVERLAY DE CHARGEMENT AVEC LOGO ROTATIF -->
+    <div id="kaido-loader-overlay">
+        <img src="image/logo kaido V4.png" alt="Kaido Loading" class="loader-logo-spin">
+        <div class="loader-text-title">Tracer votre route...</div>
+        <div class="loader-text-subtitle">L'intelligence de Kaido conçoit votre carnet de voyage sur-mesure. Veuillez patienter.</div>
+    </div>
 </body>
 </html>
