@@ -418,10 +418,10 @@
             </div>
 
             <div class="header-right">
-                <!-- UN SEUL BOUTON PROFIL RESPONSIVE -->
-                <a href="#" class="user-profile-btn" title="Profil">
+                <!-- BOUTON PROFIL DYNAMIQUE -->
+                <a href="#" class="user-profile-btn" id="user-profile-link" title="Profil">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span class="user-name-text">F.DUCOURTHIAL</span>
+                    <span class="user-name-text" id="user-display-name">Mon Profil</span>
                 </a>
             </div>
         </header>
@@ -449,6 +449,22 @@
     <!-- LOGIQUE DE RENDU -->
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
+        // --- CHARGEMENT DYNAMIQUE DU NOM DE L'UTILISATEUR ---
+        if (typeof supabase !== 'undefined') {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const nameSpan = document.getElementById('user-display-name');
+                    if (nameSpan) {
+                        const userName = user.user_metadata?.full_name || user.email.split('@')[0].toUpperCase();
+                        nameSpan.textContent = userName;
+                    }
+                }
+            } catch (err) {
+                console.warn("Impossible de récupérer l'utilisateur connecté.", err);
+            }
+        }
+
         const grid = document.getElementById('trips-grid');
         
         if (grid) {
