@@ -443,6 +443,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // CLIC SUR LA JOURNÉE
                 block.querySelector('.day-header').addEventListener('click', () => {
+                    // Basculer sur l'onglet carte si besoin
+                    const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
+                    if (mapTabBtn) mapTabBtn.click();
                     displayDayOnMap(day.steps, destination);
                 });
 
@@ -455,6 +458,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         const stepIndex = parseInt(itemEl.getAttribute('data-idx'));
                         const stepData = day.steps[stepIndex];
+                        
+                        // Basculer sur l'onglet carte si besoin
+                        const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
+                        if (mapTabBtn) mapTabBtn.click();
+
                         selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination);
                     });
                 });
@@ -630,6 +638,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- BASCULE DES ONGLETS (TABS) ---
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTabId = btn.getAttribute('data-tab');
+
+            tabButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            tabContents.forEach(content => {
+                if (content.id === targetTabId) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+
+            // Si on ouvre l'onglet carte, on force Google Maps à recalculer sa taille
+            if (targetTabId === 'tab-map' && map) {
+                setTimeout(() => {
+                    google.maps.event.trigger(map, 'resize');
+                }, 100);
+            }
+        });
+    });
+
     // --- EXPORT PDF ---
     const exportBtn = document.getElementById('btn-export-pdf');
     if (exportBtn) {
@@ -639,7 +675,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights, #add-expense-form, .btn-delete-expense');
+            // Afficher temporairement tous les onglets pour générer un PDF complet
+            tabContents.forEach(el => el.style.display = 'block');
+
+            const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights, #add-expense-form, .btn-delete-expense, .trip-nav-tabs');
             elementsToHide.forEach(el => el.style.display = 'none');
 
             const element = document.querySelector('main.container');
@@ -658,10 +697,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             html2pdf().set(opt).from(element).save().then(() => {
                 elementsToHide.forEach(el => el.style.display = '');
+                // Réappliquer l'onglet actif après la génération du PDF
+                const activeBtn = document.querySelector('.tab-btn.active');
+                if (activeBtn) activeBtn.click();
                 exportBtn.textContent = originalText;
             }).catch(err => {
                 console.error("Erreur lors de la génération du PDF :", err);
                 elementsToHide.forEach(el => el.style.display = '');
+                const activeBtn = document.querySelector('.tab-btn.active');
+                if (activeBtn) activeBtn.click();
                 exportBtn.textContent = originalText;
             });
         });
