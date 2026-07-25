@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 🔥 NOUVEAU : DÉCODAGE DES DÉPENSES
+    // DÉCODAGE DES DÉPENSES
     if (typeof activeTrip.expenses === 'string') {
         try {
             activeTrip.expenses = JSON.parse(activeTrip.expenses);
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
     }
 
-    // 🔥 NOUVEAU : INITIALISATION DU TABLEAU DE DÉPENSES S'IL EST VIDE
+    // INITIALISATION DU TABLEAU DE DÉPENSES S'IL EST VIDE
     if (!activeTrip.expenses) {
         activeTrip.expenses = [];
     }
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     desc_text: activeTrip.desc,
                     checklist: activeTrip.checklist,
                     itinerary: activeTrip.itinerary,
-                    expenses: activeTrip.expenses || [] // ✅ Parfaitement intégré !
+                    expenses: activeTrip.expenses || []
                 }).eq('id', activeTrip.id);
             } catch (e) {
                 console.warn("Sauvegarde locale uniquement.");
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url('${activeTrip.image}')`;
     }
 
-    // Budget
+    // Budget global estimé
     let totalB = parseFloat(activeTrip.budget) || 0;
     let daysCount = (activeTrip.itinerary && activeTrip.itinerary.length) ? activeTrip.itinerary.length : 3;
     if (totalB <= 0) totalB = daysCount * 150 + 200;
@@ -464,6 +464,91 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // --- RENDU SUIVI DES DÉPENSES RÉELLES ---
+    const renderExpenses = () => {
+        const listEl = document.getElementById('expenses-list');
+        const totalSpentEl = document.getElementById('expenses-total-spent');
+        const targetBudgetEl = document.getElementById('expenses-target-budget');
+        const progressBar = document.getElementById('expenses-progress-bar');
+
+        if (!listEl) return;
+
+        const targetBudget = parseFloat(activeTrip.budget) || totalB;
+        let totalSpent = 0;
+
+        listEl.innerHTML = '';
+
+        if (activeTrip.expenses.length === 0) {
+            listEl.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense enregistrée.</span>`;
+        } else {
+            activeTrip.expenses.forEach(expense => {
+                totalSpent += parseFloat(expense.amount) || 0;
+
+                const row = document.createElement('div');
+                row.style.cssText = `
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: rgba(255, 255, 255, 0.02);
+                    padding: 0.4rem 0.6rem;
+                    border-radius: 4px;
+                    border: 1px solid rgba(212, 175, 55, 0.1);
+                    font-size: 0.82rem;
+                `;
+
+                row.innerHTML = `
+                    <span style="color: var(--text-main); font-weight: 500;">${expense.title}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <strong style="color: var(--color-gold);">${parseFloat(expense.amount).toFixed(2)} €</strong>
+                        <button class="btn-delete-expense" data-id="${expense.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.75rem; opacity: 0.7;">✖</button>
+                    </div>
+                `;
+
+                row.querySelector('.btn-delete-expense').addEventListener('click', async () => {
+                    activeTrip.expenses = activeTrip.expenses.filter(e => String(e.id) !== String(expense.id));
+                    await saveTrip();
+                    renderExpenses();
+                });
+
+                listEl.appendChild(row);
+            });
+        }
+
+        if (totalSpentEl) totalSpentEl.textContent = `${totalSpent.toFixed(2)} €`;
+        if (targetBudgetEl) targetBudgetEl.textContent = `${targetBudget} €`;
+
+        if (progressBar) {
+            const percentage = Math.min(100, Math.round((totalSpent / targetBudget) * 100));
+            progressBar.style.width = `${percentage}%`;
+            progressBar.style.background = totalSpent > targetBudget ? '#A63A2B' : '#D4AF37';
+        }
+    };
+
+    renderExpenses();
+
+    // Formulaire d'ajout de dépense
+    const expenseForm = document.getElementById('add-expense-form');
+    if (expenseForm) {
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('expense-title-input');
+            const amountInput = document.getElementById('expense-amount-input');
+
+            if (titleInput && amountInput && titleInput.value.trim() && amountInput.value) {
+                activeTrip.expenses.push({
+                    id: Date.now(),
+                    title: titleInput.value.trim(),
+                    amount: parseFloat(amountInput.value)
+                });
+                await saveTrip();
+                renderExpenses();
+
+                titleInput.value = '';
+                amountInput.value = '';
+            }
+        });
+    }
+
     // Rendu Checklist
     function renderChecklist() {
         const container = document.getElementById('checklist-container');
@@ -554,7 +639,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights');
+            const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights, #add-expense-form, .btn-delete-expense');
             elementsToHide.forEach(el => el.style.display = 'none');
 
             const element = document.querySelector('main.container');
