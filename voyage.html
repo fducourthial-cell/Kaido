@@ -8,21 +8,21 @@
     <link rel="stylesheet" href="css/style.css">
 
     <!-- CONFIGURATION PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0D0B09">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="image/logo kaido V4.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0D0B09">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="image/logo kaido V4.png">
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('✅ Service Worker enregistré avec succès !', reg.scope))
-        .catch((err) => console.error('❌ Échec enregistrement Service Worker:', err));
-    });
-  }
-</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((reg) => console.log('✅ Service Worker enregistré avec succès !', reg.scope))
+            .catch((err) => console.error('❌ Échec enregistrement Service Worker:', err));
+        });
+      }
+    </script>
     
     <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -61,7 +61,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: transparent; /* Transparence totale sans fond noir */
+            background: transparent;
             border-bottom: none;
         }
 
@@ -83,7 +83,7 @@
 
         /* LOGO CENTRÉ À 100PX */
         .header-logo-center {
-            height: 300px;
+            height: 100px;
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
@@ -98,10 +98,8 @@
             display: flex;
             align-items: flex-end;
             padding: 2.5rem 2rem;
-            /* Ombre légère uniquement sur le bas pour la lisibilité du titre */
             box-shadow: inset 0 -50px 40px rgba(13, 11, 9, 0.6);
             background-color: #1a1714;
-            /* Rendu d'image optimisé pour éviter l'effet flou */
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
         }
@@ -287,14 +285,14 @@
             <a href="index.html" class="header-link-red">← Mes Voyages</a>
         </div>
 
-        <!-- 2. CENTRE : Logo KAIDO de 100px -->
+        <!-- 2. CENTRE : Logo KAIDO centré -->
         <div>
             <a href="index.html" style="display: flex; align-items: center; justify-content: center;">
                 <img src="image/logo kaido V4.png" alt="Kaido Logo" class="header-logo-center">
             </a>
         </div>
 
-        <!-- 3. DROITE : Bouton utilisateur (injecté dynamiquement par auth.js) -->
+        <!-- 3. DROITE : Bouton utilisateur -->
         <nav id="nav-right">
             <!-- auth.js y place le bouton de connexion/profil -->
         </nav>
@@ -359,7 +357,7 @@
                     </a>
                 </div>
 
-                <!-- 2. CHECK-LIST (Placée au-dessus de la carte) -->
+                <!-- 2. CHECK-LIST -->
                 <div class="checklist-card">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">À ne pas oublier</p>
@@ -370,7 +368,7 @@
                     </form>
                 </div>
 
-                <!-- 3. CARTE INTERACTIVE (STICKY POUR SUIVRE LE SCROLL) -->
+                <!-- 3. CARTE INTERACTIVE -->
                 <div class="map-card">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
                     <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une activité pour la localiser</p>
