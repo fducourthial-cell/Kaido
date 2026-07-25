@@ -37,6 +37,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             text-align: center;
             margin-bottom: 1.8rem;
         }
+        .kaido-google-btn {
+            width: 100%;
+            background: #ffffff;
+            color: #333333;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .kaido-google-btn:hover {
+            background: #f1f1f1;
+            border-color: #D4AF37;
+        }
+        .kaido-auth-divider {
+            text-align: center;
+            color: #8E847A;
+            font-size: 0.8rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
         .kaido-auth-field {
             margin-bottom: 1.2rem;
         }
@@ -105,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.head.appendChild(style);
 
-    // 2. Structure HTML de la Modale
+    // 2. Structure HTML de la Modale (avec le bouton Google)
     const modalHTML = `
         <div id="kaidoAuthModal" class="kaido-auth-modal">
             <div class="kaido-auth-card">
@@ -113,6 +141,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h3 class="kaido-auth-title" id="authTitle">Connexion à Kaido</h3>
                 <p class="kaido-auth-sub" id="authSub">Accédez à tous vos carnets de route synchronisés.</p>
                 
+                <!-- BOUTON GOOGLE OAUTH -->
+                <button type="button" id="googleLoginBtn" class="kaido-google-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.19v3.15C3.17 21.32 7.24 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.6H1.19C.43 8.13 0 9.87 0 11.7c0 1.83.43 3.57 1.19 5.1l4.08-2.56z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.24 0 3.17 2.68 1.19 6.6l4.08 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
+                    Continuer avec Google
+                </button>
+
+                <div class="kaido-auth-divider">ou par email</div>
+
                 <form id="kaidoAuthForm">
                     <div class="kaido-auth-field">
                         <label for="authEmail">Adresse Email</label>
@@ -166,7 +202,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('closeAuthModal').addEventListener('click', () => modal.style.display = 'none');
     }
 
-    // 4. Inscription / Connexion Supabase
+    // Gestionnaire du clic sur le bouton Google OAuth
+    const googleBtn = document.getElementById('googleLoginBtn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', async () => {
+            const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
+            if (!client) {
+                alert("Supabase indisponible.");
+                return;
+            }
+            try {
+                const { error } = await client.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + window.location.pathname
+                    }
+                });
+                if (error) throw error;
+            } catch (err) {
+                alert("Erreur de connexion Google : " + err.message);
+            }
+        });
+    }
+
+    // 4. Inscription / Connexion Supabase classique par email
     if (authForm) {
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -202,7 +261,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Mettre à jour notre bouton existant dans le Header (sans en créer un en double)
+    // 5. Mettre à jour notre bouton existant dans le Header (Extraction du prénom)
     const updateHeaderAuth = async () => {
         const authBtn = document.getElementById('user-profile-link');
         const nameSpan = document.getElementById('user-display-name');
@@ -221,8 +280,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (user) {
-            const userName = user.user_metadata?.full_name || user.email.split('@')[0].toUpperCase();
-            nameSpan.textContent = userName;
+            // Récupère le nom complet depuis Google ou les métadonnées, ou l'email, et isole uniquement le PRÉNOM
+            const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+            const firstName = fullName.trim().split(' ')[0].toUpperCase();
+
+            nameSpan.textContent = firstName;
             authBtn.title = "Connecté - Cliquer pour vous déconnecter";
             authBtn.onclick = async (e) => {
                 e.preventDefault();
