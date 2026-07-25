@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // --- DECODAGE SYSTEMATIQUE DE SUPABASE ---
+    // --- DÉCODAGE SYSTÉMATIQUE DE SUPABASE ---
     if (typeof activeTrip.itinerary === 'string') {
         try {
             activeTrip.itinerary = JSON.parse(activeTrip.itinerary);
@@ -310,11 +310,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // 🔥 NOUVEAU : DÉCODAGE DES DÉPENSES
+    if (typeof activeTrip.expenses === 'string') {
+        try {
+            activeTrip.expenses = JSON.parse(activeTrip.expenses);
+        } catch (e) {
+            console.error("Erreur de conversion des dépenses :", e);
+            activeTrip.expenses = [];
+        }
+    }
+
     if (!activeTrip.checklist) {
         activeTrip.checklist = [
             { id: 1, text: "Passeport / Carte d'identité", done: false },
             { id: 2, text: "Billets de réservation", done: false }
         ];
+    }
+
+    // 🔥 NOUVEAU : INITIALISATION DU TABLEAU DE DÉPENSES S'IL EST VIDE
+    if (!activeTrip.expenses) {
+        activeTrip.expenses = [];
     }
 
     async function saveTrip() {
@@ -332,7 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     desc_text: activeTrip.desc,
                     checklist: activeTrip.checklist,
                     itinerary: activeTrip.itinerary,
-                    expenses: activeTrip.expenses || []
+                    expenses: activeTrip.expenses || [] // ✅ Parfaitement intégré !
                 }).eq('id', activeTrip.id);
             } catch (e) {
                 console.warn("Sauvegarde locale uniquement.");
