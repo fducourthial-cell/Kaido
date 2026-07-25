@@ -193,13 +193,12 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
     }
 }
 
-// --- FONCTION MÉTÉO (OPEN-METEO AVEC FALLBACK GÉOCODAGE AUTO & DATES DYNAMIQUES) ---
+// --- FONCTION MÉTÉO ---
 async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDate) {
     const container = document.getElementById('weather-container');
     const subtitle = document.getElementById('weather-subtitle');
     if (!container) return;
 
-    // Géocodage de secours si pas de GPS enregistré
     if ((!lat || !lng) && typeof google !== 'undefined' && google.maps) {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address: destinationName }, (results, status) => {
@@ -230,7 +229,6 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
     try {
         let url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
 
-        // Vérification si les dates du voyage sont dans les 14 prochains jours
         if (startDate && endDate) {
             const start = new Date(startDate);
             const today = new Date();
@@ -295,29 +293,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- DÉCODAGE SYSTÉMATIQUE DE SUPABASE ---
     if (typeof activeTrip.itinerary === 'string') {
-        try {
-            activeTrip.itinerary = JSON.parse(activeTrip.itinerary);
-        } catch (e) {
-            console.error("Erreur de conversion de l'itinéraire :", e);
-        }
+        try { activeTrip.itinerary = JSON.parse(activeTrip.itinerary); } catch (e) { console.error(e); }
     }
-
     if (typeof activeTrip.checklist === 'string') {
-        try {
-            activeTrip.checklist = JSON.parse(activeTrip.checklist);
-        } catch (e) {
-            console.error("Erreur de conversion de la checklist :", e);
-        }
+        try { activeTrip.checklist = JSON.parse(activeTrip.checklist); } catch (e) { console.error(e); }
     }
-
-    // DÉCODAGE DES DÉPENSES
     if (typeof activeTrip.expenses === 'string') {
-        try {
-            activeTrip.expenses = JSON.parse(activeTrip.expenses);
-        } catch (e) {
-            console.error("Erreur de conversion des dépenses :", e);
-            activeTrip.expenses = [];
-        }
+        try { activeTrip.expenses = JSON.parse(activeTrip.expenses); } catch (e) { activeTrip.expenses = []; }
     }
 
     if (!activeTrip.checklist) {
@@ -326,11 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { id: 2, text: "Billets de réservation", done: false }
         ];
     }
-
-    // INITIALISATION DU TABLEAU DE DÉPENSES S'IL EST VIDE
-    if (!activeTrip.expenses) {
-        activeTrip.expenses = [];
-    }
+    if (!activeTrip.expenses) activeTrip.expenses = [];
 
     async function saveTrip() {
         const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
@@ -370,7 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url('${activeTrip.image}')`;
     }
 
-    // Budget global estimé
+    // Budget global
     let totalB = parseFloat(activeTrip.budget) || 0;
     let daysCount = (activeTrip.itinerary && activeTrip.itinerary.length) ? activeTrip.itinerary.length : 3;
     if (totalB <= 0) totalB = daysCount * 150 + 200;
@@ -441,15 +419,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div>${stepsHTML}</div>
                 `;
 
-                // CLIC SUR LA JOURNÉE
+                // 📌 CLIC SUR LA JOURNÉE ENTIÈRE
                 block.querySelector('.day-header').addEventListener('click', () => {
-                    // Basculer sur l'onglet carte si besoin
                     const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
-                    if (mapTabBtn) mapTabBtn.click();
-                    displayDayOnMap(day.steps, destination);
+                    if (mapTabBtn) mapTabBtn.click(); // 1. Ouvre l'onglet Carte
+
+                    setTimeout(() => {
+                        if (map) google.maps.event.trigger(map, 'resize');
+                        displayDayOnMap(day.steps, destination); // 2. Affiche les étapes de la journée
+                    }, 150);
                 });
 
-                // CLIC SUR UNE ACTIVITÉ
+                // 📌 CLIC SUR UNE ACTIVITÉ
                 block.querySelectorAll('.step-item').forEach((itemEl) => {
                     itemEl.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -459,11 +440,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const stepIndex = parseInt(itemEl.getAttribute('data-idx'));
                         const stepData = day.steps[stepIndex];
                         
-                        // Basculer sur l'onglet carte si besoin
                         const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
-                        if (mapTabBtn) mapTabBtn.click();
+                        if (mapTabBtn) mapTabBtn.click(); // 1. Ouvre l'onglet Carte
 
-                        selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination);
+                        setTimeout(() => {
+                            if (map) google.maps.event.trigger(map, 'resize');
+                            selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination); // 2. Affiche le marqueur
+                        }, 150);
                     });
                 });
 
@@ -472,7 +455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- RENDU SUIVI DES DÉPENSES RÉELLES ---
+    // --- RENDU DÉPENSES ---
     const renderExpenses = () => {
         const listEl = document.getElementById('expenses-list');
         const totalSpentEl = document.getElementById('expenses-total-spent');
@@ -494,14 +477,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const row = document.createElement('div');
                 row.style.cssText = `
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    background: rgba(255, 255, 255, 0.02);
-                    padding: 0.4rem 0.6rem;
-                    border-radius: 4px;
-                    border: 1px solid rgba(212, 175, 55, 0.1);
-                    font-size: 0.82rem;
+                    display: flex; justify-content: space-between; align-items: center;
+                    background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.6rem;
+                    border-radius: 4px; border: 1px solid rgba(212, 175, 55, 0.1); font-size: 0.82rem;
                 `;
 
                 row.innerHTML = `
@@ -534,7 +512,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderExpenses();
 
-    // Formulaire d'ajout de dépense
     const expenseForm = document.getElementById('add-expense-form');
     if (expenseForm) {
         expenseForm.addEventListener('submit', async (e) => {
@@ -657,7 +634,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            // Si on ouvre l'onglet carte, on force Google Maps à recalculer sa taille
             if (targetTabId === 'tab-map' && map) {
                 setTimeout(() => {
                     google.maps.event.trigger(map, 'resize');
@@ -675,7 +651,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Afficher temporairement tous les onglets pour générer un PDF complet
             tabContents.forEach(el => el.style.display = 'block');
 
             const elementsToHide = document.querySelectorAll('header, .edit-modal, #btn-open-edit, #btn-export-pdf, .checklist-form, .btn-delete-task, #btn-google-flights, #add-expense-form, .btn-delete-expense, .trip-nav-tabs');
@@ -697,7 +672,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             html2pdf().set(opt).from(element).save().then(() => {
                 elementsToHide.forEach(el => el.style.display = '');
-                // Réappliquer l'onglet actif après la génération du PDF
                 const activeBtn = document.querySelector('.tab-btn.active');
                 if (activeBtn) activeBtn.click();
                 exportBtn.textContent = originalText;
