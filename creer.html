@@ -23,7 +23,7 @@
       }
     </script>
     
-    <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
+    <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
@@ -46,11 +46,7 @@
             --font-serif: 'Playfair Display', serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg-dark);
@@ -114,9 +110,7 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
         }
 
-        .form-group {
-            margin-bottom: 1.8rem;
-        }
+        .form-group { margin-bottom: 1.8rem; }
 
         .form-group label {
             display: block;
@@ -177,9 +171,7 @@
             border-color: var(--color-gold);
         }
 
-        gmp-place-autocomplete {
-            width: 100%;
-        }
+        gmp-place-autocomplete { width: 100%; }
         
         gmp-place-autocomplete::part(input) {
             width: 100%;
@@ -257,12 +249,11 @@
 
         <section class="create-hero">
             <h1>Tracer une nouvelle route</h1>
-            <p>Laissez l'intelligence de Kaido concevoir votre carnet de voyage sur-mesure.</p>
+            <p>L'intelligence de Kaido conçoit votre carnet de voyage sur-mesure.</p>
         </section>
 
         <main class="kaido-form-box">
             <form id="create-trip-form">
-
                 <div class="form-group">
                     <label for="trip-departure">🛫 Ville de départ</label>
                     <input type="text" id="trip-departure" class="form-control" placeholder="Ex: Paris, Édimbourg, Lyon..." required>
@@ -297,7 +288,6 @@
                 <button type="submit" class="kaido-submit-btn">
                     ✨ Concevoir mon itinéraire sur-mesure
                 </button>
-
             </form>
         </main>
     </div>
@@ -317,6 +307,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('create-trip-form');
         const modernField = document.getElementById('trip-destination-modern');
+        const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
 
         let selectedDestinationName = "";
         let placesService = null;
@@ -431,7 +422,7 @@
                     }
 
                     if (submitBtn) {
-                        submitBtn.textContent = "Calcul en cours...";
+                        submitBtn.textContent = "🧠 L'IA conçoit votre voyage...";
                         submitBtn.disabled = true;
                     }
 
@@ -447,38 +438,70 @@
                         return;
                     }
 
-                    let spots = [];
-                    try {
-                        spots = await fetchTopPlacesSafe(cleanDestination);
-                    } catch (err) {
-                        spots = [
-                            { name: "Centre historique", lat: null, lng: null },
-                            { name: "Parc principal", lat: null, lng: null }
-                        ];
+                    // 1. Appel Netlify pour l'itinéraire riche et la checklist spécifique par IA
+                    const response = await fetch(NETLIFY_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            destination: cleanDestination,
+                            departure: departure,
+                            totalDays: totalDays,
+                            descText: desc
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error || "Erreur de génération par l'IA Netlify.");
                     }
 
-                    const itinerary = generateItinerary(start, totalDays, spots);
-                    const mainLat = (spots.length > 0 && spots[0].lat) ? spots[0].lat : null;
-                    const mainLng = (spots.length > 0 && spots[0].lng) ? spots[0].lng : null;
+                    const aiData = await response.json();
+                    const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
+                    const formattedItinerary = (aiData.itinerary || []).map((dayObj, index) => {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + index);
+                        return {
+                            day: dayObj.day || `Jour ${index + 1}`,
+                            dateText: formatDate(currentDate),
+                            steps: (dayObj.steps || []).map(step => ({
+                                time: step.time || "10:00",
+                                activity: step.activity || step.title || "Activité",
+                                location: step.location || cleanDestination,
+                                lat: null,
+                                lng: null
+                            }))
+                        };
+                    });
+
+                    const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({
+                        id: Date.now() + idx,
+                        text: item,
+                        done: false
+                    }));
+
+                    // 2. Infos photo & géolocalisation
                     const destInfo = await getDestinationInfo(cleanDestination);
+
+                    // 3. Calcul de notre budget intelligent
                     const calculatedBudget = calculateSmartBudget(cleanDestination, totalDays, desc, userBudget);
 
                     const newTrip = {
                         id: Date.now(),
                         title: cleanDestination,
                         destination: cleanDestination,
-                        destinationLat: mainLat,
-                        destinationLng: mainLng,
+                        destinationLat: destInfo.lat,
+                        destinationLng: destInfo.lng,
                         departure: departure,
-                        dates: `${formatDate(start)} au ${formatDate(end)}`,
+                        dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
                         dateStart: dateStart,
                         dateEnd: dateEnd,
                         budget: calculatedBudget.total,
                         budgetDetails: calculatedBudget,
                         desc: desc,
                         image: destInfo.image,
-                        itinerary: itinerary,
+                        itinerary: formattedItinerary,
+                        checklist: formattedChecklist,
                         expenses: []
                     };
 
@@ -490,6 +513,7 @@
                     window.location.href = 'voyage.html';
 
                 } catch (error) {
+                    console.error(error);
                     if (loaderOverlay) loaderOverlay.style.display = 'none';
                     alert("Erreur lors de la création : " + error.message);
                     if (submitBtn) { submitBtn.textContent = originalBtnText; submitBtn.disabled = false; }
@@ -534,51 +558,6 @@
             rest: Math.max(50, restPart),
             isRoadTrip: isRoadTrip
         };
-    }
-
-    function fetchTopPlacesSafe(destinationName) {
-        return new Promise((resolve, reject) => {
-            if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
-                reject("API Google Maps absente.");
-                return;
-            }
-            const service = new google.maps.places.PlacesService(document.createElement('div'));
-            service.textSearch({ query: `attractions touristiques à ${destinationName}`, fields: ['name', 'geometry'] }, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                    const topSpots = results
-                        .filter(p => p.name && p.geometry && p.geometry.location)
-                        .slice(0, 10)
-                        .map(p => ({ name: p.name, lat: p.geometry.location.lat(), lng: p.geometry.location.lng() }));
-                    if (topSpots.length > 0) resolve(topSpots);
-                    else reject("Aucun lieu trouvé.");
-                } else reject(status);
-            });
-        });
-    }
-
-    function generateItinerary(startDate, totalDays, spots) {
-        const itinerary = [];
-        let spotIndex = 0;
-        for (let i = 0; i < totalDays; i++) {
-            const currentDate = new Date(startDate);
-            currentDate.setDate(startDate.getDate() + i);
-            const daySteps = [];
-            
-            const spotMatin = spots[spotIndex % spots.length];
-            daySteps.push({ time: "10:00", activity: `Visite : ${spotMatin.name}`, location: spotMatin.name, lat: spotMatin.lat, lng: spotMatin.lng });
-            spotIndex++;
-
-            const spotAprem = spots[spotIndex % spots.length];
-            daySteps.push({ time: "15:00", activity: `Découverte : ${spotAprem.name}`, location: spotAprem.name, lat: spotAprem.lat, lng: spotAprem.lng });
-            spotIndex++;
-
-            itinerary.push({ day: `Jour ${i + 1}`, dateText: formatDate(currentDate), steps: daySteps });
-        }
-        return itinerary;
-    }
-
-    function formatDate(date) {
-        return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
     }
     </script>
 </body>
