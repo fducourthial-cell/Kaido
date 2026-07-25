@@ -193,11 +193,26 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
     }
 }
 
-// --- FONCTION MÉTÉO (API OPEN-METEO) ---
-async function fetchAndRenderWeather(lat, lng) {
+// --- FONCTION MÉTÉO (OPEN-METEO AVEC FALLBACK GÉOCODAGE AUTO & DATES DYNAMIQUES) ---
+async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDate) {
     const container = document.getElementById('weather-container');
     const subtitle = document.getElementById('weather-subtitle');
-    if (!container || !lat || !lng) return;
+    if (!container) return;
+
+    // Géocodage de secours si pas de GPS enregistré
+    if ((!lat || !lng) && typeof google !== 'undefined' && google.maps) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: destinationName }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                const autoLat = results[0].geometry.location.lat();
+                const autoLng = results[0].geometry.location.lng();
+                fetchAndRenderWeather(autoLat, autoLng, destinationName, startDate, endDate);
+            } else {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Météo indisponible pour cette destination.</span>`;
+            }
+        });
+        return;
+    }
 
     const weatherCodes = {
         0: '☀️ Ensoleillé',
@@ -213,7 +228,19 @@ async function fetchAndRenderWeather(lat, lng) {
     };
 
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+        let url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+
+        // Vérification si les dates du voyage sont dans les 14 prochains jours
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const today = new Date();
+            const diffDays = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= 0 && diffDays <= 14) {
+                url += `&start_date=${startDate}&end_date=${endDate}`;
+            }
+        }
+
         const response = await fetch(url);
         const data = await response.json();
 
@@ -252,7 +279,7 @@ async function fetchAndRenderWeather(lat, lng) {
         }
     } catch (err) {
         console.warn("Impossible de charger la météo :", err);
-        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Météo non disponible pour ces coordonnées.</span>`;
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Météo indisponible.</span>`;
     }
 }
 
@@ -351,11 +378,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialisation Carte & Météo
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
-    
-    // 🔥 Lancement de la météo 🔥
-    if (activeTrip.destinationLat && activeTrip.destinationLng) {
-        fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng);
-    }
+    fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
     // Rendu de l'itinéraire
     const daysContainer = document.getElementById('itinerary-days-container');
