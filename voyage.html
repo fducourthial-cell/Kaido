@@ -29,6 +29,9 @@
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
 
+    <!-- LIBRAIRIE EXPORT PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -320,6 +323,13 @@
                 </div>
 
                 <div id="itinerary-days-container"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h3 style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Notes de voyage</h3>
+    <div style="display: flex; gap: 0.5rem;">
+        <button id="btn-export-pdf" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-gold); color: #0D0B09; font-weight: bold; border: none; border-radius: 4px; cursor: pointer;">📄 Exporter en PDF</button>
+        <button id="btn-open-edit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-torii); color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ Modifier</button>
+    </div>
+</div>
             </section>
 
             <!-- SIDEBAR LOGISTIQUE -->
