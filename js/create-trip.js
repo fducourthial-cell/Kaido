@@ -43,10 +43,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 console.log("📍 Destination textuelle extraite :", cleanDestination);
 
-                // 2. LECTURE DES AUTRES CHAMPS
-                const departureInput = document.getElementById('trip-departure');
-                const departure = departureInput ? departureInput.value : 'Paris';
-                
+                // 2. EXTRACTION ULTRA-BLINDÉE DE LA VILLE DE DÉPART
+                let departureText = "";
+
+                const departureModernField = document.getElementById('trip-departure-modern');
+                if (departureModernField) {
+                    if (typeof departureModernField.value === 'string' && departureModernField.value.trim() !== '') {
+                        departureText = departureModernField.value;
+                    } else if (typeof departureModernField.value === 'object' && departureModernField.value !== null) {
+                        departureText = departureModernField.value.displayName || departureModernField.value.formattedAddress || departureModernField.value.name || "";
+                    }
+                    
+                    if (!departureText) {
+                        const innerDepInput = departureModernField.shadowRoot ? departureModernField.shadowRoot.querySelector('input') : departureModernField.querySelector('input');
+                        if (innerDepInput && innerDepInput.value) {
+                            departureText = innerDepInput.value;
+                        }
+                    }
+                }
+
+                if (!departureText) {
+                    const backupDepInput = document.getElementById('trip-departure');
+                    if (backupDepInput) departureText = backupDepInput.value;
+                }
+
+                const departure = String(departureText || 'Paris').trim();
+                console.log("🛫 Ville de départ extraite :", departure);
+
+                // 3. LECTURE DES AUTRES CHAMPS
                 const dateStart = document.getElementById('trip-date-start').value;
                 const dateEnd = document.getElementById('trip-date-end').value;
                 
@@ -85,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // 3. RECHERCHE DES LIEUX À VISITER AVEC COORDONNÉES GPS
+                // 4. RECHERCHE DES LIEUX À VISITER AVEC COORDONNÉES GPS
                 let spots = [];
                 try {
                     spots = await fetchTopPlacesSafe(cleanDestination);
@@ -107,12 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mainLat = (spots.length > 0 && spots[0].lat) ? spots[0].lat : null;
                 const mainLng = (spots.length > 0 && spots[0].lng) ? spots[0].lng : null;
                 
-                // 4. RÉCUPÉRATION DE L'IMAGE PEXELS
+                // 5. RÉCUPÉRATION DE L'IMAGE PEXELS
                 console.log("🖼️ Appel Pexels pour :", cleanDestination);
                 const finalImage = await fetchPexelsImage(cleanDestination);
                 console.log("✅ Image retenue :", finalImage);
 
-                // 5. ENREGISTREMENT DU VOYAGE (AVEC LAT ET LNG)
+                // 6. ENREGISTREMENT DU VOYAGE (AVEC LAT ET LNG)
                 const newTrip = {
                     id: Date.now(),
                     title: cleanDestination,
@@ -197,7 +221,7 @@ function fetchTopPlacesSafe(destinationName) {
 
             const request = {
                 query: `attractions touristiques à ${destinationName}`,
-                fields: ['name', 'geometry'] // <-- On demande explicitement geometry pour récupérer lat/lng
+                fields: ['name', 'geometry']
             };
 
             service.textSearch(request, (results, status) => {
@@ -250,7 +274,7 @@ function generateItinerary(startDate, totalDays, spots) {
             activity: `Découverte incontournable : ${spotAprem.name}`,
             location: spotAprem.name,
             lat: spotAprem.lat,
-            lng: spotAprem.lng
+            lng: spotArem?.lng || spotAprem.lng
         });
         spotIndex++;
 
