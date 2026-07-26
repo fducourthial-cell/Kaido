@@ -167,6 +167,13 @@ body:has(#trip-cover) header {
     background: transparent;
     border-bottom: none;
 }
+/* CENTRAGE DU LOGO SUR LA PAGE CRÉER */
+body:has(.create-hero) .kaido-header,
+body:has(.create-hero) header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 /* ==========================================================================
    4. DASHBOARD (INDEX.HTML)
    ========================================================================== */
