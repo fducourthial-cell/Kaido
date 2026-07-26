@@ -288,7 +288,7 @@ const updateHeaderAuth = async () => {
 
         if (userAvatar && authBtn) {
             authBtn.innerHTML = `
-                <img src="${userAvatar}" alt="${firstName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-gold);">
+                <img src="${userAvatar}" alt="${firstName}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-gold);">
             `;
         } else if (nameSpan) {
             nameSpan.textContent = firstName;
