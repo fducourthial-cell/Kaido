@@ -1,5 +1,5 @@
 /* ==========================================================================
-   VARIABLES & DESIGN SYSTEM KAIDO
+   1. VARIABLES & DESIGN SYSTEM KAIDO
    ========================================================================== */
 :root {
     --bg-dark: #0D0B09;
@@ -8,7 +8,7 @@
     --color-torii: #A63A2B;
     --text-main: #F4EFEA;
     --text-muted: #8E847A;
-    --border-color: rgba(212, 175, 55, 0.08);
+    --border-color: rgba(212, 175, 55, 0.15);
     --font-kaido: 'Plus Jakarta Sans', sans-serif;
     --font-serif: 'Playfair Display', serif;
 }
@@ -20,7 +20,7 @@
 }
 
 /* ==========================================================================
-   STYLE GLOBAL & HALO CHALEUREUX + TEXTURE WASHI
+   2. STYLE GLOBAL & HALO CHALEUREUX + TEXTURE WASHI
    ========================================================================== */
 body {
     background-color: #0d0b09;
@@ -32,9 +32,11 @@ body {
     );
     background-attachment: fixed;
     color: var(--text-main);
+    font-family: var(--font-kaido);
     line-height: 1.6;
     position: relative;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* Calque de texture papier de riz (Washi) */
@@ -58,7 +60,7 @@ body::before {
 }
 
 /* ==========================================================================
-   HEADER COMPACT AVEC LOGO CENTRÉ ET KAIDO ROUGE TORII
+   3. EN-TÊTES & LOGOS (INDEX, CRÉER & VOYAGE)
    ========================================================================== */
 .kaido-header {
     display: grid;
@@ -96,15 +98,15 @@ body::before {
     align-items: center;
 }
 
-.header-logo {
-    height: 75px; /* Taille corrigée pour ne plus être géante */
+.header-logo, .header-logo-center {
+    height: 75px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 3px 10px rgba(212, 175, 55, 0.2));
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
     transition: transform 0.3s ease;
 }
 
-.header-logo:hover {
+.header-logo:hover, .header-logo-center:hover {
     transform: scale(1.05);
 }
 
@@ -112,6 +114,23 @@ body::before {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+}
+
+/* Lien rouge spécifique (ex: page voyage) */
+.header-link-red {
+    display: none;
+    color: var(--color-torii);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+}
+.header-link-red:hover {
+    opacity: 0.85;
+    color: #c94332;
 }
 
 /* Bouton Profil / Identifiant responsive */
@@ -130,14 +149,13 @@ body::before {
     letter-spacing: 0.05em;
     transition: all 0.3s ease;
 }
-
 .user-profile-btn:hover {
     background: rgba(212, 175, 55, 0.1);
     border-color: var(--color-gold);
 }
 
 /* ==========================================================================
-   TITRES & GRILLE DES VOYAGES
+   4. DASHBOARD (INDEX.HTML)
    ========================================================================== */
 .dashboard-title-wrapper {
     margin: 2.5rem 0 2rem 0;
@@ -321,29 +339,419 @@ body::before {
 }
 
 /* ==========================================================================
-   MEDIA QUERIES MOBILE (MAX 768px)
+   5. FORMULAIRES & CRÉATION (CREER.HTML)
    ========================================================================== */
+.create-hero {
+    padding: 3.5rem 0 2.5rem 0;
+    text-align: center;
+}
+.create-hero h1 {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 400;
+    margin-bottom: 0.8rem;
+    color: var(--text-main);
+}
+.create-hero p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    font-weight: 300;
+    max-width: 550px;
+    margin: 0 auto;
+}
+
+.kaido-form-box {
+    max-width: 800px;
+    margin: 0 auto 5rem auto;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 2.8rem;
+    border-radius: 6px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+.form-group {
+    margin-bottom: 1.8rem;
+}
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-gold);
+    margin-bottom: 0.6rem;
+}
+
+.form-control {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 2px solid rgba(214, 175, 55, 0.2);
+    padding: 0.9rem 1rem;
+    color: var(--text-main);
+    font-family: var(--font-kaido);
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.form-control:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(214, 175, 55, 0.4);
+    border-bottom-color: var(--color-gold);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+gmp-place-autocomplete {
+    width: 100%;
+}
+gmp-place-autocomplete::part(input) {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-bottom: 2px solid rgba(214, 175, 55, 0.2) !important;
+    padding: 0.9rem 1rem !important;
+    color: var(--text-main) !important;
+    font-family: var(--font-kaido) !important;
+    font-size: 1rem !important;
+    border-radius: 4px !important;
+}
+
+.kaido-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--color-torii), #82271B);
+    color: white;
+    border: 1px solid rgba(214, 175, 55, 0.15);
+    padding: 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(166, 58, 43, 0.15);
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+.kaido-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(166, 58, 43, 0.35);
+    border-color: var(--color-gold);
+}
+
+/* ==========================================================================
+   6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
+   ========================================================================== */
+.trip-header-visual {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 2.5rem 2rem;
+    box-shadow: inset 0 -50px 40px rgba(13, 11, 9, 0.6);
+    background-color: #1a1714;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+.trip-header-title {
+    position: relative;
+    z-index: 2;
+}
+.trip-header-title h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    margin: 0 0 0.4rem 0;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+.trip-header-title p {
+    margin: 0;
+    color: var(--color-gold);
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* Barre de navigation interne du voyage */
+.trip-nav-tabs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #14110E;
+    border-top: 1px solid var(--border-color);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 1000;
+    padding: 0.3rem 0;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+}
+.tab-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0.2rem 0;
+    white-space: nowrap;
+}
+.tab-btn .tab-icon {
+    font-size: 1rem;
+}
+.tab-btn span:not(.tab-icon) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.tab-btn.active, .tab-btn:hover {
+    color: var(--color-gold);
+}
+
+/* Disposition Itinéraire + Carte Split */
+.itinerary-split-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.itinerary-list-col { width: 100%; }
+.itinerary-map-col { width: 100%; }
+
+.checklist-card {
+    margin-top: 1.5rem;
+    padding: 1.2rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+.checklist-items {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    max-height: 220px;
+    overflow-y: auto;
+}
+.checklist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.9rem;
+}
+.checklist-item label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(--text-main);
+    flex-grow: 1;
+}
+.checklist-item input[type="checkbox"] {
+    accent-color: var(--color-gold);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+.checklist-item.completed label {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+.btn-delete-task {
+    background: none;
+    border: none;
+    color: var(--color-torii);
+    cursor: pointer;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+.btn-delete-task:hover { opacity: 1; }
+.checklist-form { display: flex; gap: 8px; margin-top: 1rem; }
+.checklist-input {
+    flex: 1;
+    background: var(--bg-dark);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: var(--text-main);
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+.checklist-input:focus { outline: none; border-color: var(--color-gold); }
+.btn-add-task {
+    background: var(--color-gold);
+    color: var(--bg-dark);
+    border: none;
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.map-card {
+    padding: 1.2rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+#map {
+    width: 100%;
+    height: 350px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.activity-preview-box {
+    display: none;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 0.8rem;
+    transition: all 0.3s ease;
+}
+.activity-preview-img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    display: block;
+    background-color: #1a1714;
+}
+.activity-preview-title {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    color: var(--color-gold);
+    font-weight: 600;
+    text-align: center;
+}
+.activity-preview-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.step-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.step-item:hover {
+    background: rgba(212, 175, 55, 0.08) !important;
+    border-color: var(--color-gold) !important;
+    transform: translateX(4px);
+}
+.step-item.active-step {
+    border-color: var(--color-gold) !important;
+    background: rgba(212, 175, 55, 0.12) !important;
+}
+
+/* Modales d'édition */
+.edit-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    justify-content: center; align-items: center;
+}
+.edit-modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%; max-width: 500px;
+    color: var(--text-main);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* ==========================================================================
+   7. OVERLAY DE CHARGEMENT ROTATIF
+   ========================================================================== */
+#kaido-loader-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(13, 11, 9, 0.9);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    text-align: center;
+    padding: 1.5rem;
+}
+.loader-logo-spin {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    animation: kaidoSpin 2s linear infinite;
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+}
+@keyframes kaidoSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.loader-text-title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--color-gold);
+    margin-bottom: 0.5rem;
+}
+.loader-text-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+}
+
+/* ==========================================================================
+   8. MEDIA QUERIES (RESPONSIVE)
+   ========================================================================== */
+
+/* Écrans mobiles (max 768px) */
 @media (max-width: 768px) {
     .container {
         width: 100%;
         padding: 0 1rem;
     }
-
     .kaido-header {
         grid-template-columns: auto 1fr auto;
         gap: 10px;
         padding: 0.8rem 0;
     }
-
-    .header-logo {
-        height: 65px;
+    .header-logo, .header-logo-center {
+        height: 65px !important;
     }
-
     .kaido-header .brand-name {
         font-size: 1.1rem;
         letter-spacing: 0.15em;
     }
-
     .user-profile-btn {
         padding: 0.5rem;
         width: 38px;
@@ -351,16 +759,13 @@ body::before {
         border-radius: 50%;
         justify-content: center;
     }
-
     .user-profile-btn span.user-name-text {
         display: none;
     }
-
     .dashboard-title-wrapper {
         margin: 1.5rem 0 1.2rem 0;
         text-align: center;
     }
-
     .dashboard-title {
         font-size: 1.35rem;
         justify-content: center;
@@ -368,26 +773,136 @@ body::before {
         gap: 0.2rem;
         line-height: 1.4;
     }
-
     .dashboard-subtitle-jp {
         font-size: 0.8rem;
     }
-
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: 1.2rem;
         padding-bottom: 2.5rem;
     }
-
     .trip-card, .create-trip-zone {
         min-height: 360px;
     }
-
     .trip-banner {
         height: 160px;
     }
-
     .trip-details {
         padding: 1.2rem;
+    }
+    .create-hero {
+        padding: 2rem 0 1.5rem 0;
+    }
+    .create-hero h1 {
+        font-size: 1.8rem;
+    }
+    .kaido-form-box {
+        padding: 1.5rem 1.2rem;
+        margin-bottom: 2.5rem;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+/* Mode paysage smartphone (max 991px) */
+@media (orientation: landscape) and (max-width: 991px) {
+    body {
+        padding-bottom: 0 !important;
+        padding-left: 65px;
+    }
+    .trip-nav-tabs {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: auto;
+        width: 65px;
+        height: 100vh;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.2rem;
+        border-top: none;
+        border-right: 1px solid var(--border-color);
+        padding: 1rem 0.2rem;
+    }
+    .tab-btn {
+        flex: initial;
+        width: 100%;
+        font-size: 0.58rem;
+    }
+    .tab-btn .tab-icon {
+        font-size: 1.2rem;
+    }
+}
+
+/* Grands écrans / PC (min 992px) */
+@media (min-width: 992px) {
+    body {
+        padding-bottom: 0;
+        padding-left: 0 !important;
+    }
+    .header-link-red {
+        display: inline-block;
+    }
+    .trip-nav-tabs {
+        position: relative;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        width: auto;
+        height: auto;
+        flex-direction: row;
+        background: rgba(20, 17, 14, 0.6);
+        border-top: none;
+        border-right: none;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        justify-content: flex-start;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding: 0.6rem 1rem;
+        box-shadow: none;
+    }
+    .tab-btn {
+        flex: initial;
+        min-width: auto;
+        flex-direction: row;
+        gap: 8px;
+        font-size: 0.95rem;
+        padding: 0.6rem 1.2rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(212, 175, 55, 0.1);
+        border-radius: 6px;
+    }
+    .tab-btn .tab-icon {
+        font-size: 1.2rem;
+    }
+    .tab-btn.active {
+        background: var(--color-gold);
+        color: var(--bg-dark);
+        border-color: var(--color-gold);
+        font-weight: 700;
+    }
+    .mobile-only-tab {
+        display: none !important;
+    }
+    .itinerary-split-layout {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+    .itinerary-list-col {
+        flex: 1.2;
+    }
+    .itinerary-map-col {
+        flex: 1;
+        position: sticky;
+        top: 2rem;
+        z-index: 10;
+    }
+    .sticky-map-box {
+        margin-top: 0 !important;
     }
 }
