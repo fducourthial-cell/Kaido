@@ -1,36 +1,39 @@
-/* ==========================================================================
-   VARIABLES & DESIGN SYSTEM
-   ========================================================================== */
-:root {
-    --primary-color: #102a43; /* Bleu très profond pour le texte/nav */
-    --accent-color: #f7a072;  /* Pêche doux pour les accents */
-    --bg-light: #f1f5f8;
-    --card-bg: #ffffff;
-    --text-main: #102a43;
-    --text-muted: #627d98;
-    --border-color: #d9e2ec;
-    --radius: 12px; /* Un peu plus arrondi pour le côté "premium" */
-    --shadow: 0 10px 15px -3px rgba(16, 42, 67, 0.1), 0 4px 6px -2px rgba(16, 42, 67, 0.05);
-}
+ /* CODE COULEUR UNIVERSEL KAIDO */
+        :root {
+            --bg-dark: #0D0B09;
+            --bg-card: #14110E;
+            --color-gold: #D4AF37;
+            --color-torii: #A63A2B;
+            --text-main: #F4EFEA;
+            --text-muted: #8E847A;
+            --border-color: rgba(212, 175, 55, 0.08);
+            --font-kaido: 'Plus Jakarta Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
 
-/* ==========================================================================
-   RESET & STYLES GLOBAUX
-   ========================================================================== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    background-color: var(--bg-light);
+        body {
+    /* Fond de base très sombre avec un dégradé radial (le halo chaleureux au centre) */
+    background-color: #0d0b09;
+    background-image: radial-gradient(
+        circle at center,
+        rgba(58, 42, 35, 0.45) 0%,   /* Un cœur chaleureux, brun/terre cuite très doux et diffus */
+        rgba(20, 16, 13, 0.8) 50%,    /* Transition douce */
+        #0a0807 100%                  /* Noir profond sur les bords extérieurs */
+    );
+    background-attachment: fixed; /* Fixe le dégradé pour qu'il ne bouge pas au scroll */
     color: var(--text-main);
     line-height: 1.6;
+    position: relative;
+    min-height: 100vh;
 }
-/* ==========================================================================
-   TEXTURE PAPIER DE RIZ (WASHICRAFT)
-   ========================================================================== */
+
+/* Calque optionnel : Ajout du grain Washi par-dessus le halo pour un rendu parfait */
 body::before {
     content: "";
     position: fixed;
@@ -38,350 +41,347 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    /* Motif de bruit/grain subtil généré en SVG (léger et sans fichier externe) */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none; /* Permet de cliquer à travers la texture sans gêner l'interface */
-    z-index: 9999; /* S'assure que le grain reste subtilement au-dessus de tout */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%2E%2C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
 }
 
-/* Conteneur principal */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-}
+        .container {
+            width: 92%;
+            max-width: 1550px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
 
-/* ==========================================================================
-   BARRE DE NAVIGATION (HEADER)
-   ========================================================================== */
-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.15); /* Fond sombre ultra-léger pour détacher le menu sans bloquer l'image */
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-}
+        /* HEADER COMPACT AVEC LOGO CENTRÉ ET KAIDO ROUGE TORII */
+        .kaido-header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-header h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
+        .header-left {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
 
-/* Logo Kaido avec Kanji */
-.logo-kanji {
-    font-size: 1.2rem;
-    background: rgba(255, 255, 255, 0.25);
-    padding: 0.3rem 0.8rem;
-    border-radius: 6px;
-    margin-left: 0.8rem;
-    font-weight: normal;
-}
+        .kaido-header .brand-name {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.25em;
+            color: var(--color-torii);
+            text-decoration: none;
+            text-shadow: 0 0 10px rgba(166, 58, 43, 0.3);
+            transition: all 0.3s ease;
+        }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    margin-left: 2rem;
-    font-weight: 500;
-    transition: all 0.3s;
-}
+        .kaido-header .brand-name:hover {
+            color: var(--color-gold);
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+        }
 
-nav a:hover {
-    opacity: 0.8;
-}
+        .header-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-/* ==========================================================================
-   COMPOSANTS (BOUTONS & BADGES)
-   ========================================================================== */
-.btn {
-    display: inline-block;
-    background-color: var(--accent-color);
-    color: white;
-    padding: 0.8rem 1.8rem;
-    border-radius: 30px; /* Boutons "pilule" modernes */
-    text-decoration: none;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-}
+        .header-logo {
+            height: 100px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 10px rgba(212, 175, 55, 0.2));
+            transition: transform 0.3s ease;
+        }
 
-.btn:hover {
-    background-color: #f58f5a;
-    transform: translateY(-2px);
-}
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
 
-/* Badges pour la timeline */
-.badge {
-    display: inline-block;
-    padding: 0.3rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.badge-flight { background: #e0f2fe; color: #0369a1; }
-.badge-hotel { background: #ede9fe; color: #5b21b6; }
-.badge-car { background: #fee2e2; color: #991b1b; }
-.badge-visit { background: #dcfce7; color: #166534; }
+        .header-right {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
 
-/* Bouton Supprimer sur les cartes */
-.btn-delete {
-    background: transparent;
-    color: #ef4444; /* Rouge alerte */
-    border: 1px solid #fee2e2;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-}
+        /* 👤 BOUTON PROFIL / IDENTIFIANT RESPONSIVE */
+        .user-profile-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            color: var(--color-gold);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
 
-.btn-delete:hover {
-    background-color: #fef2f2;
-    border-color: #fca5a5;
-}
+        .user-profile-btn:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--color-gold);
+        }
 
-/* ==========================================================================
-   FORMULAIRES (PAGE CREER)
-   ========================================================================== */
-.form-box {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 2.5rem;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border-color);
-    max-width: 600px;
-    margin: 4rem auto 0 auto;
-}
+        /* SECTION TITRE AVEC SOUS-TITRE JAPONAIS EN FILIGRANE */
+        .dashboard-title-wrapper {
+            margin: 2.5rem 0 2rem 0;
+        }
 
-.form-group {
-    margin-bottom: 1.5rem;
-}
+        .dashboard-title {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            color: var(--text-main);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
 
-.form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-}
+        /* Sous-titre japonais en filigrane doré */
+        .dashboard-subtitle-jp {
+            font-family: var(--font-kaido);
+            font-size: 0.95rem;
+            font-weight: 300;
+            color: var(--color-gold);
+            opacity: 0.75;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
 
-.form-control {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    color: var(--text-main);
-    transition: border-color 0.3s;
-}
+        /* GRILLE DES CARTES */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+            padding-bottom: 4rem;
+        }
 
-.form-control:focus {
-    outline: none;
-    border-color: var(--accent-color);
-}
+        /* STRUCTURE STRICTE DE LA CARTE */
+        .trip-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
+        .trip-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(212, 175, 55, 0.2);
+        }
 
-/* ==========================================================================
-   SECTION FINANCIÈRE (PAGE VOYAGE)
-   ========================================================================== */
-.budget-total {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--primary-color);
-    margin: 0.5rem 0 1.5rem 0;
-}
+        .trip-banner {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: #221e1a;
+            position: relative;
+        }
 
-.budget-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.8rem;
-    font-size: 0.95rem;
-}
+        .trip-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, var(--bg-card), transparent);
+        }
 
-.budget-progress-bar {
-    width: 100%;
-    height: 8px;
-    background-color: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-}
+        .trip-details {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
 
-.budget-progress-fill {
-    height: 100%;
-    background-color: var(--accent-color);
-    width: 0%; /* Mis à jour dynamiquement par le JS */
-    transition: width 0.5s ease-out;
-}
+        .trip-details h3 {
+            font-family: var(--font-serif);
+            font-size: 1.35rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
 
-.divider {
-    height: 1px;
-    background-color: var(--border-color);
-    margin: 1.5rem 0;
-}
-/* ==========================================================================
-   OPTIMISATIONS MOBILES (RESPONSIVE DESIGN)
-   ========================================================================== */
-@media (max-width: 768px) {
-    /* 1. Espacements généraux réduits pour maximiser la place */
-    .container {
-        padding: 1rem 0.75rem;
-    }
+        .trip-meta {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
 
-    /* 2. En-tête (Header) : Empilement vertical propre */
-   header {
-        position: absolute; /* Reste au-dessus de l'image sur portable aussi */
-        background-color: rgba(0, 0, 0, 0.3); /* Un poil plus sombre sur mobile pour la lisibilité */
-        padding: 0.8rem 1rem;
-        flex-direction: column;
-        gap: 0.5rem;
-        text-align: center;
-    }
+        .trip-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+        }
 
-    nav a {
-        margin: 0 0.75rem;
-        font-size: 0.95rem;
-    }
+        .trip-budget {
+            color: var(--color-gold);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
 
-    /* 3. Section d'accueil (Hero) adaptée aux petits écrans */
-    .hero-section {
-        height: 35vh; /* Hauteur réduite sur mobile */
-        margin-bottom: 1rem;
-    }
+        .trip-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    .hero-content h2 {
-        font-size: 1.7rem; /* Titre plus compact pour éviter les coupures */
-        padding: 0 0.5rem;
-        line-height: 1.2;
-    }
+        .btn-delete {
+            background: rgba(166, 58, 43, 0.1);
+            border: 1px solid rgba(166, 58, 43, 0.25);
+            color: var(--color-torii);
+            cursor: pointer;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
 
-    .hero-content p {
-        font-size: 0.95rem;
-        margin-bottom: 1rem;
-    }
+        .btn-delete:hover {
+            background: var(--color-torii);
+            color: #ffffff;
+            transform: scale(1.1);
+        }
 
-    /* 4. Tableau de bord : Les cartes de voyage s'empilent sur 1 seule colonne */
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
+        .btn-view {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
 
-    .trip-banner {
-        height: 140px; /* Bannière un peu moins haute */
-    }
+        .btn-view:hover {
+            color: var(--color-gold);
+        }
 
-    /* 5. Page Voyage (Itinéraire d'un voyage spécifique) */
-    .trip-layout {
-        display: flex;
-        flex-direction: column-reverse; /* 💡 TRÈS PRATIQUE : Place le budget et les vols EN HAUT sur mobile, puis l'itinéraire dessous */
-        gap: 1.5rem;
-    }
+        .create-trip-zone {
+            border: 2px dashed rgba(212, 175, 55, 0.15);
+            background: rgba(20, 17, 14, 0.4);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 2rem;
+            text-align: center;
+        }
 
-    .trip-header-visual {
-        height: 180px;
-        padding: 1rem;
-    }
+        .create-trip-zone:hover {
+            border-color: var(--color-gold);
+            background: rgba(20, 17, 14, 0.7);
+        }
 
-    .trip-header-title h2 {
-        font-size: 1.5rem;
-    }
+        .create-trip-zone .plus-icon {
+            font-size: 2.5rem;
+            color: var(--color-gold);
+            margin-bottom: 1rem;
+        }
 
-    .sidebar-logistique {
-        width: 100%; /* Prend toute la largeur */
-    }
+        .create-trip-zone h3 {
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
 
-    /* Ajustement de la timeline du planning */
-    .day-block {
-        padding: 1rem;
-        margin-bottom: 1.25rem;
-    }
+        /* 📱 MEDIA QUERIES MOBILE (MAX 768px) */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                padding: 0 1rem;
+            }
 
-    .step-item {
-        gap: 1rem;
-        padding-left: 1rem;
-    }
+            .kaido-header {
+                grid-template-columns: auto 1fr auto;
+                gap: 10px;
+                padding: 0.8rem 0;
+            }
 
-    /* 6. Formulaire "Créer un voyage" */
-    .form-box {
-        padding: 1.5rem;
-        margin: 1.5rem auto 0 auto;
-    }
+            .header-logo {
+                height: 65px;
+            }
 
-    .form-row {
-        grid-template-columns: 1fr; /* Les deux champs de date s'empilent au lieu d'être côte à côte */
-        gap: 0;
-    }
-}
-/* Alignement du footer de la carte */
-.trip-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    padding-top: 1rem;
-}
+            .kaido-header .brand-name {
+                font-size: 1.1rem;
+                letter-spacing: 0.15em;
+            }
 
-/* Le budget en gros et doré à gauche */
-.trip-budget {
-    color: #D4AF37; /* Or chaud Kaido */
-    font-weight: 700;
-    font-size: 1.1rem;
-}
+            /* TRANSFORMATION DU BOUTON PROFIL EN ICÔNE RONDE SUR MOBILE */
+            .user-profile-btn {
+                padding: 0.5rem;
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                justify-content: center;
+            }
 
-/* Conteneur des actions à droite */
-.trip-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
+            .user-profile-btn span.user-name-text {
+                display: none; /* Masque le texte du nom sur téléphone, garde l'icône */
+            }
 
-/* Lien Voir l'itinéraire */
-.btn-view {
-    color: #8E847A;
-    text-decoration: none;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    transition: color 0.3s ease;
-}
+            .dashboard-title-wrapper {
+                margin: 1.5rem 0 1.2rem 0;
+                text-align: center;
+            }
 
-.btn-view:hover {
-    color: #D4AF37;
-}
+            .dashboard-title {
+                font-size: 1.35rem;
+                justify-content: center;
+                flex-direction: column;
+                gap: 0.2rem;
+                line-height: 1.4;
+            }
 
-/* Bouton Supprimer discret (Poubelle rouge/sombre) */
-.btn-delete {
-    background: rgba(166, 58, 43, 0.1);
-    border: 1px solid rgba(166, 58, 43, 0.2);
-    color: #A63A2B; /* Rouge Torii */
-    cursor: pointer;
-    padding: 0.4rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+            .dashboard-subtitle-jp {
+                font-size: 0.8rem;
+            }
 
-.btn-delete:hover {
-    background: #A63A2B;
-    color: #FFFFFF;
-    transform: scale(1.05);
-}
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+                padding-bottom: 2.5rem;
+            }
+
+            .trip-card, .create-trip-zone {
+                min-height: 360px;
+            }
+
+            .trip-banner {
+                height: 160px;
+            }
+
+            .trip-details {
+                padding: 1.2rem;
+            }
+        }
