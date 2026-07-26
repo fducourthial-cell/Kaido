@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 5. Mettre à jour notre bouton existant dans le Header (Extraction ultra-précise du Prénom)
- const updateHeaderAuth = async () => {
+const updateHeaderAuth = async () => {
     const authBtn = document.getElementById('user-profile-link');
     const nameSpan = document.getElementById('user-display-name');
     if (!authBtn) return;
@@ -293,27 +293,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (nameSpan) {
             nameSpan.textContent = firstName;
         }
+
+        if (nameSpan) nameSpan.textContent = firstName;
+        authBtn.title = "Connecté - Cliquer pour vous déconnecter";
+        authBtn.onclick = async (e) => {
+            e.preventDefault();
+            if (confirm("Voulez-vous vous déconnecter ?")) {
+                if (client) await client.auth.signOut();
+                location.reload();
+            }
+        };
+    } else {
+        if (nameSpan) nameSpan.textContent = "Connexion";
+        authBtn.title = "Se connecter";
+        authBtn.onclick = (e) => {
+            e.preventDefault();
+            toggleMode(false);
+            modal.style.display = 'flex';
+        };
     }
 };
-            nameSpan.textContent = firstName;
-            authBtn.title = "Connecté - Cliquer pour vous déconnecter";
-            authBtn.onclick = async (e) => {
-                e.preventDefault();
-                if (confirm("Voulez-vous vous déconnecter de Kaido ?")) {
-                    if (client) await client.auth.signOut();
-                    location.reload();
-                }
-            };
-        } else {
-            nameSpan.textContent = "Connexion";
-            authBtn.title = "Se connecter";
-            authBtn.onclick = (e) => {
-                e.preventDefault();
-                toggleMode(false);
-                modal.style.display = 'flex';
-            };
-        }
-    };
 
     await updateHeaderAuth();
 });
