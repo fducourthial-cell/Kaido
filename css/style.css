@@ -154,7 +154,7 @@ body::before {
     border-color: var(--color-gold);
 }
 /* Header spécifique transparent pour la page voyage.html */
-header {
+body:has(#trip-cover) header {
     position: absolute;
     top: 0; 
     left: 0; 
@@ -167,7 +167,6 @@ header {
     background: transparent;
     border-bottom: none;
 }
-
 /* ==========================================================================
    4. DASHBOARD (INDEX.HTML)
    ========================================================================== */
