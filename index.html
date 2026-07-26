@@ -54,15 +54,22 @@
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: var(--font-kaido);
-            min-height: 100vh;
-            line-height: 1.5;
-        }
-        /* ==========================================================================
-   TEXTURE PAPIER DE RIZ (WASHICRAFT)
-   ========================================================================== */
+    /* Fond de base très sombre avec un dégradé radial (le halo chaleureux au centre) */
+    background-color: #0d0b09;
+    background-image: radial-gradient(
+        circle at center,
+        rgba(58, 42, 35, 0.45) 0%,   /* Un cœur chaleureux, brun/terre cuite très doux et diffus */
+        rgba(20, 16, 13, 0.8) 50%,    /* Transition douce */
+        #0a0807 100%                  /* Noir profond sur les bords extérieurs */
+    );
+    background-attachment: fixed; /* Fixe le dégradé pour qu'il ne bouge pas au scroll */
+    color: var(--text-main);
+    line-height: 1.6;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Calque optionnel : Ajout du grain Washi par-dessus le halo pour un rendu parfait */
 body::before {
     content: "";
     position: fixed;
@@ -70,10 +77,9 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    /* Motif de bruit/grain subtil généré en SVG (léger et sans fichier externe) */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none; /* Permet de cliquer à travers la texture sans gêner l'interface */
-    z-index: 9999; /* S'assure que le grain reste subtilement au-dessus de tout */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
 }
 
         .container {
