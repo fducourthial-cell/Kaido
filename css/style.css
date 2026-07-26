@@ -153,6 +153,20 @@ body::before {
     background: rgba(212, 175, 55, 0.1);
     border-color: var(--color-gold);
 }
+/* Header spécifique transparent pour la page voyage.html */
+header {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    right: 0;
+    z-index: 20;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+    border-bottom: none;
+}
 
 /* ==========================================================================
    4. DASHBOARD (INDEX.HTML)
