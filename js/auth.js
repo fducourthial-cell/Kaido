@@ -262,10 +262,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 5. Mettre à jour notre bouton existant dans le Header (Extraction ultra-précise du Prénom)
-   const updateHeaderAuth = async () => {
+ const updateHeaderAuth = async () => {
     const authBtn = document.getElementById('user-profile-link');
     const nameSpan = document.getElementById('user-display-name');
-    if (!authBtn) return; // nameSpan peut devenir optionnel si on remplace tout par l'avatar
+    if (!authBtn) return;
 
     const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
     let user = null;
@@ -280,25 +280,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (user) {
-        // Cherche en priorité le prénom isolé par Google (given_name), sinon prend le nom complet ou l'email
         const rawSource = user.user_metadata?.given_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
-        
-        // Extrait strictement le premier mot
         const rawFirstName = String(rawSource).trim().split(/\s+/)[0];
-        
-        // Met uniquement la 1ère lettre en majuscule et le reste en minuscules
         const firstName = rawFirstName.charAt(0).toUpperCase() + rawFirstName.slice(1).toLowerCase();
 
-        // Récupération de l'avatar Google (avatar_url ou picture)
         const userAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
 
         if (userAvatar && authBtn) {
-            // Si on a un avatar, on transforme le bouton pour afficher l'image ronde (et le prénom au survol ou à côté si tu veux)
             authBtn.innerHTML = `
                 <img src="${userAvatar}" alt="${firstName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-gold);">
             `;
         } else if (nameSpan) {
-            // Repli si pas d'avatar : affiche juste le texte comme avant
             nameSpan.textContent = firstName;
         }
     }
