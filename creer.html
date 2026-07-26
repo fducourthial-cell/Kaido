@@ -52,8 +52,8 @@
         <main class="kaido-form-box">
             <form id="create-trip-form">
                 <div class="form-group">
-                    <label for="trip-departure">🛫 Ville de départ</label>
-                    <input type="text" id="trip-departure" class="form-control" placeholder="Ex: Paris, Édimbourg, Lyon..." required>
+                    <label for="trip-departure-modern">🛫 Ville de départ</label>
+                    <gmp-place-autocomplete id="trip-departure-modern" placeholder="Ex: Paris, Édimbourg, Lyon..."></gmp-place-autocomplete>
                 </div>
 
                 <div class="form-group">
@@ -104,9 +104,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('create-trip-form');
         const modernField = document.getElementById('trip-destination-modern');
+        const departureModernField = document.getElementById('trip-departure-modern');
         const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
 
         let selectedDestinationName = "";
+        let selectedDepartureName = "";
         let placesService = null;
 
         function getPlacesService() {
@@ -168,6 +170,15 @@
             });
         }
 
+        if (departureModernField) {
+            departureModernField.addEventListener('gmp-placeselect', (event) => {
+                const place = event.detail.place;
+                if (place) {
+                    selectedDepartureName = place.displayName || place.formattedAddress || place.name || "";
+                }
+            });
+        }
+
         if (form) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -203,8 +214,20 @@
                         return;
                     }
 
-                    const departureInput = document.getElementById('trip-departure');
-                    const departure = departureInput ? departureInput.value : 'Paris';
+                    let departureText = "";
+                    if (departureModernField) {
+                        if (typeof departureModernField.value === 'string' && departureModernField.value.trim() !== '') {
+                            departureText = departureModernField.value;
+                        } else if (typeof departureModernField.value === 'object' && departureModernField.value !== null) {
+                            departureText = departureModernField.value.displayName || departureModernField.value.formattedAddress || departureModernField.value.name || "";
+                        }
+                        if (!departureText) {
+                            const innerInput = departureModernField.shadowRoot ? departureModernField.shadowRoot.querySelector('input') : departureModernField.querySelector('input');
+                            if (innerInput && innerInput.value) departureText = innerInput.value;
+                        }
+                    }
+
+                    const departure = String(departureText || selectedDepartureName || 'Paris').trim();
                     const dateStart = document.getElementById('trip-date-start').value;
                     const dateEnd = document.getElementById('trip-date-end').value;
                     const budgetInput = document.getElementById('trip-budget-input');
