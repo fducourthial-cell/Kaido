@@ -400,6 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
     }
     if (!activeTrip.expenses) activeTrip.expenses = [];
+    if (!activeTrip.bookingNotes) activeTrip.bookingNotes = [];
 
     async function saveTrip() {
         const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
@@ -416,7 +417,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     desc_text: activeTrip.desc,
                     checklist: activeTrip.checklist,
                     itinerary: activeTrip.itinerary,
-                    expenses: activeTrip.expenses || []
+                    expenses: activeTrip.expenses || [],
+                    booking_notes: activeTrip.bookingNotes || []
                 }).eq('id', activeTrip.id);
             } catch (e) {
                 console.warn("Sauvegarde locale uniquement.");
@@ -451,11 +453,96 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('budget-hotel')) document.getElementById('budget-hotel').textContent = `${hotel} €`;
     if (document.getElementById('budget-rest')) document.getElementById('budget-rest').textContent = `${rest} €`;
 
-    const flightBtn = document.getElementById('btn-google-flights');
-    if (flightBtn) {
-        const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
-        const dest = encodeURIComponent(destination.split(',')[0].trim());
-        flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
+    // --- MODULE RÉSERVATIONS & LIENS DÉDIÉS ---
+    const destinationClean = encodeURIComponent(destination.split(',')[0].trim());
+    const checkIn = activeTrip.dateStart || '';
+    const checkOut = activeTrip.dateEnd || '';
+
+    const resFlight = document.getElementById('res-btn-flights');
+    const resBooking = document.getElementById('res-btn-booking');
+    const resAirbnb = document.getElementById('res-btn-airbnb');
+    const resCar = document.getElementById('res-btn-car');
+    const flightBtn = document.getElementById('btn-google-flights'); // Rétrocompatibilité ancien bouton si présent
+
+    const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
+    const flightUrl = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${destinationClean}`;
+
+    if (flightBtn) flightBtn.href = flightUrl;
+    if (resFlight) resFlight.href = flightUrl;
+
+    if (resBooking) {
+        let url = `https://www.booking.com/searchresults.fr.html?ss=${destinationClean}`;
+        if (checkIn && checkOut) url += `&checkin=${checkIn}&checkout=${checkOut}`;
+        resBooking.href = url;
+    }
+    if (resAirbnb) {
+        let url = `https://www.airbnb.fr/s/${destinationClean}/homes`;
+        if (checkIn && checkOut) url += `?checkin=${checkIn}&checkout=${checkOut}`;
+        resAirbnb.href = url;
+    }
+    if (resCar) {
+        resCar.href = `https://www.kayak.fr/cars/${destinationClean}/${checkIn}/${checkOut}`;
+    }
+
+    // Gestion des notes de réservation personnelles
+    const renderBookingNotes = () => {
+        const listContainer = document.getElementById('booking-notes-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
+
+        if (!activeTrip.bookingNotes || activeTrip.bookingNotes.length === 0) {
+            listContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Aucune note ou référence de réservation enregistrée.</span>`;
+            return;
+        }
+
+        activeTrip.bookingNotes.forEach(note => {
+            const item = document.createElement('div');
+            item.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 4px; border: 1px solid rgba(212,175,55,0.1); font-size: 0.85rem;`;
+            
+            let linkHTML = '';
+            if (note.link) {
+                linkHTML = `<a href="${note.link}" target="_blank" style="color: var(--color-gold); text-decoration: underline; margin-left: 10px; font-size: 0.8rem;">🔗 Ouvrir le lien</a>`;
+            }
+
+            item.innerHTML = `
+                <div>
+                    <strong style="color: var(--text-main);">${note.title}</strong>
+                    ${linkHTML}
+                </div>
+                <button class="btn-delete-booking-note" data-id="${note.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.8rem;">✖</button>
+            `;
+
+            item.querySelector('.btn-delete-booking-note').addEventListener('click', async () => {
+                activeTrip.bookingNotes = activeTrip.bookingNotes.filter(n => n.id !== note.id);
+                await saveTrip();
+                renderBookingNotes();
+            });
+
+            listContainer.appendChild(item);
+        });
+    };
+
+    renderBookingNotes();
+
+    const bookingNoteForm = document.getElementById('add-booking-note-form');
+    if (bookingNoteForm) {
+        bookingNoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('booking-title-input');
+            const linkInput = document.getElementById('booking-link-input');
+
+            if (titleInput && titleInput.value.trim()) {
+                activeTrip.bookingNotes.push({
+                    id: Date.now(),
+                    title: titleInput.value.trim(),
+                    link: linkInput ? linkInput.value.trim() : ''
+                });
+                await saveTrip();
+                renderBookingNotes();
+                titleInput.value = '';
+                if (linkInput) linkInput.value = '';
+            }
+        });
     }
 
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
