@@ -299,11 +299,11 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
     }
 }
 
-// Fonction pour interroger l'API Distance Matrix de Google et afficher les temps/distances
+// Fonction de calcul des temps et distances entre les étapes (via DirectionsService)
 async function calculateTravelTimesForTrip(itinerary, mainDestination) {
-    if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) return;
+    if (typeof google === 'undefined' || !google.maps || !google.maps.DirectionsService) return;
 
-    const service = new google.maps.DistanceMatrixService();
+    const directionsService = new google.maps.DirectionsService();
 
     for (let dayIdx = 0; dayIdx < itinerary.length; dayIdx++) {
         const day = itinerary[dayIdx];
@@ -319,16 +319,15 @@ async function calculateTravelTimesForTrip(itinerary, mainDestination) {
             const infoEl = document.getElementById(`travel-info-${dayIdx}-${idx}`);
             if (!infoEl) continue;
 
-            service.getDistanceMatrix({
-                origins: [origin],
-                destinations: [destinationLoc],
+            directionsService.route({
+                origin: origin,
+                destination: destinationLoc,
                 travelMode: google.maps.TravelMode.DRIVING,
-                unitSystem: google.maps.UnitSystem.METRIC,
             }, (response, status) => {
-                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
-                    const element = response.rows[0].elements[0];
-                    const distance = element.distance.text;
-                    const duration = element.duration.text;
+                if (status === 'OK' && response.routes[0] && response.routes[0].legs[0]) {
+                    const leg = response.routes[0].legs[0];
+                    const distance = leg.distance.text;
+                    const duration = leg.duration.text;
                     infoEl.innerHTML = `<span style="opacity: 0.8;">🚗 ${duration} (${distance})</span>`;
                 } else {
                     infoEl.innerHTML = `<span style="opacity: 0.5; font-style: italic;">🚗 Trajet non estimé</span>`;
@@ -434,7 +433,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
     fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
-    // Rendu de l'itinéraire avec calcul des temps et distances
+    // Rendu de l'itinéraire avec encadrés de liaison pour les trajets
     const daysContainer = document.getElementById('itinerary-days-container');
     if (daysContainer) {
         daysContainer.innerHTML = '';
@@ -524,7 +523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 daysContainer.appendChild(block);
             });
 
-            // Lancement du calcul des distances via DistanceMatrix API en arrière-plan
+            // Lancement du calcul automatique des trajets via DirectionsService
             calculateTravelTimesForTrip(activeTrip.itinerary, destination);
         }
     }
