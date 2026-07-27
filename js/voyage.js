@@ -569,11 +569,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadParticipants();
         await loadSharedExpenses();
 
-        // Écouteur ajout participant (modifié)
+        // Écouteur ajout participant
         const addPartForm = document.getElementById('add-participant-form');
         if (addPartForm) {
             addPartForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); // 🛑 EMPÊCHE LE RAFRAÎCHISSEMENT DE LA PAGE
+                e.preventDefault();
                 
                 const nameInput = document.getElementById('participant-name-input');
                 const name = nameInput.value.trim();
@@ -593,16 +593,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Écouteur ajout dépense partagée
+        // Écouteur ajout dépense partagée (avec parts personnalisées - Étape 3)
         const addSharedForm = document.getElementById('add-shared-expense-form');
         if (addSharedForm) {
-            addSharedForm.onsubmit = async (e) => {
+            addSharedForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const title = document.getElementById('shared-title-input').value.trim();
                 const amount = parseFloat(document.getElementById('shared-amount-input').value);
                 const paid_by = document.getElementById('shared-paidby-select').value;
 
+                // Récupérer les IDs des participants cochés
+                const checkedBoxes = document.querySelectorAll('input[name="expense-split-participant"]:checked');
+                const selectedParticipantIds = Array.from(checkedBoxes).map(cb => cb.value);
+
                 if (!title || isNaN(amount) || !paid_by) return;
+                if (selectedParticipantIds.length === 0) {
+                    alert("Veuillez sélectionner au moins une personne pour répartir la dépense.");
+                    return;
+                }
 
                 const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
                 if (!client) return;
@@ -619,20 +627,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                // 2. Répartir par défaut sur tous les participants actuels
-                if (currentParticipants.length > 0) {
-                    const splits = currentParticipants.map(p => ({
-                        expense_id: expenseData.id,
-                        participant_id: p.id
-                    }));
+                // 2. Insérer uniquement les splits pour les participants cochés
+                const splits = selectedParticipantIds.map(participantId => ({
+                    expense_id: expenseData.id,
+                    participant_id: participantId
+                }));
 
-                    await client.from('trip_expense_splits').insert(splits);
-                }
+                await client.from('trip_expense_splits').insert(splits);
 
                 document.getElementById('shared-title-input').value = '';
                 document.getElementById('shared-amount-input').value = '';
+                
+                // Recocher toutes les cases par défaut pour la prochaine fois
+                document.querySelectorAll('input[name="expense-split-participant"]').forEach(cb => cb.checked = true);
+
                 await loadSharedExpenses();
-            };
+            });
         }
     }
 
@@ -693,6 +703,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         select.innerHTML = '<option value="">Payé par...</option>' + currentParticipants.map(p => `
             <option value="${p.id}">${p.name}</option>
         `).join('');
+
+        // Générer aussi les cases à cocher pour la répartition sur-mesure (Étape 3)
+        const checkboxesContainer = document.getElementById('shared-splits-checkboxes');
+        if (checkboxesContainer) {
+            if (currentParticipants.length === 0) {
+                checkboxesContainer.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">Ajoutez des participants d\'abord.</span>';
+                return;
+            }
+            checkboxesContainer.innerHTML = currentParticipants.map(p => `
+                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <input type="checkbox" name="expense-split-participant" value="${p.id}" checked style="accent-color: var(--color-gold);">
+                    ${p.name}
+                </label>
+            `).join('');
+        }
     }
 
     function renderSharedExpensesUI() {
