@@ -1,6 +1,6 @@
 let map;
 let activeMarkers = []; // Tableau pour stocker tous les marqueurs affichés
-let routePolyline = null; // Ligne reliant les activités du jour
+let routePolyline = null; // Objet pour stocker le tracé de la route ou les lignes
 let placesService = null;
 
 // Initialisation de la carte basée en priorité sur les coordonnées GPS enregistrées
@@ -47,30 +47,31 @@ function clearMapOverlays() {
     activeMarkers.forEach(m => m.setMap(null));
     activeMarkers = [];
     if (routePolyline) {
-        routePolyline.setMap(null);
+        if (typeof routePolyline.setMap === 'function') {
+            routePolyline.setMap(null);
+        } else if (typeof routePolyline.setDirections === 'function') {
+            routePolyline.setMap(null);
+        }
         routePolyline = null;
     }
 }
 
-// Affichage hybride de la journée : direct si lat/lng existent, fallback geocoder sinon
+// Affichage du tracé routier réel de la journée sur la carte (DirectionsRenderer)
 async function displayDayOnMap(steps, mainDestination) {
     clearMapOverlays();
     if (!steps || steps.length === 0 || !map) return;
 
-    const bounds = new google.maps.LatLngBounds();
-    const pathCoordinates = [];
     const geocoder = new google.maps.Geocoder();
+    const resolvedWaypoints = [];
 
+    // 1. Résolution de toutes les coordonnées des étapes
     for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
         let loc = null;
 
-        // 1. Si on a déjà les coordonnées GPS
         if (step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng)) {
-            loc = { lat: parseFloat(step.lat), lng: parseFloat(step.lng) };
-        } 
-        // 2. Fallback par Géocodage si c'est un ancien voyage
-        else {
+            loc = new google.maps.LatLng(parseFloat(step.lat), parseFloat(step.lng));
+        } else {
             const query = step.location ? `${step.location}, ${mainDestination}` : `${step.activity || step.title}, ${mainDestination}`;
             await new Promise((resolve) => {
                 geocoder.geocode({ address: query }, (results, status) => {
@@ -82,57 +83,73 @@ async function displayDayOnMap(steps, mainDestination) {
             });
         }
 
-        // Si la position est valide, création du marqueur
         if (loc) {
-            bounds.extend(loc);
-            pathCoordinates.push(loc);
-
-            const marker = new google.maps.Marker({
-                position: loc,
-                map: map,
-                title: `${i + 1}. ${step.activity || step.title}`,
-                label: {
-                    text: `${i + 1}`,
-                    color: "#0D0B09",
-                    fontWeight: "bold",
-                    fontSize: "12px"
-                },
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 13,
-                    fillColor: "#D4AF37",
-                    fillOpacity: 1,
-                    strokeWeight: 2,
-                    strokeColor: "#FFFFFF"
-                }
-            });
-
-            activeMarkers.push(marker);
+            resolvedWaypoints.push({ location: loc, stepInfo: step, index: i });
         }
     }
 
-    // Tracé de la ligne reliant les activités
-    if (pathCoordinates.length > 1) {
-        routePolyline = new google.maps.Polyline({
-            path: pathCoordinates,
-            geodesic: true,
-            strokeColor: "#A63A2B", // Rouge Torii
-            strokeOpacity: 0.9,
-            strokeWeight: 4
+    if (resolvedWaypoints.length === 0) return;
+
+    // Si une seule étape, simple marqueur
+    if (resolvedWaypoints.length === 1) {
+        const singleLoc = resolvedWaypoints[0].location;
+        const marker = new google.maps.Marker({
+            position: singleLoc,
+            map: map,
+            title: resolvedWaypoints[0].stepInfo.activity || resolvedWaypoints[0].stepInfo.title,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 13,
+                fillColor: "#D4AF37",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#FFFFFF"
+            }
         });
-        routePolyline.setMap(map);
+        activeMarkers.push(marker);
+        map.setCenter(singleLoc);
+        map.setZoom(14);
+        return;
     }
 
-    // Ajustement automatique du zoom et du centrage pour englober tout le trajet du jour
-    if (!bounds.isEmpty()) {
-        map.fitBounds(bounds);
-        if (pathCoordinates.length === 1) {
-            map.setZoom(14);
+    // 2. Tracé de la vraie route routière entre les étapes
+    const origin = resolvedWaypoints[0].location;
+    const destination = resolvedWaypoints[resolvedWaypoints.length - 1].location;
+    
+    const waypoints = resolvedWaypoints.slice(1, resolvedWaypoints.length - 1).map(wp => ({
+        location: wp.location,
+        stopover: true
+    }));
+
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+        map: map,
+        suppressMarkers: false,
+        polylineOptions: {
+            strokeColor: "#2563eb", // Le bleu route de Google Maps
+            strokeWeight: 5,
+            strokeOpacity: 0.85
         }
-    }
+    });
+
+    routePolyline = directionsRenderer;
+
+    directionsService.route({
+        origin: origin,
+        destination: destination,
+        waypoints: waypoints,
+        optimizeWaypoints: false,
+        travelMode: google.maps.TravelMode.DRIVING,
+    }, (response, status) => {
+        if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+        } else {
+            console.warn("Impossible de tracer l'itinéraire routier :", status);
+        }
+    });
 }
 
-// Sélectionner une seule activité au clic individuel (avec aperçu image & géocodage robuste)
+// Sélectionner une seule activité au clic individuel
 function selectActivityOnMap(step, addressQuery, mainDestination) {
     const actName = step ? (step.activity || step.title || 'Activité') : 'Activité';
     const locationName = step ? (step.location || addressQuery || mainDestination) : (addressQuery || mainDestination);
@@ -147,7 +164,6 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
     if (previewLoading) previewLoading.style.display = 'flex';
     if (previewTitle) previewTitle.textContent = `📍 ${actName}`;
 
-    // Helper pour placer le marqueur
     const placeMarkerAt = (location) => {
         clearMapOverlays();
         const marker = new google.maps.Marker({
@@ -161,14 +177,10 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
         map.setZoom(13);
     };
 
-    // 1. Placement du marqueur via lat/lng si présents
     if (step && step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng) && map) {
         placeMarkerAt({ lat: parseFloat(step.lat), lng: parseFloat(step.lng) });
-    } 
-    // 2. Géocodage ciblé (priorité au lieu exact plutôt qu'au titre poétique)
-    else if (map) {
+    } else if (map) {
         const geocoder = new google.maps.Geocoder();
-        
         let cleanQuery = locationName;
         if (!cleanQuery.toLowerCase().includes(mainDestination.toLowerCase())) {
             cleanQuery = `${locationName}, ${mainDestination}`;
@@ -178,20 +190,16 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
             if (status === 'OK' && results[0]) {
                 placeMarkerAt(results[0].geometry.location);
             } else {
-                // Recherche de secours si la première tentative échoue
                 const fallbackQuery = `${actName}, ${mainDestination}`;
                 geocoder.geocode({ address: fallbackQuery }, (resFallback, statusFallback) => {
                     if (statusFallback === 'OK' && resFallback[0]) {
                         placeMarkerAt(resFallback[0].geometry.location);
-                    } else {
-                        console.warn("Impossible de géolocaliser :", cleanQuery);
                     }
                 });
             }
         });
     }
 
-    // Recherche de la photo d'illustration via Google Places
     if (placesService) {
         const query = `${actName}, ${locationName}`;
         placesService.findPlaceFromQuery(
@@ -232,26 +240,16 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
     }
 
     const weatherCodes = {
-        0: '☀️ Ensoleillé',
-        1: '🌤️ Peu nuageux',
-        2: '⛅ Partiellement nuageux',
-        3: '☁️ Couvert',
-        45: '🌫️ Brouillard',
-        51: '🌧️ Bruine légère',
-        61: '🌧️ Pluie',
-        71: '❄️ Neige',
-        80: '🌦️ Averses',
-        95: '🌩️ Orage'
+        0: '☀️ Ensoleillé', 1: '🌤️ Peu nuageux', 2: '⛅ Partiellement nuageux', 3: '☁️ Couvert',
+        45: '🌫️ Brouillard', 51: '🌧️ Bruine légère', 61: '🌧️ Pluie', 71: '❄️ Neige', 80: '🌦️ Averses', 95: '🌩️ Orage'
     };
 
     try {
         let url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
-
         if (startDate && endDate) {
             const start = new Date(startDate);
             const today = new Date();
             const diffDays = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
-
             if (diffDays >= 0 && diffDays <= 14) {
                 url += `&start_date=${startDate}&end_date=${endDate}`;
             }
@@ -263,7 +261,6 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
         if (data && data.daily) {
             container.innerHTML = '';
             const daysLimit = Math.min(data.daily.time.length, 5);
-            
             for (let i = 0; i < daysLimit; i++) {
                 const dateRaw = data.daily.time[i];
                 const dateFormatted = new Date(dateRaw).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -273,17 +270,7 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
                 const tempMin = Math.round(data.daily.temperature_2m_min[i]);
 
                 const item = document.createElement('div');
-                item.style.cssText = `
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    background: rgba(255, 255, 255, 0.02);
-                    padding: 0.5rem 0.8rem;
-                    border-radius: 6px;
-                    border: 1px solid rgba(212, 175, 55, 0.1);
-                    font-size: 0.85rem;
-                `;
-
+                item.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.5rem 0.8rem; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.1); font-size: 0.85rem;`;
                 item.innerHTML = `
                     <span style="color: var(--text-main); font-weight: 500; text-transform: capitalize;">${dateFormatted}</span>
                     <span>${weatherText}</span>
@@ -347,7 +334,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // --- DÉCODAGE SYSTÉMATIQUE DE SUPABASE ---
     if (typeof activeTrip.itinerary === 'string') {
         try { activeTrip.itinerary = JSON.parse(activeTrip.itinerary); } catch (e) { console.error(e); }
     }
@@ -392,7 +378,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Infos du voyage
     const destination = activeTrip.destination || activeTrip.title || "Destination";
     const titleEl = document.getElementById('trip-main-title');
     const datesEl = document.getElementById('trip-main-dates');
@@ -407,7 +392,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url('${activeTrip.image}')`;
     }
 
-    // --- BUDGET GLOBAL INTELLIGENT ---
     let totalB = parseFloat(activeTrip.budget) || 0;
     let daysCount = (activeTrip.itinerary && activeTrip.itinerary.length) ? activeTrip.itinerary.length : 3;
     if (totalB <= 0) totalB = daysCount * 150 + 200;
@@ -421,7 +405,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('budget-hotel')) document.getElementById('budget-hotel').textContent = `${hotel} €`;
     if (document.getElementById('budget-rest')) document.getElementById('budget-rest').textContent = `${rest} €`;
 
-    // Lien Google Flights
     const flightBtn = document.getElementById('btn-google-flights');
     if (flightBtn) {
         const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
@@ -429,11 +412,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         flightBtn.href = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${dest}`;
     }
 
-    // Initialisation Carte & Météo
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
     fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
-    // Rendu de l'itinéraire avec encadrés de liaison pour les trajets
     const daysContainer = document.getElementById('itinerary-days-container');
     if (daysContainer) {
         daysContainer.innerHTML = '';
@@ -442,13 +423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             activeTrip.itinerary.forEach((day, dayIdx) => {
                 const block = document.createElement('div');
                 block.className = 'day-block-card';
-                block.style.cssText = `
-                    background-color: #14110E;
-                    border: 1px solid rgba(212, 175, 55, 0.15);
-                    border-radius: 8px;
-                    padding: 1.2rem;
-                    margin-bottom: 1.5rem;
-                `;
+                block.style.cssText = `background-color: #14110E; border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem;`;
 
                 let stepsHTML = '';
                 if (day.steps) {
@@ -467,7 +442,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         `;
 
-                        // Encadré de liaison pour le trajet vers l'étape suivante
                         if (idx < day.steps.length - 1) {
                             stepsHTML += `
                                 <div id="travel-info-${dayIdx}-${idx}" style="display: flex; align-items: center; gap: 6px; margin: 0.4rem 0 0.4rem 3.5rem; font-size: 0.75rem; color: var(--color-gold);">
@@ -523,7 +497,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 daysContainer.appendChild(block);
             });
 
-            // Lancement du calcul automatique des trajets via DirectionsService
             calculateTravelTimesForTrip(activeTrip.itinerary, destination);
         }
     }
@@ -549,11 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 totalSpent += parseFloat(expense.amount) || 0;
 
                 const row = document.createElement('div');
-                row.style.cssText = `
-                    display: flex; justify-content: space-between; align-items: center;
-                    background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.6rem;
-                    border-radius: 4px; border: 1px solid rgba(212, 175, 55, 0.1); font-size: 0.82rem;
-                `;
+                row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid rgba(212, 175, 55, 0.1); font-size: 0.82rem;`;
 
                 row.innerHTML = `
                     <span style="color: var(--text-main); font-weight: 500;">${expense.title}</span>
@@ -619,12 +588,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadParticipants();
         await loadSharedExpenses();
 
-        // Écouteur ajout participant
         const addPartForm = document.getElementById('add-participant-form');
         if (addPartForm) {
             addPartForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
                 const nameInput = document.getElementById('participant-name-input');
                 const name = nameInput.value.trim();
                 if (!name) return;
@@ -643,7 +610,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Écouteur ajout dépense partagée (avec parts personnalisées)
         const addSharedForm = document.getElementById('add-shared-expense-form');
         if (addSharedForm) {
             addSharedForm.addEventListener('submit', async (e) => {
@@ -684,7 +650,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 document.getElementById('shared-title-input').value = '';
                 document.getElementById('shared-amount-input').value = '';
-                
                 document.querySelectorAll('input[name="expense-split-participant"]').forEach(cb => cb.checked = true);
 
                 await loadSharedExpenses();
@@ -948,7 +913,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Modale d'édition
     const modal = document.getElementById('editModal');
     const openBtn = document.getElementById('btn-open-edit');
     const closeBtn = document.getElementById('btn-close-edit');
@@ -982,7 +946,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- BASCULE DES ONGLETS (TABS) & ADAPTATION MOBILE DE LA CARTE ---
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
     const mapCardBox = document.querySelector('.map-card');
@@ -1029,7 +992,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // --- EXPORT PDF ---
     const exportBtn = document.getElementById('btn-export-pdf');
     if (exportBtn) {
         exportBtn.addEventListener('click', () => {
