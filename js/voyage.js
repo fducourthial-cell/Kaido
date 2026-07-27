@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resBooking = document.getElementById('res-btn-booking');
     const resAirbnb = document.getElementById('res-btn-airbnb');
     const resCar = document.getElementById('res-btn-car');
-    const flightBtn = document.getElementById('btn-google-flights'); // Rétrocompatibilité ancien bouton si présent
+    const flightBtn = document.getElementById('btn-google-flights');
 
     const dep = activeTrip.departure ? encodeURIComponent(activeTrip.departure.split(',')[0].trim()) : 'Lyon';
     const flightUrl = `https://www.google.com/travel/flights?q=Vols%20de%20${dep}%20%C3%A0%20${destinationClean}`;
@@ -484,7 +484,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         resCar.href = `https://www.kayak.fr/cars/${destinationClean}/${checkIn}/${checkOut}`;
     }
 
-    // Gestion des notes de réservation personnelles
     const renderBookingNotes = () => {
         const listContainer = document.getElementById('booking-notes-list');
         if (!listContainer) return;
@@ -548,15 +547,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
     fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
+    // --- RENDU ITINÉRAIRE AVEC GLISSER-DÉPOSER (DRAG & DROP) ---
     const daysContainer = document.getElementById('itinerary-days-container');
-    if (daysContainer) {
+    
+    const renderItinerary = () => {
+        if (!daysContainer) return;
         daysContainer.innerHTML = '';
 
         if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
             activeTrip.itinerary.forEach((day, dayIdx) => {
                 const block = document.createElement('div');
                 block.className = 'day-block-card';
-                block.style.cssText = `background-color: #14110E; border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem;`;
+                block.dataset.dayIdx = dayIdx;
+                block.style.cssText = `
+                    background-color: #14110E;
+                    border: 1px solid rgba(212, 175, 55, 0.15);
+                    border-radius: 8px;
+                    padding: 1.2rem;
+                    margin-bottom: 1.5rem;
+                    transition: border-color 0.2s;
+                `;
+
+                // Déposer sur le jour (pour déplacer une étape d'un jour à un autre)
+                block.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    block.style.borderColor = 'var(--color-gold)';
+                });
+
+                block.addEventListener('dragleave', () => {
+                    block.style.borderColor = 'rgba(212, 175, 55, 0.15)';
+                });
+
+                block.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    block.style.borderColor = 'rgba(212, 175, 55, 0.15)';
+                    
+                    const sourceDayIdx = parseInt(e.dataTransfer.getData('text/sourceDay'));
+                    const sourceStepIdx = parseInt(e.dataTransfer.getData('text/sourceStep'));
+                    const targetDayIdx = dayIdx;
+
+                    if (isNaN(sourceDayIdx) || isNaN(sourceStepIdx)) return;
+
+                    const [movedStep] = activeTrip.itinerary[sourceDayIdx].steps.splice(sourceStepIdx, 1);
+                    activeTrip.itinerary[targetDayIdx].steps.push(movedStep);
+
+                    await saveTrip();
+                    renderItinerary();
+                });
 
                 let stepsHTML = '';
                 if (day.steps) {
@@ -566,9 +603,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const timeStr = step.time || '--:--';
 
                         stepsHTML += `
-                            <div class="step-item" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent; cursor:pointer;">
+                            <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid rgba(255,255,255,0.05); cursor:grab;">
+                                <span style="color:var(--text-muted); font-size:1rem; cursor:grab;" title="Glisser pour déplacer">⠿</span>
                                 <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${timeStr}</span>
-                                <div style="flex: 1;">
+                                <div style="flex: 1; cursor:pointer;" class="step-click-target">
                                     <div style="color:#F4EFEA; font-weight:600;">${actName}</div>
                                     <div style="color:#8E847A; font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
@@ -594,25 +632,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
 
-                block.querySelector('.day-header').addEventListener('click', () => {
-                    if (window.innerWidth < 992) {
-                        const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
-                        if (mapTabBtn) mapTabBtn.click();
-                    }
-
-                    setTimeout(() => {
-                        if (map) google.maps.event.trigger(map, 'resize');
-                        displayDayOnMap(day.steps, destination);
-                    }, 100);
-                });
-
-                block.querySelectorAll('.step-item').forEach((itemEl) => {
-                    itemEl.addEventListener('click', (e) => {
+                // Événements de Drag & Drop pour chaque étape
+                block.querySelectorAll('.step-item').forEach((stepEl) => {
+                    stepEl.addEventListener('dragstart', (e) => {
                         e.stopPropagation();
-                        document.querySelectorAll('.step-item').forEach(s => s.classList.remove('active-step'));
-                        itemEl.classList.add('active-step');
+                        e.dataTransfer.setData('text/sourceDay', stepEl.getAttribute('data-day'));
+                        e.dataTransfer.setData('text/sourceStep', stepEl.getAttribute('data-idx'));
+                        stepEl.style.opacity = '0.4';
+                    });
 
-                        const stepIndex = parseInt(itemEl.getAttribute('data-idx'));
+                    stepEl.addEventListener('dragend', () => {
+                        stepEl.style.opacity = '1';
+                    });
+
+                    stepEl.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                    });
+
+                    // Réorganisation dans la même journée ou entre étapes
+                    stepEl.addEventListener('drop', async (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        
+                        const sourceDayIdx = parseInt(e.dataTransfer.getData('text/sourceDay'));
+                        const sourceStepIdx = parseInt(e.dataTransfer.getData('text/sourceStep'));
+                        const targetDayIdx = dayIdx;
+                        const targetStepIdx = parseInt(stepEl.getAttribute('data-idx'));
+
+                        if (isNaN(sourceDayIdx) || isNaN(sourceStepIdx) || isNaN(targetStepIdx)) return;
+
+                        const [movedStep] = activeTrip.itinerary[sourceDayIdx].steps.splice(sourceStepIdx, 1);
+                        activeTrip.itinerary[targetDayIdx].steps.splice(targetStepIdx, 0, movedStep);
+
+                        await saveTrip();
+                        renderItinerary();
+                    });
+
+                    // Clic pour afficher sur la carte
+                    stepEl.querySelector('.step-click-target').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('.step-item').forEach(s => s.style.borderColor = 'rgba(255,255,255,0.05)');
+                        stepEl.style.borderColor = 'var(--color-gold)';
+
+                        const stepIndex = parseInt(stepEl.getAttribute('data-idx'));
                         const stepData = day.steps[stepIndex];
                         
                         if (window.innerWidth < 992) {
@@ -627,12 +689,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 });
 
+                block.querySelector('.day-header').addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
+                        if (mapTabBtn) mapTabBtn.click();
+                    }
+
+                    setTimeout(() => {
+                        if (map) google.maps.event.trigger(map, 'resize');
+                        displayDayOnMap(day.steps, destination);
+                    }, 100);
+                });
+
                 daysContainer.appendChild(block);
             });
 
             calculateTravelTimesForTrip(activeTrip.itinerary, destination);
         }
-    }
+    };
+
+    renderItinerary();
 
     // --- RENDU DÉPENSES ---
     const renderExpenses = () => {
