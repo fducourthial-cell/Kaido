@@ -393,23 +393,28 @@ async function calculateTravelTimesForTrip(itinerary, mainDestination) {
     }
 }
 
-// Fonction d'optimisation locale d'une journée
+// Fonction d'optimisation d'une journée
 async function optimizeDayRoute(dayIdx) {
-    const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
+    let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
     if (!activeTrip || !activeTrip.itinerary || !activeTrip.itinerary[dayIdx]) return;
 
     const day = activeTrip.itinerary[dayIdx];
-    if (!day.steps || day.steps.length <= 1) return;
+    if (!day.steps || day.steps.length <= 1) {
+        alert("Pas assez d'étapes à optimiser pour cette journée.");
+        return;
+    }
 
+    // Tri chronologique intelligent des étapes de la journée
     day.steps.sort((a, b) => {
-        if (!a.time || a.time === '--:--') return 1;
-        if (!b.time || b.time === '--:--') return -1;
-        return a.time.localeCompare(b.time);
+        const timeA = (a.time && a.time !== '--:--') ? a.time : "99:99";
+        const timeB = (b.time && b.time !== '--:--') ? b.time : "99:99";
+        return timeA.localeCompare(timeB);
     });
 
+    // Sauvegarde dans le stockage local
     localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
     
-    // Met aussi à jour dans kaido_trips global
+    // Mise à jour globale dans kaido_trips
     const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
     const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
     if (idx !== -1) {
@@ -417,6 +422,18 @@ async function optimizeDayRoute(dayIdx) {
         localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
     }
 
+    // Synchronisation Supabase si disponible
+    if (typeof supabase !== 'undefined' && window.supabaseClient) {
+        try {
+            await window.supabaseClient.from('trips').update({
+                itinerary: activeTrip.itinerary
+            }).eq('id', activeTrip.id);
+        } catch (e) {
+            console.warn("Mise à jour Cloud ignorée, sauvegarde locale active.");
+        }
+    }
+
+    // Rafraîchissement immédiat de l'interface et de la carte
     location.reload();
 }
 
