@@ -126,7 +126,7 @@ async function displayDayOnMap(steps, mainDestination) {
         map: map,
         suppressMarkers: false,
         polylineOptions: {
-            strokeColor: "#2563eb", // Le bleu route de Google Maps
+            strokeColor: "#A63A2B", // Le bleu route de Google Maps
             strokeWeight: 5,
             strokeOpacity: 0.85
         }
