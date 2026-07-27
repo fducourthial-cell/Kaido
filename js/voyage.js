@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Écouteur ajout dépense partagée (avec parts personnalisées - Étape 3)
+        // Écouteur ajout dépense partagée (avec parts personnalisées)
         const addSharedForm = document.getElementById('add-shared-expense-form');
         if (addSharedForm) {
             addSharedForm.addEventListener('submit', async (e) => {
@@ -602,7 +602,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const amount = parseFloat(document.getElementById('shared-amount-input').value);
                 const paid_by = document.getElementById('shared-paidby-select').value;
 
-                // Récupérer les IDs des participants cochés
                 const checkedBoxes = document.querySelectorAll('input[name="expense-split-participant"]:checked');
                 const selectedParticipantIds = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -615,7 +614,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
                 if (!client) return;
                 
-                // 1. Insérer la dépense
                 const { data: expenseData, error: expenseError } = await client
                     .from('trip_expenses')
                     .insert([{ trip_id: tripId, title, amount, paid_by }])
@@ -627,7 +625,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                // 2. Insérer uniquement les splits pour les participants cochés
                 const splits = selectedParticipantIds.map(participantId => ({
                     expense_id: expenseData.id,
                     participant_id: participantId
@@ -638,7 +635,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('shared-title-input').value = '';
                 document.getElementById('shared-amount-input').value = '';
                 
-                // Recocher toutes les cases par défaut pour la prochaine fois
                 document.querySelectorAll('input[name="expense-split-participant"]').forEach(cb => cb.checked = true);
 
                 await loadSharedExpenses();
@@ -704,7 +700,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             <option value="${p.id}">${p.name}</option>
         `).join('');
 
-        // Générer aussi les cases à cocher pour la répartition sur-mesure (Étape 3)
         const checkboxesContainer = document.getElementById('shared-splits-checkboxes');
         if (checkboxesContainer) {
             if (currentParticipants.length === 0) {
@@ -782,8 +777,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         Object.keys(balances).forEach(id => {
             const b = balances[id];
-            if (b.net < -0.01) debtors.push({ id, name: b.name, amount: -b.net });
-            else if (b.net > 0.01) creditors.push({ id, name: b.name, amount: b.net });
+            if (b.net < -0.01) debtors.push({ id, name: b.name, amount: -b.net, originalId: id });
+            else if (b.net > 0.01) creditors.push({ id, name: b.name, amount: b.net, originalId: id });
         });
 
         let transactions = [];
@@ -795,7 +790,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             let creditor = creditors[cIndex];
 
             let paidAmount = Math.min(debtor.amount, creditor.amount);
-            transactions.push(`${debtor.name} doit <strong>${paidAmount.toFixed(2)} €</strong> à ${creditor.name}`);
+            
+            // Ajout du bouton "Régler" (Étape 4)
+            transactions.push(`
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.4rem 0.6rem; border-radius: 4px; margin-bottom: 0.3rem; border: 1px solid rgba(212,175,55,0.1);">
+                    <span>${debtor.name} doit <strong>${paidAmount.toFixed(2)} €</strong> à ${creditor.name}</span>
+                    <button onclick="window.settleDebt('${debtor.originalId}', '${creditor.originalId}', ${paidAmount}, '${debtor.name} rembourse ${creditor.name}')" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">Régler</button>
+                </div>
+            `);
 
             debtor.amount -= paidAmount;
             creditor.amount -= paidAmount;
@@ -807,11 +809,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (transactions.length === 0) {
             resultsContainer.innerHTML = '<span style="color: #4ade80;">✨ Tout le monde est quittes, les comptes sont à l\'équilibre !</span>';
         } else {
-            resultsContainer.innerHTML = transactions.map(t => `<div style="padding: 0.2rem 0;">• ${t}</div>`).join('');
+            resultsContainer.innerHTML = transactions.join('');
         }
     }
 
-    // Fonctions globales attachées à window pour les boutons générés dynamiquement
+    // Fonction globale pour solder une dette en créant une dépense de remboursement automatique
+    window.settleDebt = async function(debtorId, creditorId, amount, title) {
+        const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
+        if (!client) return;
+
+        // Le débiteur verse l'argent au créancier : on enregistre une dépense payée par le débiteur et profitant uniquement au créancier
+        const { data: expenseData, error: expenseError } = await client
+            .from('trip_expenses')
+            .insert([{ trip_id: tripId, title: title, amount: amount, paid_by: debtorId }])
+            .select()
+            .single();
+
+        if (expenseError) {
+            console.error("Erreur lors du règlement de la dette:", expenseError);
+            return;
+        }
+
+        // Le split est attribué uniquement au créancier pour annuler la dette
+        await client.from('trip_expense_splits').insert([{
+            expense_id: expenseData.id,
+            participant_id: creditorId
+        }]);
+
+        await loadSharedExpenses();
+    };
+
     window.deleteParticipant = async function(id) {
         const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
         if (!client) return;
