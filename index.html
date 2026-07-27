@@ -51,33 +51,26 @@
                 </a>
             </div>
 
-            <div class="header-right">
+            <div class="header-right" style="display: flex; align-items: center; gap: 1rem;">
+                <!-- SÉLECTEUR DE LANGUE GLOBAL -->
+                <select id="global-lang-selector" style="background: var(--bg-dark); color: var(--color-gold); border: 1px solid rgba(212, 175, 55, 0.3); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                </select>
+
                 <!-- BOUTON PROFIL DYNAMIQUE -->
                 <a href="#" class="user-profile-btn" id="user-profile-link" title="Profil">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     <span class="user-name-text" id="user-display-name">Mon Profil</span>
                 </a>
             </div>
-
-            <div class="header-right" style="display: flex; align-items: center; gap: 1rem;">
-    <!-- SÉLECTEUR DE LANGUE GLOBAL -->
-    <select id="global-lang-selector" style="background: var(--bg-dark); color: var(--color-gold); border: 1px solid rgba(212, 175, 55, 0.3); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
-        <option value="fr">🇫🇷 FR</option>
-        <option value="en">🇬🇧 EN</option>
-        <option value="es">🇪🇸 ES</option>
-    </select>
-
-    <!-- BOUTON PROFIL DYNAMIQUE -->
-    <a href="#" class="user-profile-btn" id="user-profile-link" title="Profil">
-        ...
-    </a>
-</div>
         </header>
 
         <!-- TITRE PRINCIPAL ÉPURÉ AVEC PORTE ET SOUS-TITRE JAPONAIS -->
         <div class="dashboard-title-wrapper">
             <h1 class="dashboard-title">
-                ⛩️ Mes futurs voyages 
+                ⛩️ <span data-i18n="navTitle">Mes futurs voyages</span> 
                 <span class="dashboard-subtitle-jp">旅 — Korekara no tabi</span>
             </h1>
         </div>
@@ -88,7 +81,7 @@
             <!-- Zone fixe pour ajouter un voyage -->
             <a href="creer.html" class="create-trip-zone">
                 <div class="plus-icon">+</div>
-                <h3>Tracer une nouvelle route</h3>
+                <h3 data-i18n="newRoute">Tracer une nouvelle route</h3>
             </a>
 
         </section>
