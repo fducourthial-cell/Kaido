@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
     fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
-    // --- RENDU ITINÉRAIRE AVEC GLISSER-DÉPOSER (DRAG & DROP) ---
+    // --- RENDU ITINÉRAIRE AVEC GLISSER-DÉPOSER & HORAIRES LIÉS AUX ÉTAPES ---
     const daysContainer = document.getElementById('itinerary-days-container');
     
     const renderItinerary = () => {
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         stepsHTML += `
                             <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid rgba(255,255,255,0.05); cursor:grab;">
                                 <span style="color:var(--text-muted); font-size:1rem; cursor:grab;" title="Glisser pour déplacer">⠿</span>
-                                <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${timeStr}</span>
+                                <input type="time" class="step-time-input" data-day="${dayIdx}" data-idx="${idx}" value="${timeStr !== '--:--' ? timeStr : ''}" style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:#D4AF37; font-weight:bold; font-size:0.85rem; padding:0.2rem; border-radius:4px; cursor:pointer;" title="Modifier l'horaire">
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
                                     <div style="color:#F4EFEA; font-weight:600;">${actName}</div>
                                     <div style="color:#8E847A; font-size:0.8rem;">📍 ${loc}</div>
@@ -631,6 +631,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
+
+                // Modification interactive de l'horaire rattaché à l'étape
+                block.querySelectorAll('.step-time-input').forEach((timeInput) => {
+                    timeInput.addEventListener('change', async (e) => {
+                        const dIdx = parseInt(timeInput.getAttribute('data-day'));
+                        const sIdx = parseInt(timeInput.getAttribute('data-idx'));
+                        activeTrip.itinerary[dIdx].steps[sIdx].time = e.target.value;
+                        await saveTrip();
+                    });
+
+                    timeInput.addEventListener('mousedown', (e) => {
+                        e.stopPropagation(); // Évite de lancer le drag and drop en cliquant sur l'heure
+                    });
+                });
 
                 // Événements de Drag & Drop pour chaque étape
                 block.querySelectorAll('.step-item').forEach((stepEl) => {
