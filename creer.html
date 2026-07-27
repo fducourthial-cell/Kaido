@@ -72,9 +72,20 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
-                    <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1500" min="0">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="trip-budget-input">💶 Budget Max estimé (Optionnel)</label>
+                        <input type="number" id="trip-budget-input" class="form-control" placeholder="Ex: 1500" min="0">
+                    </div>
+                    <!-- AJOUT DU SÉLECTEUR DE LANGUE -->
+                    <div class="form-group" style="flex: 1;">
+                        <label for="trip-lang-select">🌐 Langue</label>
+                        <select id="trip-lang-select" class="form-control" style="background: var(--bg-dark); color: var(--text-main); border: 1px solid rgba(212, 175, 55, 0.2); padding: 0.6rem; border-radius: 6px;">
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="en">🇬🇧 English</option>
+                            <option value="es">🇪🇸 Español</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -234,6 +245,10 @@
                     const userBudget = budgetInput ? parseFloat(budgetInput.value) : 0;
                     const notesInput = document.getElementById('trip-notes');
                     const desc = notesInput ? notesInput.value : '';
+                    
+                    // Récupération de la langue sélectionnée
+                    const langSelect = document.getElementById('trip-lang-select');
+                    const selectedLang = langSelect ? langSelect.value : 'fr';
 
                     if (!dateStart || !dateEnd) {
                         alert("Veuillez renseigner les dates aller et retour.");
@@ -258,7 +273,7 @@
                         return;
                     }
 
-                    // 1. Appel Netlify pour l'itinéraire riche et la checklist spécifique par IA
+                    // 1. Appel Netlify avec le paramètre 'lang'
                     const response = await fetch(NETLIFY_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -266,7 +281,8 @@
                             destination: cleanDestination,
                             departure: departure,
                             totalDays: totalDays,
-                            descText: desc
+                            descText: desc,
+                            lang: selectedLang
                         })
                     });
 
