@@ -56,7 +56,7 @@ function clearMapOverlays() {
     }
 }
 
-// Affichage du tracé routier réel de la journée sur la carte (DirectionsRenderer) aux couleurs de Kaido
+// Affichage du tracé routier Rouge Torii et des marqueurs numérotés Or personnalisés
 async function displayDayOnMap(steps, mainDestination) {
     clearMapOverlays();
     if (!steps || steps.length === 0 || !map) return;
@@ -90,16 +90,25 @@ async function displayDayOnMap(steps, mainDestination) {
 
     if (resolvedWaypoints.length === 0) return;
 
-    // Si une seule étape, simple marqueur Or
+    const bounds = new google.maps.LatLngBounds();
+    resolvedWaypoints.forEach(wp => bounds.extend(wp.location));
+
+    // Si une seule étape, simple marqueur numéroté "1" en Or
     if (resolvedWaypoints.length === 1) {
         const singleLoc = resolvedWaypoints[0].location;
         const marker = new google.maps.Marker({
             position: singleLoc,
             map: map,
-            title: resolvedWaypoints[0].stepInfo.activity || resolvedWaypoints[0].stepInfo.title,
+            title: `1. ${resolvedWaypoints[0].stepInfo.activity || resolvedWaypoints[0].stepInfo.title}`,
+            label: {
+                text: "1",
+                color: "#0D0B09",
+                fontWeight: "bold",
+                fontSize: "12px"
+            },
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 14,
+                scale: 13,
                 fillColor: "#D4AF37", // Or Kaido
                 fillOpacity: 1,
                 strokeWeight: 2,
@@ -112,7 +121,7 @@ async function displayDayOnMap(steps, mainDestination) {
         return;
     }
 
-    // 2. Tracé de la route entre les étapes (Rouge Torii & Marqueurs Or)
+    // 2. Tracé de la route (Rouge Torii) sans les marqueurs par défaut
     const origin = resolvedWaypoints[0].location;
     const destination = resolvedWaypoints[resolvedWaypoints.length - 1].location;
     
@@ -124,21 +133,11 @@ async function displayDayOnMap(steps, mainDestination) {
     const directionsService = new google.maps.DirectionsService();
     const directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
-        suppressMarkers: false,
+        suppressMarkers: true, // On masque les marqueurs par défaut pour mettre nos propres pastilles Or numérotées
         polylineOptions: {
             strokeColor: "#A63A2B", // Rouge Torii
             strokeWeight: 5,
             strokeOpacity: 0.9
-        },
-        markerOptions: {
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 14,
-                fillColor: "#D4AF37", // Or Kaido
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#FFFFFF"
-            }
         }
     });
 
@@ -153,10 +152,39 @@ async function displayDayOnMap(steps, mainDestination) {
     }, (response, status) => {
         if (status === 'OK') {
             directionsRenderer.setDirections(response);
+
+            // 3. Ajout manuel de nos beaux marqueurs numérotés en Or (1, 2, 3...)
+            resolvedWaypoints.forEach((wp) => {
+                const marker = new google.maps.Marker({
+                    position: wp.location,
+                    map: map,
+                    title: `${wp.index + 1}. ${wp.stepInfo.activity || wp.stepInfo.title}`,
+                    label: {
+                        text: `${wp.index + 1}`,
+                        color: "#0D0B09", // Texte sombre pour un contraste parfait sur l'or
+                        fontWeight: "bold",
+                        fontSize: "12px"
+                    },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 13,
+                        fillColor: "#D4AF37", // Or Kaido
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: "#FFFFFF"
+                    }
+                });
+                activeMarkers.push(marker);
+            });
+
         } else {
             console.warn("Impossible de tracer l'itinéraire routier :", status);
         }
     });
+
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds);
+    }
 }
 
 // Sélectionner une seule activité au clic individuel
@@ -183,7 +211,7 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
             animation: google.maps.Animation.DROP,
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 14,
+                scale: 13,
                 fillColor: "#D4AF37", // Or Kaido
                 fillOpacity: 1,
                 strokeWeight: 2,
