@@ -569,11 +569,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadParticipants();
         await loadSharedExpenses();
 
-        // Écouteur ajout participant
+        // Écouteur ajout participant (modifié)
         const addPartForm = document.getElementById('add-participant-form');
         if (addPartForm) {
-            addPartForm.onsubmit = async (e) => {
-                e.preventDefault();
+            addPartForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // 🛑 EMPÊCHE LE RAFRAÎCHISSEMENT DE LA PAGE
+                
                 const nameInput = document.getElementById('participant-name-input');
                 const name = nameInput.value.trim();
                 if (!name) return;
@@ -589,7 +590,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     console.error("Erreur ajout participant:", error);
                 }
-            };
+            });
         }
 
         // Écouteur ajout dépense partagée
