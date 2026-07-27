@@ -299,6 +299,45 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
     }
 }
 
+// Fonction pour interroger l'API Distance Matrix de Google et afficher les temps/distances
+async function calculateTravelTimesForTrip(itinerary, mainDestination) {
+    if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) return;
+
+    const service = new google.maps.DistanceMatrixService();
+
+    for (let dayIdx = 0; dayIdx < itinerary.length; dayIdx++) {
+        const day = itinerary[dayIdx];
+        if (!day.steps || day.steps.length < 2) continue;
+
+        for (let idx = 0; idx < day.steps.length - 1; idx++) {
+            const currentStep = day.steps[idx];
+            const nextStep = day.steps[idx + 1];
+
+            const origin = currentStep.location ? `${currentStep.location}, ${mainDestination}` : (currentStep.activity || mainDestination);
+            const destinationLoc = nextStep.location ? `${nextStep.location}, ${mainDestination}` : (nextStep.activity || mainDestination);
+
+            const infoEl = document.getElementById(`travel-info-${dayIdx}-${idx}`);
+            if (!infoEl) continue;
+
+            service.getDistanceMatrix({
+                origins: [origin],
+                destinations: [destinationLoc],
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+            }, (response, status) => {
+                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+                    const element = response.rows[0].elements[0];
+                    const distance = element.distance.text;
+                    const duration = element.duration.text;
+                    infoEl.innerHTML = `<span style="opacity: 0.8;">🚗 ${duration} (${distance})</span>`;
+                } else {
+                    infoEl.innerHTML = `<span style="opacity: 0.5; font-style: italic;">🚗 Trajet non estimé</span>`;
+                }
+            });
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
     const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
@@ -395,13 +434,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
     fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
-    // Rendu de l'itinéraire
+    // Rendu de l'itinéraire avec calcul des temps et distances
     const daysContainer = document.getElementById('itinerary-days-container');
     if (daysContainer) {
         daysContainer.innerHTML = '';
 
         if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
-            activeTrip.itinerary.forEach((day) => {
+            activeTrip.itinerary.forEach((day, dayIdx) => {
                 const block = document.createElement('div');
                 block.className = 'day-block-card';
                 block.style.cssText = `
@@ -420,14 +459,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const timeStr = step.time || '--:--';
 
                         stepsHTML += `
-                            <div class="step-item" data-idx="${idx}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent; cursor:pointer;">
+                            <div class="step-item" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid transparent; cursor:pointer;">
                                 <span style="color:#D4AF37; font-weight:bold; font-size:0.85rem; min-width:50px;">${timeStr}</span>
-                                <div>
+                                <div style="flex: 1;">
                                     <div style="color:#F4EFEA; font-weight:600;">${actName}</div>
                                     <div style="color:#8E847A; font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
                             </div>
                         `;
+
+                        // Encadré de liaison pour le trajet vers l'étape suivante
+                        if (idx < day.steps.length - 1) {
+                            stepsHTML += `
+                                <div id="travel-info-${dayIdx}-${idx}" style="display: flex; align-items: center; gap: 6px; margin: 0.4rem 0 0.4rem 3.5rem; font-size: 0.75rem; color: var(--color-gold);">
+                                    <span style="opacity: 0.7;">🚗 Calcul du trajet...</span>
+                                </div>
+                            `;
+                        }
                     });
                 }
 
@@ -437,7 +485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span style="color:#F4EFEA; font-weight:500;">${day.dateText || ''}</span>
                         <span style="margin-left:auto; color:#D4AF37; font-size:0.8rem;">📍 Voir la journée sur la carte</span>
                     </div>
-                    <div>${stepsHTML}</div>
+                    <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
 
                 block.querySelector('.day-header').addEventListener('click', () => {
@@ -475,6 +523,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 daysContainer.appendChild(block);
             });
+
+            // Lancement du calcul des distances via DistanceMatrix API en arrière-plan
+            calculateTravelTimesForTrip(activeTrip.itinerary, destination);
         }
     }
 
@@ -791,7 +842,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let paidAmount = Math.min(debtor.amount, creditor.amount);
             
-            // Ajout du bouton "Régler" (Étape 4)
             transactions.push(`
                 <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.4rem 0.6rem; border-radius: 4px; margin-bottom: 0.3rem; border: 1px solid rgba(212,175,55,0.1);">
                     <span>${debtor.name} doit <strong>${paidAmount.toFixed(2)} €</strong> à ${creditor.name}</span>
@@ -813,12 +863,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Fonction globale pour solder une dette en créant une dépense de remboursement automatique
     window.settleDebt = async function(debtorId, creditorId, amount, title) {
         const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
         if (!client) return;
 
-        // Le débiteur verse l'argent au créancier : on enregistre une dépense payée par le débiteur et profitant uniquement au créancier
         const { data: expenseData, error: expenseError } = await client
             .from('trip_expenses')
             .insert([{ trip_id: tripId, title: title, amount: amount, paid_by: debtorId }])
@@ -830,7 +878,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Le split est attribué uniquement au créancier pour annuler la dette
         await client.from('trip_expense_splits').insert([{
             expense_id: expenseData.id,
             participant_id: creditorId
@@ -853,9 +900,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadSharedExpenses();
     };
 
-    // Lancement du module Tricount
     initTricountModule();
-    // ==========================================
 
     // Rendu Checklist
     function renderChecklist() {
