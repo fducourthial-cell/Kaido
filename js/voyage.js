@@ -72,7 +72,11 @@ async function displayDayOnMap(steps, mainDestination) {
         if (step.lat && step.lng && !isNaN(step.lat) && !isNaN(step.lng)) {
             loc = new google.maps.LatLng(parseFloat(step.lat), parseFloat(step.lng));
         } else {
-            const query = step.location ? `${step.location}, ${mainDestination}` : `${step.activity || step.title}, ${mainDestination}`;
+            const rawLocation = step.location || step.activity || step.title;
+            const query = rawLocation.toLowerCase().includes(mainDestination.toLowerCase()) 
+                ? rawLocation 
+                : `${rawLocation}, ${mainDestination}`;
+
             await new Promise((resolve) => {
                 geocoder.geocode({ address: query }, (results, status) => {
                     if (status === 'OK' && results[0]) {
@@ -108,7 +112,7 @@ async function displayDayOnMap(steps, mainDestination) {
             },
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 13,
+                scale: 14,
                 fillColor: "#D4AF37", // Or Kaido
                 fillOpacity: 1,
                 strokeWeight: 2,
@@ -133,7 +137,8 @@ async function displayDayOnMap(steps, mainDestination) {
     const directionsService = new google.maps.DirectionsService();
     const directionsRenderer = new google.maps.DirectionsRenderer({
         map: map,
-        suppressMarkers: true, // On masque les marqueurs par défaut pour mettre nos propres pastilles Or numérotées
+        suppressMarkers: true, // SUPPRIME LES ÉPINGLES GOOGLE PAR DÉFAUT (Fini les doublons !)
+        preserveViewport: false,
         polylineOptions: {
             strokeColor: "#A63A2B", // Rouge Torii
             strokeWeight: 5,
@@ -147,7 +152,7 @@ async function displayDayOnMap(steps, mainDestination) {
         origin: origin,
         destination: destination,
         waypoints: waypoints,
-        optimizeWaypoints: false,
+        optimizeWaypoints: false, // FALSE POUR RESPECTER STRICTEMENT L'ORDRE 1 -> 2 -> 3
         travelMode: google.maps.TravelMode.DRIVING,
     }, (response, status) => {
         if (status === 'OK') {
@@ -167,7 +172,7 @@ async function displayDayOnMap(steps, mainDestination) {
                     },
                     icon: {
                         path: google.maps.SymbolPath.CIRCLE,
-                        scale: 13,
+                        scale: 14,
                         fillColor: "#D4AF37", // Or Kaido
                         fillOpacity: 1,
                         strokeWeight: 2,
@@ -179,6 +184,24 @@ async function displayDayOnMap(steps, mainDestination) {
 
         } else {
             console.warn("Impossible de tracer l'itinéraire routier :", status);
+            // Fallback si le tracé route échoue
+            resolvedWaypoints.forEach((wp) => {
+                const marker = new google.maps.Marker({
+                    position: wp.location,
+                    map: map,
+                    title: `${wp.index + 1}. ${wp.stepInfo.activity || wp.stepInfo.title}`,
+                    label: { text: `${wp.index + 1}`, color: "#0D0B09", fontWeight: "bold", fontSize: "12px" },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 14,
+                        fillColor: "#D4AF37",
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: "#FFFFFF"
+                    }
+                });
+                activeMarkers.push(marker);
+            });
         }
     });
 
@@ -211,7 +234,7 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
             animation: google.maps.Animation.DROP,
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 13,
+                scale: 14,
                 fillColor: "#D4AF37", // Or Kaido
                 fillOpacity: 1,
                 strokeWeight: 2,
@@ -368,6 +391,33 @@ async function calculateTravelTimesForTrip(itinerary, mainDestination) {
             });
         }
     }
+}
+
+// Fonction d'optimisation locale d'une journée
+async function optimizeDayRoute(dayIdx) {
+    const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
+    if (!activeTrip || !activeTrip.itinerary || !activeTrip.itinerary[dayIdx]) return;
+
+    const day = activeTrip.itinerary[dayIdx];
+    if (!day.steps || day.steps.length <= 1) return;
+
+    day.steps.sort((a, b) => {
+        if (!a.time || a.time === '--:--') return 1;
+        if (!b.time || b.time === '--:--') return -1;
+        return a.time.localeCompare(b.time);
+    });
+
+    localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
+    
+    // Met aussi à jour dans kaido_trips global
+    const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+    const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
+    if (idx !== -1) {
+        allTrips[idx] = activeTrip;
+        localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
+    }
+
+    location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -625,13 +675,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 block.innerHTML = `
-                    <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem; cursor:pointer;" title="Cliquez pour afficher l'itinéraire de la journée sur la carte">
-                        <span style="background:#A63A2B; color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem;">${day.day}</span>
-                        <span style="color:#F4EFEA; font-weight:500;">${day.dateText || ''}</span>
-                        <span style="margin-left:auto; color:#D4AF37; font-size:0.8rem;">📍 Voir la journée sur la carte</span>
+                    <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem; margin-bottom: 0.5rem;">
+                        <span style="background:#A63A2B; color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem; cursor:pointer;" class="day-map-trigger">${day.day}</span>
+                        <span style="color:#F4EFEA; font-weight:500; cursor:pointer;" class="day-map-trigger">${day.dateText || ''}</span>
+                        
+                        <!-- Bouton Optimiser -->
+                        <button class="btn-optimize-day" data-day-idx="${dayIdx}" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: auto;" title="Réordonner logiquement les étapes">⚡ Optimiser</button>
+                        
+                        <span style="color:#D4AF37; font-size:0.8rem; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
                     </div>
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
+
+                // Événement pour le bouton "Optimiser" de la journée
+                block.querySelector('.btn-optimize-day').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const dIdx = parseInt(e.target.getAttribute('data-day-idx'));
+                    await optimizeDayRoute(dIdx);
+                });
 
                 // Modification interactive de l'horaire rattaché à l'étape
                 block.querySelectorAll('.step-time-input').forEach((timeInput) => {
@@ -643,7 +704,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     timeInput.addEventListener('mousedown', (e) => {
-                        e.stopPropagation(); // Évite de lancer le drag and drop en cliquant sur l'heure
+                        e.stopPropagation();
                     });
                 });
 
@@ -704,16 +765,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 });
 
-                block.querySelector('.day-header').addEventListener('click', () => {
-                    if (window.innerWidth < 992) {
-                        const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
-                        if (mapTabBtn) mapTabBtn.click();
-                    }
+                block.querySelectorAll('.day-map-trigger').forEach(trigger => {
+                    trigger.addEventListener('click', () => {
+                        if (window.innerWidth < 992) {
+                            const mapTabBtn = document.querySelector('.tab-btn[data-tab="tab-map"]');
+                            if (mapTabBtn) mapTabBtn.click();
+                        }
 
-                    setTimeout(() => {
-                        if (map) google.maps.event.trigger(map, 'resize');
-                        displayDayOnMap(day.steps, destination);
-                    }, 100);
+                        setTimeout(() => {
+                            if (map) google.maps.event.trigger(map, 'resize');
+                            displayDayOnMap(day.steps, destination);
+                        }, 100);
+                    });
                 });
 
                 daysContainer.appendChild(block);
