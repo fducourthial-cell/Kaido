@@ -393,7 +393,7 @@ async function calculateTravelTimesForTrip(itinerary, mainDestination) {
     }
 }
 
-// Fonction d'optimisation d'une journée
+// Fonction d'optimisation locale d'une journée
 async function optimizeDayRoute(dayIdx) {
     let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
     if (!activeTrip || !activeTrip.itinerary || !activeTrip.itinerary[dayIdx]) return;
@@ -404,17 +404,16 @@ async function optimizeDayRoute(dayIdx) {
         return;
     }
 
-    // Tri chronologique intelligent des étapes de la journée
+    // Tri chronologique intelligent basé sur les horaires des étapes
     day.steps.sort((a, b) => {
         const timeA = (a.time && a.time !== '--:--') ? a.time : "99:99";
         const timeB = (b.time && b.time !== '--:--') ? b.time : "99:99";
         return timeA.localeCompare(timeB);
     });
 
-    // Sauvegarde dans le stockage local
     localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
     
-    // Mise à jour globale dans kaido_trips
+    // Met aussi à jour dans kaido_trips global
     const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
     const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
     if (idx !== -1) {
@@ -433,7 +432,6 @@ async function optimizeDayRoute(dayIdx) {
         }
     }
 
-    // Rafraîchissement immédiat de l'interface et de la carte
     location.reload();
 }
 
