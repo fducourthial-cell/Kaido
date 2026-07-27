@@ -56,7 +56,7 @@ function clearMapOverlays() {
     }
 }
 
-// Affichage du tracé routier réel de la journée sur la carte (DirectionsRenderer)
+// Affichage du tracé routier réel de la journée sur la carte (DirectionsRenderer) aux couleurs de Kaido
 async function displayDayOnMap(steps, mainDestination) {
     clearMapOverlays();
     if (!steps || steps.length === 0 || !map) return;
@@ -90,7 +90,7 @@ async function displayDayOnMap(steps, mainDestination) {
 
     if (resolvedWaypoints.length === 0) return;
 
-    // Si une seule étape, simple marqueur
+    // Si une seule étape, simple marqueur Or
     if (resolvedWaypoints.length === 1) {
         const singleLoc = resolvedWaypoints[0].location;
         const marker = new google.maps.Marker({
@@ -99,8 +99,8 @@ async function displayDayOnMap(steps, mainDestination) {
             title: resolvedWaypoints[0].stepInfo.activity || resolvedWaypoints[0].stepInfo.title,
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 13,
-                fillColor: "#D4AF37",
+                scale: 14,
+                fillColor: "#D4AF37", // Or Kaido
                 fillOpacity: 1,
                 strokeWeight: 2,
                 strokeColor: "#FFFFFF"
@@ -112,7 +112,7 @@ async function displayDayOnMap(steps, mainDestination) {
         return;
     }
 
-    // 2. Tracé de la vraie route routière entre les étapes
+    // 2. Tracé de la route entre les étapes (Rouge Torii & Marqueurs Or)
     const origin = resolvedWaypoints[0].location;
     const destination = resolvedWaypoints[resolvedWaypoints.length - 1].location;
     
@@ -126,9 +126,19 @@ async function displayDayOnMap(steps, mainDestination) {
         map: map,
         suppressMarkers: false,
         polylineOptions: {
-            strokeColor: "#A63A2B", // Le bleu route de Google Maps
+            strokeColor: "#A63A2B", // Rouge Torii
             strokeWeight: 5,
-            strokeOpacity: 0.85
+            strokeOpacity: 0.9
+        },
+        markerOptions: {
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 14,
+                fillColor: "#D4AF37", // Or Kaido
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#FFFFFF"
+            }
         }
     });
 
@@ -170,7 +180,15 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
             position: location,
             map: map,
             title: actName,
-            animation: google.maps.Animation.DROP
+            animation: google.maps.Animation.DROP,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 14,
+                fillColor: "#D4AF37", // Or Kaido
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#FFFFFF"
+            }
         });
         activeMarkers.push(marker);
         map.panTo(location);
