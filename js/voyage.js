@@ -430,14 +430,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const titleEl = document.getElementById('trip-main-title');
     const datesEl = document.getElementById('trip-main-dates');
     const descEl = document.getElementById('trip-main-desc');
-    const coverEl = document.getElementById('trip-cover');
 
     if (titleEl) titleEl.textContent = destination;
     if (datesEl) datesEl.textContent = `📅 ${activeTrip.dates || ''}`;
     if (descEl) descEl.textContent = activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
 
-    if (coverEl && activeTrip.image) {
-        coverEl.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url('${activeTrip.image}')`;
+    // Injection propre de l'image de couverture (Hero Card)
+    const coverImgEl = document.getElementById('trip-cover-img');
+    if (coverImgEl && activeTrip.image) {
+        coverImgEl.src = activeTrip.image;
     }
 
     let totalB = parseFloat(activeTrip.budget) || 0;
