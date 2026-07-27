@@ -271,6 +271,63 @@
                     </div>
                 </div>
             </div>
+            <div id="tab-reservations" class="tab-content" style="display: none;">
+    <div style="background-color: #14110E; border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+        <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: var(--font-title, serif);">✈️ Liens de réservation & Partenaires</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Préparez votre voyage en un clic. Les dates et la destination de votre séjour sont automatiquement prises en compte.
+        </p>
+
+        <!-- Grille des liens partenaires -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <a id="res-btn-flights" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(212, 175, 55, 0.2); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+                <span style="font-size: 1.5rem;">✈️</span>
+                <div>
+                    <div style="font-weight: 600; color: var(--color-gold);">Google Flights</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Trouver les meilleurs vols</div>
+                </div>
+            </a>
+
+            <a id="res-btn-booking" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(212, 175, 55, 0.2); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">🏨</span>
+                <div>
+                    <div style="font-weight: 600; color: var(--color-gold);">Booking.com</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Hôtels & Hébergements</div>
+                </div>
+            </a>
+
+            <a id="res-btn-airbnb" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(212, 175, 55, 0.2); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">🏠</span>
+                <div>
+                    <div style="font-weight: 600; color: var(--color-gold);">Airbnb</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Apparts & Logements insolites</div>
+                </div>
+            </a>
+
+            <a id="res-btn-car" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(212, 175, 55, 0.2); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">🚗</span>
+                <div>
+                    <div style="font-weight: 600; color: var(--color-gold);">Location de voiture</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Comparer les loueurs (Kayak)</div>
+                </div>
+            </a>
+        </div>
+
+        <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: var(--font-title, serif);">📋 Mes notes de réservation personnelles</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Ajoutez ici vos numéros de vol, codes de réservation d'hôtel ou liens directs vers vos billets.</p>
+        
+        <!-- Formulaire et liste pour ajouter des notes/références persos -->
+        <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem;">
+            <input type="text" id="booking-title-input" placeholder="Ex : Vol AF1234 - Réservation Hôtel ABC..." style="flex: 1; background: var(--bg-dark); border: 1px solid rgba(212,175,55,0.2); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
+            <input type="text" id="booking-link-input" placeholder="Lien (optionnel, ex: https://...)" style="flex: 1; background: var(--bg-dark); border: 1px solid rgba(212,175,55,0.2); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
+            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter</button>
+        </form>
+
+        <div id="booking-notes-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- Les notes perso s'afficheront ici -->
+        </div>
+    </div>
+</div>
 
             <!-- ONGLET 4 : CARTE INTERACTIVE (MOBILE) -->
             <div id="tab-map" class="tab-content" style="display: none;"></div>
