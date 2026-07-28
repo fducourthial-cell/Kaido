@@ -28,8 +28,8 @@ const shareBtn = document.getElementById('btn-share-trip');
 
 if (shareBtn) {
     shareBtn.addEventListener('click', async () => {
-        // currentTripId est l'ID de ton voyage actuel (variable déjà utilisée dans ton code existant)
-        if (typeof currentTripId === 'undefined' || !currentTripId) {
+        // On vérifie activeTrip.id au lieu de currentTripId
+        if (!activeTrip || !activeTrip.id) {
             alert("Erreur : Impossible d'identifier ce voyage.");
             return;
         }
@@ -37,9 +37,9 @@ if (shareBtn) {
         try {
             // 1. On récupère d'abord le voyage actuel depuis Supabase pour voir s'il a déjà un share_token
             const { data: tripData, error: fetchError } = await supabase
-                .from('voyages') // Remplace par 'trips' si c'est le nom de ta table
+                .from('trips')
                 .select('share_token')
-                .eq('id', currentTripId)
+                .eq('id', activeTrip.id)
                 .single();
 
             if (fetchError) throw fetchError;
@@ -53,7 +53,7 @@ if (shareBtn) {
                 const { error: updateError } = await supabase
                     .from('voyages')
                     .update({ share_token: token })
-                    .eq('id', currentTripId);
+                    .eq('id', activeTrip.id);
 
                 if (updateError) throw updateError;
             }
