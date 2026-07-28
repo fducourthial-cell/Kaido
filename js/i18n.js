@@ -67,7 +67,7 @@ function applyGlobalTheme(theme) {
             themeBtn.innerHTML = '<span style="font-size: 1.1rem;">🌙</span>';
             themeBtn.title = "Passer au thème sombre";
         } else {
-            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">📜</span>';
+            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">☀️</span>';
             themeBtn.title = "Passer au thème papyrus";
         }
     }
