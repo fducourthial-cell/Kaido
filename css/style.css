@@ -885,7 +885,7 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
 }
 
 /* --- VERSION MOBILE PAYSAGE (Smartphones à l'horizontale) --- */
-@media (max-width: 991px) and (orientation: landscape) {
+@media (max-width: 1200px) and (orientation: landscape) {
     body {
         padding-bottom: 50px; /* Moins d'espace nécessaire en bas */
     }
