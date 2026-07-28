@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kaido-cache-v2'; // <-- Incrémente la version ici à chaque grosse modif (v2, v3...)
+const CACHE_NAME = 'kaido-cache-v3'; // <-- Incrémente la version ici à chaque grosse modif (v2, v3...)
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
