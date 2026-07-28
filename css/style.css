@@ -847,6 +847,17 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     transform: translateY(-1px);
 }
 
+/* --- ANIMATION AU CLIC SUR LES ÉTAPES --- */
+@keyframes kaidoClickPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.97); filter: brightness(1.2); }
+    100% { transform: scale(1); }
+}
+
+.step-item.clicked-animation {
+    animation: kaidoClickPulse 0.3s ease;
+}
+
 /* ==========================================================================
    8. MEDIA QUERIES (RESPONSIVE)
    ========================================================================== */
