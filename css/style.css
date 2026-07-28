@@ -80,8 +80,8 @@ body::before {
     justify-content: flex-start;
 }
 .kaido-header .header-btn-round {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(212, 175, 55, 0.2);
