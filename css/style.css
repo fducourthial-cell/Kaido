@@ -869,8 +869,10 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
 }
 
 /* ==========================================================================
-   8. MEDIA QUERIES (RESPONSIVE)
+   8. MEDIA QUERIES (RESPONSIVE & ADAPTATION MOBILE)
    ========================================================================== */
+
+/* --- PETITS ÉCRANS & SMARTPHONES (Général) --- */
 @media (max-width: 768px) {
     .container { width: 100%; padding: 0 1rem; }
     .kaido-header { grid-template-columns: auto 1fr auto; gap: 10px; padding: 0.8rem 0; }
@@ -882,114 +884,96 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     .form-row { grid-template-columns: 1fr; gap: 0; }
 }
 
+/* --- ORDINATEURS & GRANDS ÉCRANS --- */
 @media (min-width: 992px) {
     .header-link-red { display: inline-block; }
-    .trip-nav-tabs {
-        position: relative; top: auto; bottom: auto; left: auto; right: auto;
-        width: auto; height: auto; flex-direction: row;
-        background: var(--bg-card); border: 1px solid var(--border-color);
-        border-radius: 8px; justify-content: flex-start; gap: 1rem;
-        margin-top: 1.5rem; padding: 0.6rem 1rem; box-shadow: none;
-    }
-    .tab-btn { flex: initial; min-width: auto; flex-direction: row; gap: 8px; font-size: 0.95rem; padding: 0.6rem 1.2rem; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; }
-    .tab-btn.active { background: var(--color-gold); color: var(--bg-dark); border-color: var(--color-gold); font-weight: 700; }
+    .mobile-only-tab { display: none !important; }
+    
     .itinerary-split-layout { flex-direction: row; align-items: flex-start; gap: 2rem; }
     .itinerary-list-col { flex: 1.2; }
     .itinerary-map-col { flex: 1; position: sticky; top: 2rem; z-index: 10; }
-@media (min-width: 992px) {
-    .mobile-only-tab {
-        display: none !important;
+
+    /* Navigation version bureau (Pilules horizontales) */
+    .trip-nav-tabs {
+        position: relative; top: auto; bottom: auto; left: auto; right: auto;
+        width: auto; height: auto; flex-direction: row;
+        background: transparent; border: none;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 0; justify-content: flex-start; gap: 0.5rem;
+        margin-top: 0; margin-bottom: 1.5rem; padding-bottom: 0.8rem; box-shadow: none;
+        overflow-x: auto; scrollbar-width: none;
     }
+    .trip-nav-tabs::-webkit-scrollbar { display: none; }
 
-   /* ========================================================= */
-/* --- NAVIGATION PAR ONGLETS (BUREAU ET MOBILE) --- */
-/* ========================================================= */
-
-/* Version Bureau (Pilules horizontales claires) */
-.trip-nav-tabs {
-    display: flex;
-    gap: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.8rem;
-    margin-bottom: 1.5rem;
-    overflow-x: auto;
-    scrollbar-width: none; /* Cache la barre de scroll Firefox */
-}
-.trip-nav-tabs::-webkit-scrollbar {
-    display: none; /* Cache la barre Chrome/Safari */
+    .tab-btn {
+        flex: initial; min-width: auto; flex-direction: row; gap: 8px;
+        font-size: 0.9rem; padding: 0.5rem 1.2rem; background: none;
+        border: none; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .tab-btn.active {
+        background: rgba(212, 175, 55, 0.15);
+        color: var(--color-gold);
+        border: 1px solid rgba(212, 175, 55, 0.4);
+        font-weight: 600;
+    }
+    .tab-btn .tab-text { display: inline; }
 }
 
-.tab-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    padding: 0.5rem 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap; /* Empêche le texte d'être coupé */
-    flex-shrink: 0; /* Empêche le bouton de s'écraser */
-}
-
-.tab-btn.active {
-    background: rgba(212, 175, 55, 0.15);
-    color: var(--color-gold);
-    border: 1px solid rgba(212, 175, 55, 0.4);
-}
-
-/* ========================================================= */
-/* Version Mobile (Menu d'application fixé en bas) */
-/* ========================================================= */
+/* --- VERSION MOBILE APP (Smartphones Portrait & Navigation en bas) --- */
 @media (max-width: 991px) {
-    /* On ajoute de l'espace en bas de page pour ne pas cacher le contenu sous la barre */
     body {
-        padding-bottom: 80px; 
+        padding-bottom: 80px; /* Place pour la barre du bas */
     }
 
     .trip-nav-tabs {
         position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--bg-card); /* Utilise la couleur de fond dynamique du thème */
+        bottom: 0; left: 0; width: 100%;
+        background: var(--bg-card);
         border-top: 1px solid var(--border-color);
         border-bottom: none;
-        padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom)); /* Gère l'encoche basse des iPhones modernes */
-        margin: 0;
-        display: flex;
-        justify-content: space-around; /* Répartit les icônes sur toute la largeur */
-        gap: 0;
-        z-index: 1000; /* Toujours au premier plan */
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
+        padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+        margin: 0; display: flex; justify-content: space-around; gap: 0;
+        z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
     }
 
     .tab-btn {
-        flex-direction: column; /* L'icône passe au-dessus du texte */
-        padding: 0.4rem;
-        border-radius: 8px; /* On enlève la pilule ronde */
-        font-size: 0.65rem; /* Texte tout petit comme sur une vraie app */
-        gap: 4px;
-        flex: 1; /* Chaque bouton prend la même largeur */
-        border: none !important; /* Disparition des bordures */
-        background: transparent !important;
+        flex-direction: column; padding: 0.4rem; border-radius: 8px;
+        font-size: 0.65rem; gap: 4px; flex: 1; border: none !important;
+        background: transparent !important; color: var(--text-muted);
+        align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    .tab-btn .tab-icon { font-size: 1.3rem; }
+    .tab-btn.active { color: var(--color-gold); }
+    .tab-btn.active .tab-icon { transform: scale(1.15); transition: transform 0.2s; }
+}
+
+/* --- VERSION MOBILE PAYSAGE (Smartphones à l'horizontale) --- */
+@media (max-width: 991px) and (orientation: landscape) {
+    body {
+        padding-bottom: 55px; /* Moins d'espace nécessaire en bas */
+    }
+
+    .trip-nav-tabs {
+        padding: 0.3rem 1rem calc(0.3rem + env(safe-area-inset-bottom));
+    }
+
+    /* En paysage, on masque le texte pour ne garder que les icônes et sauver la hauteur de l'écran */
+    .tab-btn .tab-text {
+        display: none; 
     }
 
     .tab-btn .tab-icon {
-        font-size: 1.3rem; /* Icône bien visible */
+        font-size: 1.4rem;
+        margin: 0;
+    }
+    
+    .tab-btn {
+        padding: 0.2rem;
     }
 
-    .tab-btn.active {
-        color: var(--color-gold);
+    /* On étire la carte pour qu'elle profite du format cinémascope */
+    #map {
+        height: 65vh; 
     }
-
-    .tab-btn.active .tab-icon {
-        transform: scale(1.15); /* Petit effet de rebond sur l'icône active */
-        transition: transform 0.2s;
-    }
-}
 }
