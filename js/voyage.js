@@ -3,7 +3,27 @@ let activeMarkers = []; // Tableau pour stocker tous les marqueurs affichés
 let routePolyline = null; // Objet pour stocker le tracé de la route ou les lignes
 let placesService = null;
 
-// Initialisation de la carte basée en priorité sur les coordonnées GPS enregistrées
+// Styles personnalisés pour la carte Google Maps selon le thème actif
+const mapStyles = {
+    dark: [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+    ],
+    papyrus: [
+        { elementType: "geometry", stylers: [{ color: "#F2EBD9" }] }, // Ton blanc cassé / parchemin des cartes
+        { elementType: "labels.text.stroke", stylers: [{ color: "#FCF8F2" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#6B5E52" }] },
+        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#8C6D23" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#E4D8C3" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#D1C2A5" }] }
+    ]
+};
+
+// Initialisation de la carte basée en priorité sur les coordonnées GPS enregistrées et le thème
 function initGoogleMap(destinationName, lat, lng) {
     const mapContainer = document.getElementById('map');
     if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
@@ -14,19 +34,16 @@ function initGoogleMap(destinationName, lat, lng) {
         initialPos = { lat: parseFloat(lat), lng: parseFloat(lng) };
     }
 
+    // Récupération dynamique du thème actuel
+    const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+    const activeStyle = mapStyles[currentTheme] || mapStyles.dark;
+
     map = new google.maps.Map(mapContainer, {
         zoom: 12,
         center: initialPos,
         disableDefaultUI: true,
         zoomControl: true,
-        styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-            { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-            { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-        ]
+        styles: activeStyle
     });
 
     placesService = new google.maps.places.PlacesService(map);
@@ -613,6 +630,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     initGoogleMap(destination, activeTrip.destinationLat, activeTrip.destinationLng);
     fetchAndRenderWeather(activeTrip.destinationLat, activeTrip.destinationLng, destination, activeTrip.dateStart, activeTrip.dateEnd);
 
+    // Écouteur pour basculer le style de la carte Google Maps si on change de thème à la volée
+    const themeToggleBtn = document.getElementById('global-theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                const newTheme = document.body.getAttribute('data-theme') || 'dark';
+                if (map && mapStyles[newTheme]) {
+                    map.setOptions({ styles: mapStyles[newTheme] });
+                }
+            }, 50);
+        });
+    }
+
     // --- RENDU ITINÉRAIRE AVEC GLISSER-DÉPOSER & HORAIRES LIÉS AUX ÉTAPES ---
     const daysContainer = document.getElementById('itinerary-days-container');
     
@@ -626,27 +656,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 block.className = 'day-block-card';
                 block.dataset.dayIdx = dayIdx;
                 block.style.cssText = `
-                    background-color: #14110E;
-                    border: 1px solid rgba(212, 175, 55, 0.15);
+                    background-color: var(--bg-card);
+                    border: 1px solid var(--border-color);
                     border-radius: 8px;
                     padding: 1.2rem;
                     margin-bottom: 1.5rem;
                     transition: border-color 0.2s;
                 `;
 
-                // Déposer sur le jour (pour déplacer une étape d'un jour à un autre)
                 block.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     block.style.borderColor = 'var(--color-gold)';
                 });
 
                 block.addEventListener('dragleave', () => {
-                    block.style.borderColor = 'rgba(212, 175, 55, 0.15)';
+                    block.style.borderColor = 'var(--border-color)';
                 });
 
                 block.addEventListener('drop', async (e) => {
                     e.preventDefault();
-                    block.style.borderColor = 'rgba(212, 175, 55, 0.15)';
+                    block.style.borderColor = 'var(--border-color)';
                     
                     const sourceDayIdx = parseInt(e.dataTransfer.getData('text/sourceDay'));
                     const sourceStepIdx = parseInt(e.dataTransfer.getData('text/sourceStep'));
@@ -669,12 +698,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const timeStr = step.time || '--:--';
 
                         stepsHTML += `
-                            <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid rgba(255,255,255,0.05); cursor:grab;">
+                            <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab;">
                                 <span style="color:var(--text-muted); font-size:1rem; cursor:grab;" title="Glisser pour déplacer">⠿</span>
-                                <input type="time" class="step-time-input" data-day="${dayIdx}" data-idx="${idx}" value="${timeStr !== '--:--' ? timeStr : ''}" style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:#D4AF37; font-weight:bold; font-size:0.85rem; padding:0.2rem; border-radius:4px; cursor:pointer;" title="Modifier l'horaire">
+                                <input type="time" class="step-time-input" data-day="${dayIdx}" data-idx="${idx}" value="${timeStr !== '--:--' ? timeStr : ''}" style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--color-gold); font-weight:bold; font-size:0.85rem; padding:0.2rem; border-radius:4px; cursor:pointer;" title="Modifier l'horaire">
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
-                                    <div style="color:#F4EFEA; font-weight:600;">${actName}</div>
-                                    <div style="color:#8E847A; font-size:0.8rem;">📍 ${loc}</div>
+                                    <div style="color:var(--text-main); font-weight:600;">${actName}</div>
+                                    <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
                             </div>
                         `;
@@ -690,26 +719,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 block.innerHTML = `
-                    <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:0.5rem; margin-bottom: 0.5rem;">
-                        <span style="background:#A63A2B; color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem; cursor:pointer;" class="day-map-trigger">${day.day}</span>
-                        <span style="color:#F4EFEA; font-weight:500; cursor:pointer;" class="day-map-trigger">${day.dateText || ''}</span>
+                    <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom: 0.5rem;">
+                        <span style="background:var(--color-torii); color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem; cursor:pointer;" class="day-map-trigger">${day.day}</span>
+                        <span style="color:var(--text-main); font-weight:500; cursor:pointer;" class="day-map-trigger">${day.dateText || ''}</span>
                         
-                        <!-- Bouton Optimiser -->
                         <button class="btn-optimize-day" data-day-idx="${dayIdx}" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: auto;" title="Réordonner logiquement les étapes">⚡ Optimiser</button>
                         
-                        <span style="color:#D4AF37; font-size:0.8rem; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
+                        <span style="color:var(--color-gold); font-size:0.8rem; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
                     </div>
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
 
-                // Événement pour le bouton "Optimiser" de la journée
                 block.querySelector('.btn-optimize-day').addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const dIdx = parseInt(e.target.getAttribute('data-day-idx'));
                     await optimizeDayRoute(dIdx);
                 });
 
-                // Modification interactive de l'horaire rattaché à l'étape
                 block.querySelectorAll('.step-time-input').forEach((timeInput) => {
                     timeInput.addEventListener('change', async (e) => {
                         const dIdx = parseInt(timeInput.getAttribute('data-day'));
@@ -723,7 +749,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 });
 
-                // Événements de Drag & Drop pour chaque étape
                 block.querySelectorAll('.step-item').forEach((stepEl) => {
                     stepEl.addEventListener('dragstart', (e) => {
                         e.stopPropagation();
@@ -740,7 +765,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         e.preventDefault();
                     });
 
-                    // Réorganisation dans la même journée ou entre étapes
                     stepEl.addEventListener('drop', async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -759,10 +783,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         renderItinerary();
                     });
 
-                    // Clic pour afficher sur la carte
                     stepEl.querySelector('.step-click-target').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        document.querySelectorAll('.step-item').forEach(s => s.style.borderColor = 'rgba(255,255,255,0.05)');
+                        document.querySelectorAll('.step-item').forEach(s => s.style.borderColor = 'var(--border-color)');
                         stepEl.style.borderColor = 'var(--color-gold)';
 
                         const stepIndex = parseInt(stepEl.getAttribute('data-idx'));
@@ -824,7 +847,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 totalSpent += parseFloat(expense.amount) || 0;
 
                 const row = document.createElement('div');
-                row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid rgba(212, 175, 55, 0.1); font-size: 0.82rem;`;
+                row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.82rem;`;
 
                 row.innerHTML = `
                     <span style="color: var(--text-main); font-weight: 500;">${expense.title}</span>
@@ -1045,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const payer = currentParticipants.find(p => p.id === exp.paid_by);
             const payerName = payer ? payer.name : 'Inconnu';
             return `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--border-color);">
                     <div>
                         <strong style="color: var(--text-main);">${exp.title}</strong>
                         <div style="color: var(--text-muted); font-size: 0.75rem;">Payé par ${payerName}</div>
@@ -1109,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let paidAmount = Math.min(debtor.amount, creditor.amount);
             
             transactions.push(`
-                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.4rem 0.6rem; border-radius: 4px; margin-bottom: 0.3rem; border: 1px solid rgba(212,175,55,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.4rem 0.6rem; border-radius: 4px; margin-bottom: 0.3rem; border: 1px solid var(--border-color);">
                     <span>${debtor.name} doit <strong>${paidAmount.toFixed(2)} €</strong> à ${creditor.name}</span>
                     <button onclick="window.settleDebt('${debtor.originalId}', '${creditor.originalId}', ${paidAmount}, '${debtor.name} rembourse ${creditor.name}')" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">Régler</button>
                 </div>
