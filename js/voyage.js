@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- RENDU ITINÉRAIRE AVEC CHECKBOXES DE VALIDATION & GLISSER-DÉPOSER ---
+    // --- RENDU ITINÉRAIRE ---
     const daysContainer = document.getElementById('itinerary-days-container');
     
     const renderItinerary = () => {
@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const timeStr = step.time || '--:--';
                         const isDone = step.done || false;
 
-                        // Création du lien de recherche Google / Google Maps pour l'activité et sa localisation
+                        // Lien de recherche Google pour les horaires et détails
                         const searchQuery = encodeURIComponent(`${actName} ${loc}`);
                         const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
 
@@ -715,7 +715,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
 
-                                <!-- LIEN EXTERNE GOOGLE (Horaires & Détails) -->
+                                <!-- LIEN GOOGLE EXTERNE -->
                                 <a href="${googleSearchUrl}" target="_blank" class="step-google-link" title="Voir les horaires et détails sur Google" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 0.4rem 0.6rem; border-radius: 4px; color: var(--color-gold); font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: background 0.2s;">
                                     <span>🌐 Google</span>
                                 </a>
@@ -744,14 +744,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
 
-                // Écouteur pour basculer l'état "fait" / "terminé" de l'étape
                 block.querySelectorAll('.step-done-checkbox').forEach((checkbox) => {
                     checkbox.addEventListener('change', async (e) => {
                         const dIdx = parseInt(checkbox.getAttribute('data-day'));
                         const sIdx = parseInt(checkbox.getAttribute('data-idx'));
-                        
                         activeTrip.itinerary[dIdx].steps[sIdx].done = e.target.checked;
-                        
                         await saveTrip();
                         renderItinerary();
                     });
@@ -814,11 +811,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         renderItinerary();
                     });
 
-                  // Animation au clic sur l'étape
+                    // Animation au clic sur l'étape
                     stepEl.querySelector('.step-click-target').addEventListener('click', (e) => {
                         e.stopPropagation();
                         
-                        // Déclenchement de l'animation CSS
                         stepEl.classList.add('clicked-animation');
                         setTimeout(() => stepEl.classList.remove('clicked-animation'), 300);
 
@@ -843,6 +839,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     stepEl.querySelector('.step-google-link').addEventListener('click', (e) => {
                         e.stopPropagation();
                     });
+                });
 
                 block.querySelectorAll('.day-map-trigger').forEach(trigger => {
                     trigger.addEventListener('click', () => {
