@@ -61,7 +61,7 @@
 
         <!-- 3. Boutons de droite : Thème, Langue et Profil -->
         <div class="header-right">
-            <!-- BOUTON TOGGLE THÈME (Symbole japonais 🌙 / 📜) -->
+            <!-- BOUTON TOGGLE THÈME -->
             <button id="global-theme-toggle" type="button" title="Changer de thème"></button>
 
             <!-- SÉLECTEUR DE LANGUE GLOBAL -->
@@ -82,66 +82,50 @@
         </div>
     </header>
 
-    <!-- BANNIÈRE COUVERTURE -->
-    <div class="trip-hero-card" style="position: relative; width: 100%; max-width: 1550px; margin: 1.5rem auto 0 auto; height: 340px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 0 1.5rem;">
-        <img id="trip-cover-img" src="" alt="Couverture du voyage" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
-        
-        <!-- Dégradé dynamique selon le thème -->
-        <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-card) 10%, rgba(0,0,0,0.4) 60%, transparent 100%);"></div>
+    <main class="container" style="margin-top: 1.5rem;">
 
-        <!-- Contenu texte du titre et des dates -->
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: flex-end;">
+        <!-- EN-TÊTE ÉPURÉ DU VOYAGE (Remplace la grande Card Hero) -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem;">
             <div>
-                <h1 id="trip-main-title" style="color: var(--text-main); font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; text-shadow: 0 2px 6px rgba(0,0,0,0.5);">Chargement...</h1>
-                <p id="trip-main-dates" style="color: var(--color-gold); font-weight: 600; margin-top: 0.5rem; font-size: 1rem; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">📅 --/--/---- au --/--/----</p>
+                <h1 id="trip-main-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0; color: var(--text-main);">Chargement...</h1>
+                <p id="trip-main-dates" style="color: var(--color-gold); font-weight: 600; margin: 0.3rem 0 0 0; font-size: 0.95rem;">📅 --/--/---- au --/--/----</p>
+            </div>
+
+            <!-- BOUTONS D'ACTION RAPIDE HAUT DE PAGE -->
+            <div style="display: flex; gap: 0.6rem;">
+                <button id="btn-export-pdf" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.82rem;">📄 Exporter PDF</button>
+                <button id="btn-open-edit" style="background: var(--color-torii); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.82rem;">⚙️ Modifier</button>
             </div>
         </div>
-    </div>
 
-    <main class="container" style="margin-top: 2rem;">
-
-        <!-- BARRE D'ONGLETS OPTIMISÉE -->
-        <nav class="trip-nav-tabs">
-            <button class="tab-btn active" data-tab="tab-itinerary">
-                <span class="tab-icon">🗺️</span>
-                <span data-i18n="itinerary">Itinéraire</span>
+        <!-- NAVIGATION PAR ONGLETS MINIMALISTE (Style Pills) -->
+        <nav class="trip-nav-tabs" style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1.5rem; overflow-x: auto;">
+            <button class="tab-btn active" data-tab="tab-itinerary" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: var(--color-gold); padding: 0.5rem 1.2rem; font-weight: 600; cursor: pointer; border-radius: 20px; font-size: 0.9rem; transition: all 0.2s;">
+                ✨ Itinéraire
             </button>
-            <button class="tab-btn" data-tab="tab-budget">
-                <span class="tab-icon">💶</span>
-                <span data-i18n="budget">Budget</span>
+            <button class="tab-btn" data-tab="tab-budget" style="background: none; border: none; color: var(--text-muted); padding: 0.5rem 1.2rem; font-weight: 600; cursor: pointer; border-radius: 20px; font-size: 0.9rem; transition: all 0.2s;">
+                💶 Budget
             </button>
-            <button class="tab-btn" data-tab="tab-logistics">
-                <span class="tab-icon">🎒</span>
-                <span data-i18n="info">Infos</span>
+            <button class="tab-btn" data-tab="tab-logistics" style="background: none; border: none; color: var(--text-muted); padding: 0.5rem 1.2rem; font-weight: 600; cursor: pointer; border-radius: 20px; font-size: 0.9rem; transition: all 0.2s;">
+                🎒 Infos
             </button>
-            <!-- Onglet visible uniquement sur Smartphone pour basculer sur la carte plein écran -->
-            <button class="tab-btn mobile-only-tab" data-tab="tab-map">
-                <span class="tab-icon">📍</span>
-                <span data-i18n="map">Carte</span>
+            <button class="tab-btn mobile-only-tab" data-tab="tab-map" style="background: none; border: none; color: var(--text-muted); padding: 0.5rem 1.2rem; font-weight: 600; cursor: pointer; border-radius: 20px; font-size: 0.9rem; transition: all 0.2s;">
+                📍 Carte
             </button>
-            <button class="tab-btn" data-tab="tab-reservations" data-i18n="reservations">🛎️ Réservations & Liens</button>
+            <button class="tab-btn" data-tab="tab-reservations" style="background: none; border: none; color: var(--text-muted); padding: 0.5rem 1.2rem; font-weight: 600; cursor: pointer; border-radius: 20px; font-size: 0.9rem; transition: all 0.2s;">
+                🛎️ Réservations & Liens
+            </button>
         </nav>
 
         <!-- CONTENU DES ONGLETS -->
-        <div class="trip-tab-wrapper" style="margin-top: 1.5rem;">
+        <div class="trip-tab-wrapper">
 
-            <!-- ONGLET 1 : ITINÉRAIRE (+ CARTE CÔTÉ À CÔTÉ STICKY SUR PC) -->
+            <!-- ONGLET 1 : ITINÉRAIRE (+ CARTE STICKY IMMÉDIATEMENT VISIBLE) -->
             <div id="tab-itinerary" class="tab-content active-content">
                 <div class="itinerary-split-layout">
                     
                     <!-- COLONNE ITINÉRAIRE -->
                     <div class="itinerary-list-col">
-                        <div class="card-box" style="padding: 1.5rem; margin-bottom: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <h3 data-i18n="notesTitle" style="margin: 0; color: var(--text-main); font-family: 'Playfair Display', serif;">Notes de voyage</h3>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <button id="btn-export-pdf" class="btn" data-i18n="pdfBtn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-gold); color: var(--bg-dark); font-weight: bold; border: none; border-radius: 4px; cursor: pointer;">📄 Exporter en PDF</button>
-                                    <button id="btn-open-edit" class="btn" data-i18n="editBtn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--color-torii); color: white; border: none; border-radius: 4px; cursor: pointer;">⚙️ Modifier</button>
-                                </div>
-                            </div>
-                            <p id="trip-main-desc" style="color: var(--text-muted); line-height: 1.6; margin: 0;"></p>
-                        </div>
-
                         <div id="itinerary-days-container"></div>
                     </div>
 
@@ -205,12 +189,11 @@
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Suivi du budget consommé</p>
 
                        <div style="margin-bottom: 1rem;">
-                            <!-- BARRE DE PROGRESSION EN HAUT -->
+                            <!-- BARRE DE PROGRESSION -->
                             <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-bottom: 0.6rem;">
                                 <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
                             </div>
                             
-                            <!-- MONTANTS EN DESSOUS -->
                             <div style="display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; color: var(--text-main);">
                                 <div>Dépensé : <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></div>
                                 <div style="color: var(--text-muted); font-size: 0.8rem;">Budget max : <span id="expenses-target-budget">0 €</span></div>
@@ -235,7 +218,6 @@
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">⚖️ Dépenses partagées (Tricount)</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1.2rem 0;">Gérez les comptes du groupe et l'équilibre des remboursements</p>
 
-                    <!-- Gestion des participants -->
                     <div style="margin-bottom: 1.2rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 6px;">
                         <label style="display: block; font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.4rem;">Participants du voyage :</label>
                         <div id="participants-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem;"></div>
@@ -245,7 +227,6 @@
                         </form>
                     </div>
 
-                    <!-- Formulaire d'ajout de dépense commune -->
                     <form id="add-shared-expense-form" style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.2rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 6px;">
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             <input type="text" id="shared-title-input" placeholder="Intitulé (ex: Resto...)" style="flex: 2; min-width: 130px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem; border-radius: 4px; font-size: 0.8rem;" required>
@@ -265,12 +246,10 @@
                         <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; align-self: flex-end;">Ajouter la dépense</button>
                     </form>
 
-                    <!-- Liste des dépenses partagées -->
                     <div id="shared-expenses-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         <span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense partagée pour le moment.</span>
                     </div>
 
-                    <!-- Encadré des remboursements -->
                     <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px;">
                         <h4 style="margin: 0 0 0.6rem 0; color: var(--color-gold); font-size: 0.95rem; font-family: 'Playfair Display', serif;">🤝 Équilibre des comptes</h4>
                         <div id="settlement-results" style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 0.3rem;">
@@ -311,7 +290,6 @@
                         Préparez votre voyage en un clic. Les dates et la destination de votre séjour sont automatiquement prises en compte.
                     </p>
 
-                    <!-- Grille des liens partenaires -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                         <a id="res-btn-flights" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 1.5rem;">✈️</span>
