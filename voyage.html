@@ -98,31 +98,31 @@
             </div>
         </div>
 
-        <!-- NAVIGATION PAR ONGLETS MINIMALISTE (Style Pills) -->
-       <!-- NAVIGATION PAR ONGLETS (Code HTML épuré) -->
-<nav class="trip-nav-tabs">
-    <button class="tab-btn active" data-tab="tab-itinerary">
-        <span class="tab-icon">✨</span>
-        <span class="tab-text">Itinéraire</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-budget">
-        <span class="tab-icon">💶</span>
-        <span class="tab-text">Budget</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-logistics">
-        <span class="tab-icon">🎒</span>
-        <span class="tab-text">Infos</span>
-    </button>
-    <!-- Onglet Carte (uniquement mobile) -->
-    <button class="tab-btn mobile-only-tab" data-tab="tab-map">
-        <span class="tab-icon">📍</span>
-        <span class="tab-text">Carte</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-reservations">
-        <span class="tab-icon">🛎️</span>
-        <span class="tab-text">Liens</span> <!-- J'ai raccourci le texte pour le mobile -->
-    </button>
-</nav>
+        <!-- NAVIGATION PAR ONGLETS (Code HTML épuré) -->
+        <nav class="trip-nav-tabs">
+            <button class="tab-btn active" data-tab="tab-itinerary">
+                <span class="tab-icon">✨</span>
+                <span class="tab-text">Itinéraire</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-budget">
+                <span class="tab-icon">💶</span>
+                <span class="tab-text">Budget</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-logistics">
+                <span class="tab-icon">🎒</span>
+                <span class="tab-text">Infos</span>
+            </button>
+            <!-- Onglet Carte (uniquement mobile) -->
+            <button class="tab-btn mobile-only-tab" data-tab="tab-map">
+                <span class="tab-icon">📍</span>
+                <span class="tab-text">Carte</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-reservations">
+                <span class="tab-icon">🛎️</span>
+                <span class="tab-text">Liens</span>
+            </button>
+        </nav>
+
         <!-- CONTENU DES ONGLETS -->
         <div class="trip-tab-wrapper">
 
@@ -183,7 +183,6 @@
                         </div>
 
                         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
-                        
                     </div>
 
                     <!-- Colonne 2 : Dépenses sur place -->
@@ -216,7 +215,7 @@
 
                 </div>
 
-                <!-- SECTION 3 : DÉPENSES PARTAGÉES (TRICOUNT) -->
+                <!-- SECTION 3 : DÉPENSES PARTAGÉES -->
                 <div class="card-box shared-expenses-card" style="margin-top: 1.5rem; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">⚖️ Dépenses partagées</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1.2rem 0;">Gérez les comptes du groupe et l'équilibre des remboursements</p>
@@ -330,7 +329,7 @@
                     <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">📋 Mes notes de réservation personnelles</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Ajoutez ici vos numéros de vol, codes de réservation d'hôtel ou liens directs vers vos billets.</p>
                     
-                   <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
                         <input type="text" id="booking-title-input" placeholder="Ex : Vol AF1234 - Réservation Hôtel ABC..." style="flex: 2; min-width: 250px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
                         <input type="text" id="booking-link-input" placeholder="Lien (optionnel, ex: https://...)" style="flex: 2; min-width: 200px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
                         <button type="submit" style="flex: 1; min-width: 100px; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter</button>
