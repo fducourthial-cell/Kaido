@@ -497,7 +497,7 @@ gmp-place-autocomplete::part(input) {
    6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
    ========================================================================== */
 .trip-header-visual {
-    height: 300px;
+    height: 200px;
     background-size: cover;
     background-position: center;
     position: relative;
