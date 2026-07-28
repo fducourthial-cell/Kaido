@@ -27,7 +27,7 @@
             <img src="image/logo kaido v7.2.png" alt="Logo Kaido" class="header-logo">
         </div>
         <div class="header-right">
-            <!-- Bouton pour basculer le thème si le visiteur le souhaite -->
+            <!-- Bouton unique pour basculer le thème (Dark / Papyrus) -->
             <button id="global-theme-toggle" type="button" title="Changer de thème" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer;">🌓</button>
         </div>
     </header>
@@ -56,7 +56,7 @@
 
     <!-- SCRIPT DE CHARGEMENT PUBLIC VIA LE TOKEN -->
     <script>
-        // Gestion basique du thème sombre / papyrus pour les visiteurs
+        // Gestion du thème sombre / papyrus pour les visiteurs
         const toggleBtn = document.getElementById('global-theme-toggle');
         const currentTheme = localStorage.getItem('kaido_theme') || 'dark';
         document.body.setAttribute('data-theme', currentTheme);
@@ -68,7 +68,7 @@
             localStorage.setItem('kaido_theme', next);
         });
 
-        // Chargement sécurisé des données du voyage via Supabase RPC
+        // Chargement sécurisé des données du voyage via la fonction RPC Supabase
         async function loadSharedTrip() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
@@ -86,7 +86,7 @@
             }
 
             try {
-                // Appel de la fonction sécurisée Supabase créée à l'étape 2
+                // Appel de la fonction sécurisée Supabase (créée à l'étape 2)
                 const { data, error } = await supabase.rpc('get_shared_trip', { token: token });
 
                 if (error || !data || data.length === 0) {
@@ -105,7 +105,7 @@
                     descEl.textContent = trip.description;
                 }
 
-                // Remplissage de l'itinéraire (si stocké en JSON dans ta base)
+                // Remplissage de l'itinéraire en lecture seule
                 if (trip.itinerary && Array.isArray(trip.itinerary)) {
                     container.innerHTML = '';
                     trip.itinerary.forEach((day, index) => {
