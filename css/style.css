@@ -573,6 +573,16 @@ gmp-place-autocomplete::part(input) {
     box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     padding: 0 1.5rem;
 }
+/* --- NOUVEAUX ONGLETS MINIMALISTES --- */
+.trip-nav-tabs .tab-btn.active {
+    background: rgba(212, 175, 55, 0.15) !important;
+    color: var(--color-gold) !important;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+}
+.trip-nav-tabs .tab-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.03);
+}
 
 /* Ajustement du texte à l'intérieur pour qu'il reste parfaitement proportionné */
 .trip-hero-card h1 {
