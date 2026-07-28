@@ -23,6 +23,69 @@ const mapStyles = {
     ]
 };
 
+// --- GESTION DU PARTAGE PUBLIC DU VOYAGE ---
+const shareBtn = document.getElementById('btn-share-trip');
+
+if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+        // currentTripId est l'ID de ton voyage actuel (variable déjà utilisée dans ton code existant)
+        if (typeof currentTripId === 'undefined' || !currentTripId) {
+            alert("Erreur : Impossible d'identifier ce voyage.");
+            return;
+        }
+
+        try {
+            // 1. On récupère d'abord le voyage actuel depuis Supabase pour voir s'il a déjà un share_token
+            const { data: tripData, error: fetchError } = await supabase
+                .from('voyages') // Remplace par 'trips' si c'est le nom de ta table
+                .select('share_token')
+                .eq('id', currentTripId)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            let token = tripData.share_token;
+
+            // 2. S'il n'en a pas, on en génère un nouveau
+            if (!token) {
+                token = crypto.randomUUID();
+
+                const { error: updateError } = await supabase
+                    .from('voyages')
+                    .update({ share_token: token })
+                    .eq('id', currentTripId);
+
+                if (updateError) throw updateError;
+            }
+
+            // 3. On construit l'URL publique basée sur l'adresse actuelle du site
+            const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+            const publicUrl = `${baseUrl}/voyage-public.html?token=${token}`;
+
+            // 4. Copie automatique dans le presse-papiers
+            await navigator.clipboard.writeText(publicUrl);
+
+            // Feedback visuel propre
+            const originalText = shareBtn.textContent;
+            shareBtn.textContent = "✅ Lien copié !";
+            shareBtn.style.background = "rgba(46, 204, 113, 0.2)";
+            shareBtn.style.color = "#2ecc71";
+            shareBtn.style.borderColor = "#2ecc71";
+
+            setTimeout(() => {
+                shareBtn.textContent = originalText;
+                shareBtn.style.background = "rgba(212, 175, 55, 0.15)";
+                shareBtn.style.color = "var(--color-gold)";
+                shareBtn.style.borderColor = "rgba(212, 175, 55, 0.4)";
+            }, 3000);
+
+        } catch (err) {
+            console.error("Erreur lors de la génération du lien de partage :", err);
+            alert("Une erreur est survenue lors de la création du lien de partage.");
+        }
+    });
+}
+
 // Initialisation de la carte basée en priorité sur les coordonnées GPS enregistrées et le thème
 function initGoogleMap(destinationName, lat, lng) {
     const mapContainer = document.getElementById('map');
