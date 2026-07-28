@@ -330,10 +330,10 @@
                     <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">📋 Mes notes de réservation personnelles</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Ajoutez ici vos numéros de vol, codes de réservation d'hôtel ou liens directs vers vos billets.</p>
                     
-                    <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                        <input type="text" id="booking-title-input" placeholder="Ex : Vol AF1234 - Réservation Hôtel ABC..." style="flex: 2; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);"required>
-                        <input type="text" id="booking-link-input" placeholder="Lien (optionnel, ex: https://...)" style="flex: 1; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);"required>
-                        <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter</button>
+                   <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="booking-title-input" placeholder="Ex : Vol AF1234 - Réservation Hôtel ABC..." style="flex: 2; min-width: 250px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
+                        <input type="text" id="booking-link-input" placeholder="Lien (optionnel, ex: https://...)" style="flex: 2; min-width: 200px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
+                        <button type="submit" style="flex: 1; min-width: 100px; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter</button>
                     </form>
 
                     <div id="booking-notes-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
