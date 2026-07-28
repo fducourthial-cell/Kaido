@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- RENDU ITINÉRAIRE AVEC GLISSER-DÉPOSER & HORAIRES LIÉS AUX ÉTAPES ---
+    // --- RENDU ITINÉRAIRE AVEC CHECKBOXES DE VALIDATION & GLISSER-DÉPOSER ---
     const daysContainer = document.getElementById('itinerary-days-container');
     
     const renderItinerary = () => {
@@ -696,13 +696,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const loc = step.location || destination;
                         const actName = step.activity || step.title || step.name || 'Étape';
                         const timeStr = step.time || '--:--';
+                        const isDone = step.done || false; // Vérifie si l'étape est cochée
 
                         stepsHTML += `
-                            <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab;">
+                            <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab; opacity: ${isDone ? '0.5' : '1'}; transition: opacity 0.2s;">
                                 <span style="color:var(--text-muted); font-size:1rem; cursor:grab;" title="Glisser pour déplacer">⠿</span>
+                                
+                                <!-- CHECKBOX POUR FINALISER L'ACTIVITÉ -->
+                                <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;" title="Marquer comme fait">
+
                                 <input type="time" class="step-time-input" data-day="${dayIdx}" data-idx="${idx}" value="${timeStr !== '--:--' ? timeStr : ''}" style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--color-gold); font-weight:bold; font-size:0.85rem; padding:0.2rem; border-radius:4px; cursor:pointer;" title="Modifier l'horaire">
+                                
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
-                                    <div style="color:var(--text-main); font-weight:600;">${actName}</div>
+                                    <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
                                     <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
                             </div>
@@ -729,6 +735,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
+
+                // Écouteur pour basculer l'état "fait" / "terminé" de l'étape
+                block.querySelectorAll('.step-done-checkbox').forEach((checkbox) => {
+                    checkbox.addEventListener('change', async (e) => {
+                        const dIdx = parseInt(checkbox.getAttribute('data-day'));
+                        const sIdx = parseInt(checkbox.getAttribute('data-idx'));
+                        
+                        activeTrip.itinerary[dIdx].steps[sIdx].done = e.target.checked;
+                        
+                        await saveTrip();
+                        renderItinerary();
+                    });
+
+                    checkbox.addEventListener('mousedown', (e) => {
+                        e.stopPropagation();
+                    });
+                });
 
                 block.querySelector('.btn-optimize-day').addEventListener('click', async (e) => {
                     e.stopPropagation();
