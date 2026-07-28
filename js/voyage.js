@@ -696,13 +696,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const loc = step.location || destination;
                         const actName = step.activity || step.title || step.name || 'Étape';
                         const timeStr = step.time || '--:--';
-                        const isDone = step.done || false; // Vérifie si l'étape est cochée
+                        const isDone = step.done || false;
+
+                        // Création du lien de recherche Google / Google Maps pour l'activité et sa localisation
+                        const searchQuery = encodeURIComponent(`${actName} ${loc}`);
+                        const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
 
                         stepsHTML += `
                             <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab; opacity: ${isDone ? '0.5' : '1'}; transition: opacity 0.2s;">
                                 <span style="color:var(--text-muted); font-size:1rem; cursor:grab;" title="Glisser pour déplacer">⠿</span>
                                 
-                                <!-- CHECKBOX POUR FINALISER L'ACTIVITÉ -->
                                 <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;" title="Marquer comme fait">
 
                                 <input type="time" class="step-time-input" data-day="${dayIdx}" data-idx="${idx}" value="${timeStr !== '--:--' ? timeStr : ''}" style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--color-gold); font-weight:bold; font-size:0.85rem; padding:0.2rem; border-radius:4px; cursor:pointer;" title="Modifier l'horaire">
@@ -711,6 +714,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
                                     <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
+
+                                <!-- LIEN EXTERNE GOOGLE (Horaires & Détails) -->
+                                <a href="${googleSearchUrl}" target="_blank" class="step-google-link" title="Voir les horaires et détails sur Google" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 0.4rem 0.6rem; border-radius: 4px; color: var(--color-gold); font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: background 0.2s;">
+                                    <span>🌐 Google</span>
+                                </a>
                             </div>
                         `;
 
@@ -806,8 +814,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         renderItinerary();
                     });
 
+                  // Animation au clic sur l'étape
                     stepEl.querySelector('.step-click-target').addEventListener('click', (e) => {
                         e.stopPropagation();
+                        
+                        // Déclenchement de l'animation CSS
+                        stepEl.classList.add('clicked-animation');
+                        setTimeout(() => stepEl.classList.remove('clicked-animation'), 300);
+
                         document.querySelectorAll('.step-item').forEach(s => s.style.borderColor = 'var(--border-color)');
                         stepEl.style.borderColor = 'var(--color-gold)';
 
@@ -824,7 +838,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination);
                         }, 100);
                     });
-                });
+
+                    // Empêcher le clic sur le lien Google de déclencher la sélection de la carte
+                    stepEl.querySelector('.step-google-link').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
 
                 block.querySelectorAll('.day-map-trigger').forEach(trigger => {
                     trigger.addEventListener('click', () => {
