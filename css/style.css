@@ -66,7 +66,11 @@ body::before {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 0.8rem 1rem; /* Ajuste le padding si besoin pour coller aux bords */
+    width: 100%;
+    max-width: 1200px;  /* Mets exactement la même largeur max que ton conteneur principal (.container) */
+    margin: 0 auto;     /* Centrage automatique parfait entre tes traits rouges */
+    box-sizing: border-box;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
