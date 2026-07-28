@@ -372,86 +372,6 @@ async function fetchAndRenderWeather(lat, lng, destinationName, startDate, endDa
     }
 }
 
-// Fonction de calcul des temps et distances entre les étapes (via DirectionsService)
-async function calculateTravelTimesForTrip(itinerary, mainDestination) {
-    if (typeof google === 'undefined' || !google.maps || !google.maps.DirectionsService) return;
-
-    const directionsService = new google.maps.DirectionsService();
-
-    for (let dayIdx = 0; dayIdx < itinerary.length; dayIdx++) {
-        const day = itinerary[dayIdx];
-        if (!day.steps || day.steps.length < 2) continue;
-
-        for (let idx = 0; idx < day.steps.length - 1; idx++) {
-            const currentStep = day.steps[idx];
-            const nextStep = day.steps[idx + 1];
-
-            const origin = currentStep.location ? `${currentStep.location}, ${mainDestination}` : (currentStep.activity || mainDestination);
-            const destinationLoc = nextStep.location ? `${nextStep.location}, ${mainDestination}` : (nextStep.activity || mainDestination);
-
-            const infoEl = document.getElementById(`travel-info-${dayIdx}-${idx}`);
-            if (!infoEl) continue;
-
-            directionsService.route({
-                origin: origin,
-                destination: destinationLoc,
-                travelMode: google.maps.TravelMode.DRIVING,
-            }, (response, status) => {
-                if (status === 'OK' && response.routes[0] && response.routes[0].legs[0]) {
-                    const leg = response.routes[0].legs[0];
-                    const distance = leg.distance.text;
-                    const duration = leg.duration.text;
-                    infoEl.innerHTML = `<span style="opacity: 0.8;">🚗 ${duration} (${distance})</span>`;
-                } else {
-                    infoEl.innerHTML = `<span style="opacity: 0.5; font-style: italic;">🚗 Trajet non estimé</span>`;
-                }
-            });
-        }
-    }
-}
-
-// Fonction d'optimisation locale d'une journée
-async function optimizeDayRoute(dayIdx) {
-    let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
-    if (!activeTrip || !activeTrip.itinerary || !activeTrip.itinerary[dayIdx]) return;
-
-    const day = activeTrip.itinerary[dayIdx];
-    if (!day.steps || day.steps.length <= 1) {
-        alert("Pas assez d'étapes à optimiser pour cette journée.");
-        return;
-    }
-
-    // Tri chronologique intelligent basé sur les horaires des étapes
-    day.steps.sort((a, b) => {
-        const timeA = (a.time && a.time !== '--:--') ? a.time : "99:99";
-        const timeB = (b.time && b.time !== '--:--') ? b.time : "99:99";
-        return timeA.localeCompare(timeB);
-    });
-
-    localStorage.setItem('kaido_active_trip', JSON.stringify(activeTrip));
-    
-    // Met aussi à jour dans kaido_trips global
-    const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-    const idx = allTrips.findIndex(t => String(t.id) === String(activeTrip.id));
-    if (idx !== -1) {
-        allTrips[idx] = activeTrip;
-        localStorage.setItem('kaido_trips', JSON.stringify(allTrips));
-    }
-
-    // Synchronisation Supabase si disponible
-    if (typeof supabase !== 'undefined' && window.supabaseClient) {
-        try {
-            await window.supabaseClient.from('trips').update({
-                itinerary: activeTrip.itinerary
-            }).eq('id', activeTrip.id);
-        } catch (e) {
-            console.warn("Mise à jour Cloud ignorée, sauvegarde locale active.");
-        }
-    }
-
-    location.reload();
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
     let activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
     const allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
@@ -643,7 +563,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- RENDU ITINÉRAIRE ---
+    // --- RENDU ITINÉRAIRE ÉPURÉ (SANS HORAIRES, SANS DISTANCES, SANS OPTIMISER) ---
     const daysContainer = document.getElementById('itinerary-days-container');
     
     const renderItinerary = () => {
@@ -695,10 +615,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     day.steps.forEach((step, idx) => {
                         const loc = step.location || destination;
                         const actName = step.activity || step.title || step.name || 'Étape';
-                        const timeStr = step.time || '--:--';
                         const isDone = step.done || false;
 
-                        // Lien de recherche Google pour les horaires et détails
+                        // Lien Google de recherche discret
                         const searchQuery = encodeURIComponent(`${actName} ${loc}`);
                         const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
 
@@ -708,27 +627,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 
                                 <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;" title="Marquer comme fait">
 
-                                <input type="time" class="step-time-input" data-day="${dayIdx}" data-idx="${idx}" value="${timeStr !== '--:--' ? timeStr : ''}" style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--color-gold); font-weight:bold; font-size:0.85rem; padding:0.2rem; border-radius:4px; cursor:pointer;" title="Modifier l'horaire">
-                                
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
                                     <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
                                     <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
 
-                                <!-- LIEN GOOGLE EXTERNE -->
-                                <a href="${googleSearchUrl}" target="_blank" class="step-google-link" title="Voir les horaires et détails sur Google" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 0.4rem 0.6rem; border-radius: 4px; color: var(--color-gold); font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: background 0.2s;">
-                                    <span>🌐 Google</span>
+                                <!-- LIEN GOOGLE MINIMALISTE (Planète 🌐) -->
+                                <a href="${googleSearchUrl}" target="_blank" class="step-google-link" title="Voir les horaires et détails sur Google" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+                                    🌐
                                 </a>
                             </div>
                         `;
-
-                        if (idx < day.steps.length - 1) {
-                            stepsHTML += `
-                                <div id="travel-info-${dayIdx}-${idx}" style="display: flex; align-items: center; gap: 6px; margin: 0.4rem 0 0.4rem 3.5rem; font-size: 0.75rem; color: var(--color-gold);">
-                                    <span style="opacity: 0.7;">🚗 Calcul du trajet...</span>
-                                </div>
-                            `;
-                        }
                     });
                 }
 
@@ -737,9 +646,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span style="background:var(--color-torii); color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem; cursor:pointer;" class="day-map-trigger">${day.day}</span>
                         <span style="color:var(--text-main); font-weight:500; cursor:pointer;" class="day-map-trigger">${day.dateText || ''}</span>
                         
-                        <button class="btn-optimize-day" data-day-idx="${dayIdx}" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: auto;" title="Réordonner logiquement les étapes">⚡ Optimiser</button>
-                        
-                        <span style="color:var(--color-gold); font-size:0.8rem; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
+                        <span style="color:var(--color-gold); font-size:0.8rem; cursor:pointer; margin-left: auto;" class="day-map-trigger">📍 Carte</span>
                     </div>
                     <div style="margin-top: 0.5rem;">${stepsHTML}</div>
                 `;
@@ -754,25 +661,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     checkbox.addEventListener('mousedown', (e) => {
-                        e.stopPropagation();
-                    });
-                });
-
-                block.querySelector('.btn-optimize-day').addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const dIdx = parseInt(e.target.getAttribute('data-day-idx'));
-                    await optimizeDayRoute(dIdx);
-                });
-
-                block.querySelectorAll('.step-time-input').forEach((timeInput) => {
-                    timeInput.addEventListener('change', async (e) => {
-                        const dIdx = parseInt(timeInput.getAttribute('data-day'));
-                        const sIdx = parseInt(timeInput.getAttribute('data-idx'));
-                        activeTrip.itinerary[dIdx].steps[sIdx].time = e.target.value;
-                        await saveTrip();
-                    });
-
-                    timeInput.addEventListener('mousedown', (e) => {
                         e.stopPropagation();
                     });
                 });
@@ -857,8 +745,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 daysContainer.appendChild(block);
             });
-
-            calculateTravelTimesForTrip(activeTrip.itinerary, destination);
         }
     };
 
