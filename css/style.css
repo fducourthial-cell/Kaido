@@ -875,4 +875,8 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     .itinerary-split-layout { flex-direction: row; align-items: flex-start; gap: 2rem; }
     .itinerary-list-col { flex: 1.2; }
     .itinerary-map-col { flex: 1; position: sticky; top: 2rem; z-index: 10; }
+@media (min-width: 992px) {
+    .mobile-only-tab {
+        display: none !important;
+    }
 }
