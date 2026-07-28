@@ -51,9 +51,12 @@
                 </a>
             </div>
 
-            <div class="header-right" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="header-right">
+                <!-- BOUTON TOGGLE THÈME (SYMBOLES JAPONAIS 🌙 / 📜) -->
+                <button id="global-theme-toggle" type="button" title="Changer de thème"></button>
+
                 <!-- SÉLECTEUR DE LANGUE GLOBAL -->
-                <select id="global-lang-selector" style="background: var(--bg-dark); color: var(--color-gold); border: 1px solid rgba(212, 175, 55, 0.3); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                <select id="global-lang-selector">
                     <option value="fr">FR</option>
                     <option value="en">EN</option>
                     <option value="es">ES</option>
@@ -142,9 +145,9 @@
                         <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
                         <div class="trip-details">
                             <div>
-                                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #F4EFEA; margin-bottom: 0.5rem;">${cityName}</h3>
+                                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.5rem;">${cityName}</h3>
                                 <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
-                                ${trip.desc ? `<p style="margin-bottom: 1rem; color: #8E847A; font-size: 0.9rem;">${trip.desc}</p>` : ''}
+                                ${trip.desc ? `<p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">${trip.desc}</p>` : ''}
                             </div>
                             
                             <div class="trip-footer">
