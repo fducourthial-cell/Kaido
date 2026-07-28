@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#0D0B09",
   "theme_color": "#0D0B09",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "image/logo kaido V4.png",
