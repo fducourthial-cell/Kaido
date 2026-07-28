@@ -29,29 +29,31 @@ exports.handler = async (event, context) => {
     // Endpoint v1beta avec le modèle exact attribué à ton compte
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-    const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido, doublé d'un agent senior en logistique géographique.
-Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
+    const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido, doublé d'un ingénieur senior en logistique géographique.
+Génère un itinéraire de ${totalDays} jours pour${destination} (Ville de départ : ${departure}).
 Préférences / Notes de l'utilisateur : "${descText}".
 
-Règles impératives de l'agent :
-1. Propose des noms de lieux RÉELS, EXACTS et PRÉCIS (ex: "Eilean Donan Castle", "Glen Coe Valley", "Talisker Distillery").
-2. Optimise les trajets de manière géographique : regroupe les activités par proximité pour chaque journée afin d'éviter les zigzags absurdes.
-3. Pour chaque jour, inclus exactement 3 étapes clés aux horaires logiques : 09:30, 14:30 et 19:30.
-4. Remplis le champ "location" avec le nom exact du lieu et sa ville/pays pour le repérage sur carte.
-5. Crée une check-list de préparation (4 à 6 éléments) parfaitement adaptée au type de destination et de voyage.
-6. Estime de manière réaliste les détails du budget global (vols, hôtel, restos/activités) dans "budgetDetails".
+Règles impératives de logistique et de géographie :
+1. PROGRESSION GÉOGRAPHIQUE GLOBALE (Le Circuit) : L'itinéraire doit suivre une boucle ou une ligne continue logique. Le lieu du matin du Jour N+1 DOIT être géographiquement proche du lieu de la veille au soir (Jour N). Zéro aller-retour absurde d'un bout à l'autre de la région.
+2. FAISABILITÉ QUOTIDIENNE (Microgéographie) : Les 3 étapes d'une même journée doivent être regroupées dans le même secteur. Le temps de trajet entre l'étape de 09:30, celle de 14:30 et celle de 19:30 doit être court, réaliste et optimisé.
+3. LOGISTIQUE D'ARRIVÉE/DÉPART : Le Jour 1 doit refléter l'arrivée depuis ${departure} (ex: atterrissage, trajet depuis l'aéroport/gare, première activité d'introduction). Le dernier jour doit anticiper le rapprochement vers le point de départ.
+4. VÉRACITÉ : Propose uniquement des noms de lieux RÉELS, EXACTS et PRÉCIS (ex: "Eilean Donan Castle", pas "Un château écossais").
+5. PRÉCISION DE LOCALISATION : Remplis le champ "location" avec le nom exact du lieu + Ville + Pays pour garantir un géocodage parfait sur l'application. 
+6. CHECK-LIST : Fournis 4 à 6 éléments de préparation indispensables et spécifiquement liés à ce type de voyage.
+7. BUDGET : Estime de manière réaliste les coûts dans "budgetDetails" en fonction de la destination et de la durée.
 
-Exigence absolue : Retourne UNIQUEMENT un objet JSON valide, sans balises markdown (pas de \`\`\`json), sans texte avant ni après, suivant exactement cette structure :
+Exigence absolue : Retourne UNIQUEMENT un objet JSON valide, sans aucune balise markdown (pas de ```json), sans texte avant ni après.
+Structure stricte à respecter :
 {
-  "checklist": ["Passeport", "Permis de conduire", "Réservation véhicule"],
+  "checklist": ["String", "String", "String"],
   "itinerary": [
     {
       "day": "Jour 1",
       "dateText": "JJ/MM/AAAA",
       "steps": [
-        { "time": "09:30", "activity": "Nom précis de l'activité", "location": "Lieu précis, Pays", "lat": 0.0000, "lng": 0.0000 },
-        { "time": "14:30", "activity": "Nom précis de l'activité", "location": "Lieu précis, Pays", "lat": 0.0000, "lng": 0.0000 },
-        { "time": "19:30", "activity": "Soirée ou dîner", "location": "Lieu précis, Pays", "lat": 0.0000, "lng": 0.0000 }
+        { "time": "09:30", "activity": "Activité précise", "location": "Lieu exact, Pays", "lat": null, "lng": null },
+        { "time": "14:30", "activity": "Activité précise", "location": "Lieu exact, Pays", "lat": null, "lng": null },
+        { "time": "19:30", "activity": "Activité précise", "location": "Lieu exact, Pays", "lat": null, "lng": null }
       ]
     }
   ],
