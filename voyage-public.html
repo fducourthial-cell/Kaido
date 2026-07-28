@@ -10,24 +10,19 @@
     <!-- SDK CLIENT SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- EN-TÊTE PUBLIC ÉPURÉ -->
+    <!-- EN-TÊTE PUBLIC -->
     <header class="kaido-header">
         <div class="header-left">
-            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Carnet de route partagé</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Carnet de route collaboratif</span>
         </div>
         <div class="header-center">
             <img src="image/logo kaido v7.2.png" alt="Logo Kaido" class="header-logo">
         </div>
         <div class="header-right">
-            <!-- Bouton unique pour basculer le thème (Dark / Papyrus) -->
             <button id="global-theme-toggle" type="button" title="Changer de thème" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer;">🌓</button>
         </div>
     </header>
@@ -35,28 +30,67 @@
     <main class="container" style="margin-top: 1.5rem; padding-bottom: 4rem;">
 
         <!-- TITRE DU VOYAGE -->
-        <div style="margin-bottom: 1.5rem; text-align: center;">
+        <div style="margin-bottom: 2rem; text-align: center;">
             <h1 id="public-trip-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0; color: var(--text-main);">Chargement de l'aventure...</h1>
             <p id="public-trip-dates" style="color: var(--color-gold); font-weight: 600; margin: 0.3rem 0 0 0; font-size: 0.95rem;">📅 --/--/---- au --/--/----</p>
             <p id="public-trip-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto;"></p>
         </div>
 
-        <!-- CONTENU EN MODE LECTURE SEULE -->
         <div class="itinerary-split-layout">
             
-            <!-- COLONNE ITINÉRAIRE (Étapes des jours) -->
-            <div class="itinerary-list-col" style="width: 100%;">
+            <!-- COLONNE GAUCHE : ITINÉRAIRE -->
+            <div class="itinerary-list-col" style="flex: 1.5;">
+                <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">📍 L'Itinéraire</h2>
                 <div id="public-days-container">
-                    <!-- Les étapes du voyage injectées par JS -->
+                    <!-- Itinéraire injecté ici -->
                 </div>
+            </div>
+
+            <!-- COLONNE DROITE : DÉPENSES PARTAGÉES (TRICOUNT) -->
+            <div class="map-card" style="flex: 1; min-width: 350px;">
+                <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">💸 Dépenses Partagées</h2>
+                
+                <!-- Liste des participants -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;" id="participants-tags"></div>
+                    <form id="add-participant-form" style="display: flex; gap: 8px;">
+                        <input type="text" id="participant-name-input" placeholder="Ajouter un participant..." required style="flex: 1; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
+                        <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">+</button>
+                    </form>
+                </div>
+
+                <!-- Ajouter une dépense -->
+                <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="margin-top: 0; color: var(--color-gold); font-size: 0.95rem;">Nouvelle dépense partagée</h4>
+                    <form id="add-shared-expense-form">
+                        <input type="text" id="shared-title-input" placeholder="Quoi ? (ex: Resto)" required style="width: 100%; padding: 0.5rem; margin-bottom: 8px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; box-sizing: border-box;">
+                        
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <input type="number" id="shared-amount-input" placeholder="Montant (€)" required step="0.01" style="flex: 1; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
+                            <select id="shared-paidby-select" required style="flex: 1; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
+                                <option value="">Payé par...</option>
+                            </select>
+                        </div>
+
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Pour qui ?</div>
+                        <div id="shared-splits-checkboxes" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size: 0.85rem;"></div>
+
+                        <button type="submit" style="width: 100%; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter la dépense</button>
+                    </form>
+                </div>
+
+                <!-- Liste des dépenses -->
+                <div id="shared-expenses-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; max-height: 250px; overflow-y: auto;"></div>
+
+                <!-- Bilans -->
+                <h4 style="margin-top: 0; color: var(--color-gold); font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Qui doit combien ?</h4>
+                <div id="settlement-results" style="font-size: 0.85rem;"></div>
             </div>
 
         </div>
     </main>
 
-    <!-- SCRIPT DE CHARGEMENT PUBLIC VIA LE TOKEN -->
     <script>
-        // Gestion du thème sombre / papyrus pour les visiteurs
         const toggleBtn = document.getElementById('global-theme-toggle');
         const currentTheme = localStorage.getItem('kaido_theme') || 'dark';
         document.body.setAttribute('data-theme', currentTheme);
@@ -68,82 +102,234 @@
             localStorage.setItem('kaido_theme', next);
         });
 
-        // Chargement sécurisé des données du voyage via la fonction RPC Supabase
+        // Variables pour le Tricount
+        let currentTripId = null;
+        let currentParticipants = [];
+        let currentSharedExpenses = [];
+
+        // Chargement du voyage
         async function loadSharedTrip() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
 
-            const titleEl = document.getElementById('public-trip-title');
-            const datesEl = document.getElementById('public-trip-dates');
-            const descEl = document.getElementById('public-trip-desc');
-            const container = document.getElementById('public-days-container');
-
-            if (!token) {
-                titleEl.textContent = "Lien de partage invalide";
-                datesEl.textContent = "";
-                descEl.textContent = "Aucun identifiant de voyage n'a été fourni dans ce lien.";
-                return;
-            }
+            if (!token) return;
 
             try {
-                // Appel de la fonction sécurisée Supabase (créée à l'étape 2)
                 const { data, error } = await supabase.rpc('get_shared_trip', { token: token });
-
-                if (error || !data || data.length === 0) {
-                    titleEl.textContent = "Voyage introuvable";
-                    datesEl.textContent = "";
-                    descEl.textContent = "Ce carnet de route n'existe pas ou le lien a expiré.";
-                    return;
-                }
+                if (error || !data || data.length === 0) return;
 
                 const trip = data[0];
+                currentTripId = trip.id; // On récupère le VRAI ID du voyage pour le Tricount
 
-                // Remplissage des infos principales
-                titleEl.textContent = `${trip.destination || 'Voyage'} (${trip.country || ''})`;
-                datesEl.textContent = `📅 Du ${trip.date_start} au ${trip.date_end}`;
-                if (trip.description) {
-                    descEl.textContent = trip.description;
-                }
+                document.getElementById('public-trip-title').textContent = `${trip.destination || 'Voyage'} (${trip.country || ''})`;
+                document.getElementById('public-trip-dates').textContent = `📅 Du ${trip.date_start} au ${trip.date_end}`;
+                document.getElementById('public-trip-desc').textContent = trip.description || '';
 
-                // Remplissage de l'itinéraire en lecture seule
+                // RENDU DE L'ITINÉRAIRE (Correction des variables activity et location)
+                const container = document.getElementById('public-days-container');
                 if (trip.itinerary && Array.isArray(trip.itinerary)) {
                     container.innerHTML = '';
                     trip.itinerary.forEach((day, index) => {
                         let stepsHtml = '';
                         if (day.steps && Array.isArray(day.steps)) {
                             day.steps.forEach(step => {
+                                // CORRECTION ICI : On utilise les vraies clés de ta base de données
+                                const actName = step.activity || step.title || step.name || 'Étape';
+                                const loc = step.location || trip.destination || 'Lieu inconnu';
+                                
                                 stepsHtml += `
-                                    <div class="step-item" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-bottom: 0.8rem;">
-                                        <h3 style="font-size: 1rem; color: var(--text-main); margin: 0 0 0.3rem 0;">${step.title || 'Étape'}</h3>
-                                        <div style="font-size: 0.85rem; color: var(--text-muted);">${step.notes || ''}</div>
+                                    <div class="step-item" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;">
+                                        <div style="flex: 1;">
+                                            <h3 style="font-size: 1rem; color: var(--text-main); margin: 0 0 0.3rem 0;">${actName}</h3>
+                                            <div style="font-size: 0.85rem; color: var(--text-muted);">📍 ${loc}</div>
+                                        </div>
                                     </div>
                                 `;
                             });
                         }
 
                         container.innerHTML += `
-                            <div class="day-block-card" style="margin-bottom: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px;">
-                                <div class="day-header" style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--color-gold); margin-bottom: 1rem; font-weight: 600;">
-                                    Jour ${index + 1} - ${day.date || ''}
+                            <div class="day-block-card" style="margin-bottom: 1.5rem; background: transparent; border-left: 2px solid var(--color-gold); padding-left: 1.2rem;">
+                                <div class="day-header" style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--color-gold); margin-bottom: 1rem; font-weight: 600;">
+                                    ${day.day} - ${day.dateText || ''}
                                 </div>
                                 <div class="day-steps-list">
-                                    ${stepsHtml || '<p style="color: var(--text-muted); font-size: 0.85rem;">Aucune étape détaillée pour ce jour.</p>'}
+                                    ${stepsHtml || '<p style="color: var(--text-muted); font-size: 0.85rem;">Aucune étape détaillée.</p>'}
                                 </div>
                             </div>
                         `;
                     });
-                } else {
-                    container.innerHTML = `<p style="text-align: center; color: var(--text-muted);">Aucun itinéraire détaillé disponible pour le moment.</p>`;
                 }
 
+                // Initialiser le module de dépenses partagées avec l'ID du voyage
+                initTricountModule();
+
             } catch (err) {
-                console.error("Erreur de chargement :", err);
-                titleEl.textContent = "Erreur de connexion";
-                descEl.textContent = "Impossible de récupérer les données du voyage.";
+                console.error("Erreur :", err);
             }
         }
 
-        // Lancement au chargement de la page
+        // ==========================================
+        // MODULE TRICOUNT (Adapté pour vue publique)
+        // ==========================================
+        async function initTricountModule() {
+            if (!currentTripId) return;
+            await loadParticipants();
+            await loadSharedExpenses();
+
+            document.getElementById('add-participant-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nameInput = document.getElementById('participant-name-input');
+                const name = nameInput.value.trim();
+                if (!name) return;
+
+                const { error } = await supabase.from('trip_participants').insert([{ trip_id: currentTripId, name }]);
+                if (!error) {
+                    nameInput.value = '';
+                    await loadParticipants();
+                }
+            });
+
+            document.getElementById('add-shared-expense-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const title = document.getElementById('shared-title-input').value.trim();
+                const amount = parseFloat(document.getElementById('shared-amount-input').value);
+                const paid_by = document.getElementById('shared-paidby-select').value;
+                const checkedBoxes = document.querySelectorAll('input[name="expense-split-participant"]:checked');
+                const selectedParticipantIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+                if (!title || isNaN(amount) || !paid_by || selectedParticipantIds.length === 0) return;
+
+                const { data: expenseData, error: expenseError } = await supabase
+                    .from('trip_expenses')
+                    .insert([{ trip_id: currentTripId, title, amount, paid_by }])
+                    .select().single();
+
+                if (expenseError) return;
+
+                const splits = selectedParticipantIds.map(participantId => ({
+                    expense_id: expenseData.id,
+                    participant_id: participantId
+                }));
+
+                await supabase.from('trip_expense_splits').insert(splits);
+
+                document.getElementById('shared-title-input').value = '';
+                document.getElementById('shared-amount-input').value = '';
+                document.querySelectorAll('input[name="expense-split-participant"]').forEach(cb => cb.checked = true);
+
+                await loadSharedExpenses();
+            });
+        }
+
+        async function loadParticipants() {
+            const { data, error } = await supabase.from('trip_participants').select('*').eq('trip_id', currentTripId);
+            if (!error) {
+                currentParticipants = data || [];
+                renderParticipantsUI();
+                updatePaidByDropdown();
+                calculateSettlements();
+            }
+        }
+
+        async function loadSharedExpenses() {
+            const { data, error } = await supabase.from('trip_expenses').select('*, trip_expense_splits(*)').eq('trip_id', currentTripId);
+            if (!error) {
+                currentSharedExpenses = data || [];
+                renderSharedExpensesUI();
+                calculateSettlements();
+            }
+        }
+
+        function renderParticipantsUI() {
+            const container = document.getElementById('participants-tags');
+            container.innerHTML = currentParticipants.map(p => `
+                <span style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">
+                    ${p.name}
+                </span>
+            `).join('');
+        }
+
+        function updatePaidByDropdown() {
+            const select = document.getElementById('shared-paidby-select');
+            select.innerHTML = '<option value="">Payé par...</option>' + currentParticipants.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+            const checkboxesContainer = document.getElementById('shared-splits-checkboxes');
+            checkboxesContainer.innerHTML = currentParticipants.map(p => `
+                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <input type="checkbox" name="expense-split-participant" value="${p.id}" checked style="accent-color: var(--color-gold);">
+                    ${p.name}
+                </label>
+            `).join('');
+        }
+
+        function renderSharedExpensesUI() {
+            const container = document.getElementById('shared-expenses-list');
+            container.innerHTML = currentSharedExpenses.map(exp => {
+                const payer = currentParticipants.find(p => p.id === exp.paid_by);
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--border-color);">
+                        <div>
+                            <strong style="color: var(--text-main);">${exp.title}</strong>
+                            <div style="color: var(--text-muted); font-size: 0.75rem;">Payé par ${payer ? payer.name : 'Inconnu'}</div>
+                        </div>
+                        <span style="color: var(--color-gold); font-weight: 600;">${Number(exp.amount).toFixed(2)} €</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateSettlements() {
+            const resultsContainer = document.getElementById('settlement-results');
+            if (currentParticipants.length === 0 || currentSharedExpenses.length === 0) {
+                resultsContainer.innerHTML = '<span style="color: var(--text-muted);">Ajoutez des dépenses pour voir qui doit quoi.</span>';
+                return;
+            }
+
+            const balances = {};
+            currentParticipants.forEach(p => balances[p.id] = { name: p.name, net: 0 });
+
+            currentSharedExpenses.forEach(exp => {
+                const amount = Number(exp.amount);
+                const splits = exp.trip_expense_splits || [];
+                if (splits.length === 0) return;
+                const sharePerPerson = amount / splits.length;
+
+                if (balances[exp.paid_by]) balances[exp.paid_by].net += amount;
+                splits.forEach(split => {
+                    if (balances[split.participant_id]) balances[split.participant_id].net -= sharePerPerson;
+                });
+            });
+
+            let debtors = [], creditors = [];
+            Object.keys(balances).forEach(id => {
+                const b = balances[id];
+                if (b.net < -0.01) debtors.push({ id, name: b.name, amount: -b.net });
+                else if (b.net > 0.01) creditors.push({ id, name: b.name, amount: b.net });
+            });
+
+            let transactions = [], dIndex = 0, cIndex = 0;
+            while (dIndex < debtors.length && cIndex < creditors.length) {
+                let debtor = debtors[dIndex], creditor = creditors[cIndex];
+                let paidAmount = Math.min(debtor.amount, creditor.amount);
+                
+                transactions.push(`
+                    <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 4px; border: 1px solid var(--border-color);">
+                        <span>${debtor.name} doit à ${creditor.name}</span>
+                        <strong style="color: var(--color-torii);">${paidAmount.toFixed(2)} €</strong>
+                    </div>
+                `);
+                debtor.amount -= paidAmount;
+                creditor.amount -= paidAmount;
+                if (debtor.amount < 0.01) dIndex++;
+                if (creditor.amount < 0.01) cIndex++;
+            }
+
+            resultsContainer.innerHTML = transactions.length === 0 
+                ? '<span style="color: #4ade80;">✨ Les comptes sont à l\'équilibre !</span>' 
+                : transactions.join('');
+        }
+
         window.addEventListener('DOMContentLoaded', loadSharedTrip);
     </script>
 </body>
