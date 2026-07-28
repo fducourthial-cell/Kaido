@@ -958,22 +958,34 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
         padding: 0.3rem 1rem calc(0.3rem + env(safe-area-inset-bottom));
     }
 
-    /* En paysage, on masque le texte pour ne garder que les icônes et sauver la hauteur de l'écran */
-    .tab-btn .tab-text {
-        display: none; 
+   /* --- VERSION MOBILE PAYSAGE (Smartphones à l'horizontale) --- */
+@media (max-width: 991px) and (orientation: landscape) {
+    body {
+        padding-bottom: 50px; /* Moins d'espace nécessaire en bas */
+    }
+
+    .trip-nav-tabs {
+        padding: 0.3rem 1rem calc(0.3rem + env(safe-area-inset-bottom));
+        align-items: center;
+    }
+
+    /* CORRECTION : On cible n'importe quel span (notamment tes data-i18n) qui n'est pas l'icône */
+    .tab-btn span:not(.tab-icon) {
+        display: none !important; 
     }
 
     .tab-btn .tab-icon {
-        font-size: 1.4rem;
+        font-size: 1.5rem !important; /* On grossit légèrement l'icône vu qu'elle est seule */
         margin: 0;
     }
     
     .tab-btn {
         padding: 0.2rem;
+        justify-content: center;
     }
 
     /* On étire la carte pour qu'elle profite du format cinémascope */
     #map {
-        height: 65vh; 
+        height: 65vh !important; 
     }
 }
