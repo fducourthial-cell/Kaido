@@ -55,8 +55,27 @@ function applyGlobalLanguage(lang) {
     });
 }
 
+// Fonction globale d'application du thème (Sombre / Papyrus) avec symboles japonais
+function applyGlobalTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('kaido_theme', theme);
+
+    // Met à jour l'icône du bouton toggle avec les symboles japonais
+    const themeBtn = document.getElementById('global-theme-toggle');
+    if (themeBtn) {
+        if (theme === 'papyrus') {
+            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">🌙</span>';
+            themeBtn.title = "Passer au thème sombre";
+        } else {
+            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">📜</span>';
+            themeBtn.title = "Passer au thème papyrus";
+        }
+    }
+}
+
 // Initialisation au chargement de chaque page
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialisation de la langue
     const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
     applyGlobalLanguage(savedLang);
 
@@ -64,6 +83,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selector) {
         selector.addEventListener('change', (e) => {
             applyGlobalLanguage(e.target.value);
+        });
+    }
+
+    // 2. Initialisation du thème (Sombre / Papyrus)
+    const savedTheme = localStorage.getItem('kaido_theme') || 'dark';
+    applyGlobalTheme(savedTheme);
+
+    const themeToggleBtn = document.getElementById('global-theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'papyrus' : 'dark';
+            applyGlobalTheme(newTheme);
         });
     }
 });
