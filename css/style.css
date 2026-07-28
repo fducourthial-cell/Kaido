@@ -562,77 +562,6 @@ gmp-place-autocomplete::part(input) {
 /* ==========================================================================
    6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
    ========================================================================== */
-/* --- BANNIÈRE HERO PLUS COMPACTE --- */
-.trip-hero-card {
-    height: 160px !important;
-    max-width: 1550px;
-    margin: 1.5rem auto 0 auto;
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-    padding: 0 1.5rem;
-}
-/* --- NOUVEAUX ONGLETS MINIMALISTES --- */
-.trip-nav-tabs .tab-btn.active {
-    background: rgba(212, 175, 55, 0.15) !important;
-    color: var(--color-gold) !important;
-    border: 1px solid rgba(212, 175, 55, 0.4);
-}
-.trip-nav-tabs .tab-btn:hover {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.03);
-}
-
-/* Ajustement du texte à l'intérieur pour qu'il reste parfaitement proportionné */
-.trip-hero-card h1 {
-    font-size: 1.8rem !important;
-}
-.trip-hero-card p {
-    font-size: 0.85rem !important;
-    margin-top: 0.2rem !important;
-}
-
-
-/* Barre de navigation interne du voyage */
-.trip-nav-tabs {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--bg-card);
-    border-top: 1px solid var(--border-color);
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    width: 100%;
-    box-sizing: border-box;
-    z-index: 1000;
-    padding: 0.3rem 0;
-    backdrop-filter: blur(10px);
-}
-.tab-btn {
-    flex: 1 1 0;
-    min-width: 0;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0.2rem 0;
-    white-space: nowrap;
-}
-.tab-btn .tab-icon {
-    font-size: 1rem;
-}
-.tab-btn.active, .tab-btn:hover {
-    color: var(--color-gold);
-}
 
 .itinerary-split-layout {
     display: flex;
@@ -719,16 +648,16 @@ gmp-place-autocomplete::part(input) {
     margin-bottom: 0.5rem;
 }
 
-/* Aperçu d'activité entièrement centré et proportionné sous la carte */
-/* --- CENTRAGE PARFAIT DE LA PRÉVIEW D'ACTIVITÉ --- */
+/* --- CENTRAGE PARFAIT DE LA PRÉVIEW D'ACTIVITÉ ET FOND TRANSPARENT --- */
 .activity-preview-box {
     display: none;
     flex-direction: column;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
-    background: transparent;
-    border: 1px solid var(--border-color);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     border-radius: 6px;
     overflow: hidden;
     margin-top: 0.8rem;
@@ -737,6 +666,11 @@ gmp-place-autocomplete::part(input) {
     box-sizing: border-box;
     transition: all 0.3s ease;
 }
+
+/* Si tu veux un très léger fond propre sur Papyrus et Dark au lieu du 100% transparent, décommente ceci :
+body[data-theme="papyrus"] .activity-preview-box { background: rgba(228, 216, 195, 0.3) !important; border: 1px solid var(--border-color) !important; }
+body[data-theme="dark"] .activity-preview-box { background: rgba(20, 17, 14, 0.6) !important; border: 1px solid var(--border-color) !important; }
+*/
 
 .activity-preview-img {
     display: block !important;
@@ -747,7 +681,7 @@ gmp-place-autocomplete::part(input) {
     height: auto !important;
     object-fit: contain !important;
     border-radius: 4px;
-    background-color: var(--bg-dark);
+    background-color: transparent;
 }
 
 .activity-preview-title {
@@ -769,6 +703,7 @@ gmp-place-autocomplete::part(input) {
     font-size: 0.8rem;
     text-align: center;
 }
+
 .step-item {
     cursor: pointer;
     transition: all 0.2s ease;
@@ -837,7 +772,7 @@ gmp-place-autocomplete::part(input) {
 
 /* --- AMÉLIORATION DU DESIGN EN MODE PAPYRUS --- */
 body[data-theme="papyrus"] .tab-btn.active {
-    background: linear-gradient(135deg, #A63A2B, #82271B) !important; /* Le Rouge Torii signature de Kaido */
+    background: linear-gradient(135deg, #A63A2B, #82271B) !important;
     color: #FFFFFF !important;
     border-color: #A63A2B !important;
     font-weight: 700;
@@ -845,7 +780,7 @@ body[data-theme="papyrus"] .tab-btn.active {
 }
 
 body[data-theme="papyrus"] #btn-export-pdf {
-    background: linear-gradient(135deg, #D4AF37, #AA8C2C) !important; /* Un bel or lumineux et brillant */
+    background: linear-gradient(135deg, #D4AF37, #AA8C2C) !important;
     color: #0D0B09 !important;
     font-weight: 700;
     border: 1px solid rgba(140, 109, 35, 0.4);
@@ -867,6 +802,7 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
 .step-item.clicked-animation {
     animation: kaidoClickPulse 0.3s ease;
 }
+
 
 /* ==========================================================================
    8. MEDIA QUERIES (RESPONSIVE & ADAPTATION MOBILE)
@@ -916,7 +852,7 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
         border: 1px solid rgba(212, 175, 55, 0.4);
         font-weight: 600;
     }
-    .tab-btn .tab-text { display: inline; }
+    .tab-btn span:not(.tab-icon) { display: inline; }
 }
 
 /* --- VERSION MOBILE APP (Smartphones Portrait & Navigation en bas) --- */
@@ -951,16 +887,6 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
 /* --- VERSION MOBILE PAYSAGE (Smartphones à l'horizontale) --- */
 @media (max-width: 991px) and (orientation: landscape) {
     body {
-        padding-bottom: 55px; /* Moins d'espace nécessaire en bas */
-    }
-
-    .trip-nav-tabs {
-        padding: 0.3rem 1rem calc(0.3rem + env(safe-area-inset-bottom));
-    }
-
-   /* --- VERSION MOBILE PAYSAGE (Smartphones à l'horizontale) --- */
-@media (max-width: 991px) and (orientation: landscape) {
-    body {
         padding-bottom: 50px; /* Moins d'espace nécessaire en bas */
     }
 
@@ -969,13 +895,13 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
         align-items: center;
     }
 
-    /* CORRECTION : On cible n'importe quel span (notamment tes data-i18n) qui n'est pas l'icône */
+    /* On cache tout le texte des boutons pour sauver de la place verticale */
     .tab-btn span:not(.tab-icon) {
         display: none !important; 
     }
 
     .tab-btn .tab-icon {
-        font-size: 1.5rem !important; /* On grossit légèrement l'icône vu qu'elle est seule */
+        font-size: 1.5rem !important; 
         margin: 0;
     }
     
@@ -984,7 +910,7 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
         justify-content: center;
     }
 
-    /* On étire la carte pour qu'elle profite du format cinémascope */
+    /* On étire la carte au maximum */
     #map {
         height: 65vh !important; 
     }
