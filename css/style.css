@@ -830,6 +830,28 @@ gmp-place-autocomplete::part(input) {
     font-weight: 300;
 }
 
+/* --- AMÉLIORATION DU DESIGN EN MODE PAPYRUS --- */
+body[data-theme="papyrus"] .tab-btn.active {
+    background: linear-gradient(135deg, #A63A2B, #82271B) !important; /* Le Rouge Torii signature de Kaido */
+    color: #FFFFFF !important;
+    border-color: #A63A2B !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(166, 58, 43, 0.25);
+}
+
+body[data-theme="papyrus"] #btn-export-pdf {
+    background: linear-gradient(135deg, #D4AF37, #AA8C2C) !important; /* Un bel or lumineux et brillant */
+    color: #0D0B09 !important;
+    font-weight: 700;
+    border: 1px solid rgba(140, 109, 35, 0.4);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
+}
+
+body[data-theme="papyrus"] #btn-export-pdf:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
 /* ==========================================================================
    8. MEDIA QUERIES (RESPONSIVE)
    ========================================================================== */
