@@ -117,15 +117,21 @@ body::before {
 }
 
 .header-logo, .header-logo-center {
-    height: 100px;
-    width: auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 3px; /* Petite marge interne pour que le logo respire dans son cercle */
     object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .header-logo:hover, .header-logo-center:hover {
     transform: scale(1.1);
+    border-color: var(--color-gold);
+    background: rgba(212, 175, 55, 0.1);
 }
 
 .header-right {
