@@ -30,6 +30,22 @@ body[data-theme="papyrus"] {
     box-sizing: border-box;
 }
 
+/* --- ADAPTATION DES CARTES JOURS / ACTIVITÉS AU THÈME --- */
+.day-block-card, 
+.step-item, 
+.trip-card {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+/* Texte à l'intérieur des blocs d'activités en mode papyrus */
+body[data-theme="papyrus"] .step-item h3,
+body[data-theme="papyrus"] .step-item div,
+body[data-theme="papyrus"] .day-header span {
+    color: var(--text-main) !important;
+}
+
 /* ==========================================================================
    2. STYLE GLOBAL & HALO CHALEUREUX + TEXTURE WASHI
    ========================================================================== */
