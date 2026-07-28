@@ -562,32 +562,27 @@ gmp-place-autocomplete::part(input) {
 /* ==========================================================================
    6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
    ========================================================================== */
-.trip-header-visual {
-    height: 200px;
-    background-size: cover;
-    background-position: center;
+/* --- BANNIÈRE HERO PLUS COMPACTE --- */
+.trip-hero-card {
+    height: 160px !important;
+    max-width: 1550px;
+    margin: 1.5rem auto 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
     position: relative;
-    display: flex;
-    align-items: flex-end;
-    padding: 2.5rem 2rem;
-    background-color: var(--bg-card);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    padding: 0 1.5rem;
 }
-.trip-header-title {
-    position: relative;
-    z-index: 2;
+
+/* Ajustement du texte à l'intérieur pour qu'il reste parfaitement proportionné */
+.trip-hero-card h1 {
+    font-size: 1.8rem !important;
 }
-.trip-header-title h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.8rem;
-    margin: 0 0 0.4rem 0;
-    color: var(--text-main);
+.trip-hero-card p {
+    font-size: 0.85rem !important;
+    margin-top: 0.2rem !important;
 }
-.trip-header-title p {
-    margin: 0;
-    color: var(--color-gold);
-    font-weight: 600;
-    font-size: 1.05rem;
-}
+
 
 /* Barre de navigation interne du voyage */
 .trip-nav-tabs {
