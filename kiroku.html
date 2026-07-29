@@ -95,6 +95,68 @@
                     }
                     if (dropdown) dropdown.style.display = 'none';
                 }
+                // --- LOGIQUE DES SUCCÈS & ACHIEVEMENTS ---
+        const achievementsContainer = document.getElementById('kiroku-achievements-list');
+        if (achievementsContainer) {
+            // Définition des succès de Kaido
+            let achievements = [
+                {
+                    id: 'first_step',
+                    title: 'Premier Pas',
+                    desc: 'Tracer et enregistrer votre tout premier voyage.',
+                    icon: '🧭',
+                    unlocked: localTrips.length > 0
+                },
+                {
+                    id: 'completionist',
+                    title: 'Explorateur Méthodique',
+                    desc: 'Atteindre un taux de complétion global de 100% sur un carnet.',
+                    icon: '🎯',
+                    unlocked: localTrips.some(t => {
+                        let total = 0, done = 0;
+                        t.itinerary?.forEach(d => d.steps?.forEach(s => { total++; if(s.done) done++; }));
+                        return total > 0 && done === total;
+                    })
+                },
+                {
+                    id: 'budget_master',
+                    title: 'Maître des Cordons',
+                    desc: 'Enregistrer des dépenses réelles sans dépasser le budget estimé.',
+                    icon: '⚖️',
+                    unlocked: localTrips.some(t => {
+                        if (!t.expenses || t.expenses.length === 0) return false;
+                        const spent = t.expenses.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
+                        return spent <= (parseFloat(t.budget) || 0);
+                    })
+                },
+                {
+                    id: 'nomad_veteran',
+                    title: 'Grand Nomade',
+                    desc: 'Planifier 5 voyages ou plus dans votre registre.',
+                    icon: '⛩️',
+                    unlocked: localTrips.length >= 5
+                }
+            ];
+
+            achievementsContainer.innerHTML = '';
+            achievements.forEach(ach => {
+                const opacity = ach.unlocked ? '1' : '0.4';
+                const borderColor = ach.unlocked ? 'var(--color-gold)' : 'var(--border-color)';
+                const bgStyle = ach.unlocked ? 'background: rgba(212,175,55,0.05);' : 'background: var(--bg-dark);';
+
+                achievementsContainer.innerHTML += `
+                    <div style="${bgStyle} border: 1px solid ${borderColor}; border-radius: 6px; padding: 1rem; opacity: ${opacity}; display: flex; gap: 12px; align-items: center;">
+                        <div style="font-size: 2rem; background: var(--bg-card); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid ${borderColor}; flex-shrink: 0;">
+                            ${ach.icon}
+                        </div>
+                        <div>
+                            <h4 style="margin: 0 0 0.2rem 0; color: var(--text-main); font-family: 'Playfair Display', serif; font-size: 1rem;">${ach.title} ${ach.unlocked ? '✅' : '🔒'}</h4>
+                            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted);">${ach.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
             </script>
 
             <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
