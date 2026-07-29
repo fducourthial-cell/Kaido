@@ -178,6 +178,10 @@
                     const cityName = trip.destination || trip.title || 'Destination';
                     const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
+                    // --- AJOUT DU BADGE DE STATUT ---
+                    const isCompleted = trip.status === 'completed' || (trip.dateEnd && new Date(trip.dateEnd) < new Date());
+                    const statusBadge = isCompleted ? `<span style="background: rgba(46, 204, 113, 0.15); color: #2ecc71; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">✅ Aventure accomplie</span>` : `<span style="color: var(--color-gold); font-size: 0.75rem;">En cours</span>`;
+
                     let displayBudget = parseFloat(trip.budget) || 0;
                     if (displayBudget <= 0) {
                         let daysCount = 3;
@@ -193,7 +197,11 @@
                     }
 
                     card.innerHTML = `
-                        <div class="trip-banner" style="background-image: url('${finalImage}');"></div>
+                        <div class="trip-banner" style="background-image: url('${finalImage}');">
+                            <div style="position: absolute; top: 12px; right: 12px; z-index: 2;">
+                                ${statusBadge}
+                            </div>
+                        </div>
                         <div class="trip-details">
                             <div>
                                 <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.5rem;">${cityName}</h3>
@@ -303,7 +311,6 @@
                                 checklist: ct.checklist,
                                 documents: ct.documents || [],
                                 gallery: ct.gallery || [],
-                                // CORRECTIONS APPLIQUÉES ICI (ct au lieu de row)
                                 expenses: ct.expenses || [],
                                 bookingNotes: ct.booking_notes || [],
                                 status: ct.status || 'ongoing',
