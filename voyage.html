@@ -64,11 +64,12 @@
 
             <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
                 <!-- Lien vers le Projet Kiroku -->
-<a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
-    <span>🏆</span> Projet Kiroku
-</a>
+                <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
+                    <span>🏆</span> Projet Kiroku
+                </a>
 
-<hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+                
                 <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                     <span>🌓</span> Changer de thème
                 </button>
@@ -459,18 +460,18 @@
     <script src="js/modules/tricount.js"></script>
     <script src="js/modules/documents.js"></script>
     <script src="js/modules/gallery.js"></script>
-    <!-- Dans les scripts en bas de voyage.html -->
-<script src="js/modules/kiroku.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Supposons que 'currentTrip' est chargé depuis le localStorage
-        const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
-        if (activeTrip && typeof calculateTripKiroku === 'function') {
-            // Calcule et met à jour le statut/rang en arrière-plan
-            await calculateTripKiroku(activeTrip);
-        }
-    });
-</script>
+    
+    <!-- Module Kiroku et exécution en arrière-plan -->
+    <script src="js/modules/kiroku.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
+            if (activeTrip && typeof calculateTripKiroku === 'function') {
+                await calculateTripKiroku(activeTrip);
+            }
+        });
+    </script>
+    
     <script src="js/voyage.js"></script>
 </body>
 </html>
