@@ -20,7 +20,6 @@
             <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Carnet de route collaboratif</span>
         </div>
         <div class="header-center">
-            <!-- LOGO CORRIGÉ (Taille maîtrisée) -->
             <img src="image/logo kaido v7.2.png" alt="Logo Kaido" class="header-logo" style="max-height: 50px; width: auto;">
         </div>
         <div class="header-right">
@@ -37,7 +36,7 @@
             <p id="public-trip-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto;"></p>
         </div>
 
-        <div class="itinerary-split-layout">
+        <div class="itinerary-split-layout" style="display: flex; gap: 2rem; align-items: flex-start;">
             
             <!-- COLONNE GAUCHE : ITINÉRAIRE -->
             <div class="itinerary-list-col" style="flex: 1.5;">
@@ -47,69 +46,77 @@
                 </div>
             </div>
 
-            <!-- COLONNE DROITE : DÉPENSES PARTAGÉES (TRICOUNT) + GALERIE -->
-            <div class="map-card" style="flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 2rem;">
+            <!-- COLONNE DROITE : 1. MAP + 2. TRICOUNT + 3. GALERIE -->
+            <div style="flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 1.5rem;">
                 
-                <!-- Bloc Dépenses -->
-                <div>
-                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">💸 Dépenses Partagées</h2>
+                <!-- 1. CARTE INTERACTIVE & PREVIEW -->
+                <div class="map-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; overflow: hidden;">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.2rem;">🗺️ Carte & Aperçu</h2>
+                    <div id="public-map" style="width: 100%; height: 280px; border-radius: 6px; background: var(--bg-dark);"></div>
+                    <div id="public-map-preview" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 4px; border: 1px solid var(--border-color);">
+                        Cliquez sur une étape pour voir l'aperçu géographique.
+                    </div>
+                </div>
+
+                <!-- 2. BUDGET COLLABORATIF (TRICOUNT) -->
+                <div class="map-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.2rem;">💸 Dépenses Partagées</h2>
                     
-                    <!-- Liste des participants -->
-                    <div style="margin-bottom: 1.5rem;">
-                        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;" id="participants-tags"></div>
-                        <form id="add-participant-form" style="display: flex; gap: 8px;">
-                            <input type="text" id="participant-name-input" placeholder="Ajouter un participant..." required style="flex: 1; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
-                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">+</button>
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;" id="participants-tags"></div>
+                        <form id="add-participant-form" style="display: flex; gap: 6px;">
+                            <input type="text" id="participant-name-input" placeholder="Ajouter un participant..." required style="flex: 1; padding: 0.4rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; font-size: 0.85rem;">
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; cursor: pointer;">+</button>
                         </form>
                     </div>
 
-                    <!-- Ajouter une dépense -->
-                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                        <h4 style="margin-top: 0; color: var(--color-gold); font-size: 0.95rem;">Nouvelle dépense partagée</h4>
+                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem;">
+                        <h4 style="margin-top: 0; color: var(--color-gold); font-size: 0.85rem; margin-bottom: 0.5rem;">Nouvelle dépense partagée</h4>
                         <form id="add-shared-expense-form">
-                            <input type="text" id="shared-title-input" placeholder="Quoi ? (ex: Resto)" required style="width: 100%; padding: 0.5rem; margin-bottom: 8px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; box-sizing: border-box;">
+                            <input type="text" id="shared-title-input" placeholder="Quoi ? (ex: Resto)" required style="width: 100%; padding: 0.4rem; margin-bottom: 6px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;">
                             
-                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                <input type="number" id="shared-amount-input" placeholder="Montant (€)" required step="0.01" style="flex: 1; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
-                                <select id="shared-paidby-select" required style="flex: 1; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
+                            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                                <input type="number" id="shared-amount-input" placeholder="Montant (€)" required step="0.01" style="flex: 1; padding: 0.4rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; font-size: 0.85rem;">
+                                <select id="shared-paidby-select" required style="flex: 1; padding: 0.4rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; font-size: 0.85rem;">
                                     <option value="">Payé par...</option>
                                 </select>
                             </div>
 
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Pour qui ?</div>
-                            <div id="shared-splits-checkboxes" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size: 0.85rem;"></div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Pour qui ?</div>
+                            <div id="shared-splits-checkboxes" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; font-size: 0.8rem;"></div>
 
-                            <button type="submit" style="width: 100%; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter la dépense</button>
+                            <button type="submit" style="width: 100%; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">Ajouter la dépense</button>
                         </form>
                     </div>
 
-                    <!-- Liste des dépenses -->
-                    <div id="shared-expenses-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; max-height: 250px; overflow-y: auto;"></div>
+                    <div id="shared-expenses-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;"></div>
 
-                    <!-- Bilans -->
-                    <h4 style="margin-top: 0; color: var(--color-gold); font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Qui doit combien ?</h4>
-                    <div id="settlement-results" style="font-size: 0.85rem;"></div>
+                    <h4 style="margin-top: 0; color: var(--color-gold); font-size: 0.85rem; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">Qui doit combien ?</h4>
+                    <div id="settlement-results" style="font-size: 0.8rem;"></div>
                 </div>
 
-                <!-- BLOC GALERIE COLLABORATIVE -->
-                <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px;">
-                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">📸 Galerie Collaborative</h2>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Ajoutez vos souvenirs, tout le monde en profite.</p>
+                <!-- 3. GALERIE COLLABORATIVE -->
+                <div class="map-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.8rem; font-size: 1.2rem;">📸 Galerie Collaborative</h2>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.8rem;">Ajoutez vos souvenirs, tout le monde en profite.</p>
                     
-                    <div id="public-gallery-dropzone" style="border: 2px dashed var(--border-color); padding: 1rem; text-align: center; border-radius: 6px; cursor: pointer; margin-bottom: 1rem; background: rgba(255,255,255,0.01);">
+                    <div id="public-gallery-dropzone" style="border: 2px dashed var(--border-color); padding: 1rem; text-align: center; border-radius: 6px; cursor: pointer; margin-bottom: 0.8rem; background: rgba(255,255,255,0.01);">
                         <span style="font-size: 1.2rem;">☁️</span>
-                        <div style="color: var(--text-main); font-weight: 500; font-size: 0.85rem; margin-top: 0.3rem;">Cliquez pour ajouter des photos</div>
+                        <div style="color: var(--text-main); font-weight: 500; font-size: 0.8rem; margin-top: 0.3rem;">Cliquez pour ajouter des photos</div>
                         <input type="file" id="public-gallery-file-input" accept="image/*" multiple style="display: none;">
                     </div>
-                    <div id="public-gallery-progress" style="color: var(--color-gold); font-size: 0.8rem; text-align: center; margin-bottom: 1rem; display: none;"></div>
+                    <div id="public-gallery-progress" style="color: var(--color-gold); font-size: 0.8rem; text-align: center; margin-bottom: 0.8rem; display: none;"></div>
 
-                    <div id="public-gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;"></div>
+                    <div id="public-gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 6px;"></div>
                 </div>
 
             </div>
 
         </div>
     </main>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places"></script>
 
     <script>
         const toggleBtn = document.getElementById('global-theme-toggle');
@@ -123,10 +130,11 @@
             localStorage.setItem('kaido_theme', next);
         });
 
-        // Variables pour le Tricount et la Galerie
         let currentTripId = null;
         let currentParticipants = [];
         let currentSharedExpenses = [];
+        let publicMap = null;
+        let publicMarkers = [];
 
         // Chargement du voyage
         async function loadSharedTrip() {
@@ -140,13 +148,16 @@
                 if (error || !data || data.length === 0) return;
 
                 const trip = data[0];
-                currentTripId = trip.id; // On récupère le VRAI ID du voyage
+                currentTripId = trip.id;
 
                 document.getElementById('public-trip-title').textContent = `${trip.destination || 'Voyage'} (${trip.country || ''})`;
                 document.getElementById('public-trip-dates').textContent = `📅 Du ${trip.date_start} au ${trip.date_end}`;
                 document.getElementById('public-trip-desc').textContent = trip.description || '';
 
-                // RENDU DE L'ITINÉRAIRE
+                // Initialiser la Carte Google Maps
+                initPublicMap(trip.destination_lat, trip.destination_lng, trip.destination);
+
+                // RENDU DE L'ITINÉRAIRE & CLICS POUR PREVIEW MAP
                 const container = document.getElementById('public-days-container');
                 if (trip.itinerary && Array.isArray(trip.itinerary)) {
                     container.innerHTML = '';
@@ -158,10 +169,10 @@
                                 const loc = step.location || trip.destination || 'Lieu inconnu';
                                 
                                 stepsHtml += `
-                                    <div class="step-item" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 10px;">
+                                    <div class="step-item public-step-click" data-lat="${step.lat || ''}" data-lng="${step.lng || ''}" data-loc="${loc}" data-act="${actName}" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 6px; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: border-color 0.2s;">
                                         <div style="flex: 1;">
-                                            <h3 style="font-size: 1rem; color: var(--text-main); margin: 0 0 0.3rem 0;">${actName}</h3>
-                                            <div style="font-size: 0.85rem; color: var(--text-muted);">📍 ${loc}</div>
+                                            <h3 style="font-size: 0.95rem; color: var(--text-main); margin: 0 0 0.2rem 0;">${actName}</h3>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">📍 ${loc}</div>
                                         </div>
                                     </div>
                                 `;
@@ -169,8 +180,8 @@
                         }
 
                         container.innerHTML += `
-                            <div class="day-block-card" style="margin-bottom: 1.5rem; background: transparent; border-left: 2px solid var(--color-gold); padding-left: 1.2rem;">
-                                <div class="day-header" style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--color-gold); margin-bottom: 1rem; font-weight: 600;">
+                            <div class="day-block-card" style="margin-bottom: 1.5rem; background: transparent; border-left: 2px solid var(--color-gold); padding-left: 1rem;">
+                                <div class="day-header" style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--color-gold); margin-bottom: 0.8rem; font-weight: 600;">
                                     ${day.day} - ${day.dateText || ''}
                                 </div>
                                 <div class="day-steps-list">
@@ -179,14 +190,99 @@
                             </div>
                         `;
                     });
+
+                    // Activer les clics sur les étapes pour la preview map
+                    document.querySelectorAll('.public-step-click').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const act = item.getAttribute('data-act');
+                            const loc = item.getAttribute('data-loc');
+                            const lat = parseFloat(item.getAttribute('data-lat'));
+                            const lng = parseFloat(item.getAttribute('data-lng'));
+                            
+                            previewActivityOnMap(act, loc, lat, lng);
+                        });
+                    });
                 }
 
-                // Initialisation des modules
+                // Initialisation des modules Tricount & Galerie
                 initTricountModule();
-                initPublicGallery(trip); // <--- Lancement de la galerie collaborative publique
+                initPublicGallery(trip);
 
             } catch (err) {
-                console.error("Erreur :", err);
+                console.error("Erreur chargement voyage public:", err);
+            }
+        }
+
+        // ==========================================
+        // MODULE CARTE & PREVIEW
+        // ==========================================
+        function initPublicMap(lat, lng, destinationName) {
+            const mapEl = document.getElementById('public-map');
+            if (!mapEl) return;
+
+            const defaultLat = lat ? parseFloat(lat) : 46.603354;
+            const defaultLng = lng ? parseFloat(lng) : 1.888334;
+
+            publicMap = new google.maps.Map(mapEl, {
+                center: { lat: defaultLat, lng: defaultLng },
+                zoom: lat ? 10 : 5,
+                styles: [{ elementType: "geometry", stylers: [{ color: "#212121" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] }]
+            });
+
+            if (lat && lng) {
+                new google.maps.Marker({
+                    position: { lat: defaultLat, lng: defaultLng },
+                    map: publicMap,
+                    title: destinationName
+                });
+            }
+        }
+
+        function previewActivityOnMap(activityName, locationName, lat, lng) {
+            const previewEl = document.getElementById('public-map-preview');
+            if (previewEl) {
+                previewEl.innerHTML = `<strong style="color: var(--color-gold);">${activityName}</strong><br><span style="font-size: 0.8rem;">📍 ${locationName}</span>`;
+            }
+
+            if (!publicMap) return;
+
+            if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+                const pos = { lat: lat, lng: lng };
+                publicMap.setCenter(pos);
+                publicMap.setZoom(14);
+                
+                // Nettoyer les anciens marqueurs d'étape
+                publicMarkers.forEach(m => m.setMap(null));
+                publicMarkers = [];
+
+                const marker = new google.maps.Marker({
+                    position: pos,
+                    map: publicMap,
+                    title: activityName,
+                    animation: google.maps.Animation.DROP
+                });
+                publicMarkers.push(marker);
+            } else {
+                // Géocodage à la volée si pas de coordonnées précises stockées
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: locationName }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const pos = results[0].geometry.location;
+                        publicMap.setCenter(pos);
+                        publicMap.setZoom(14);
+
+                        publicMarkers.forEach(m => m.setMap(null));
+                        publicMarkers = [];
+
+                        const marker = new google.maps.Marker({
+                            position: pos,
+                            map: publicMap,
+                            title: activityName,
+                            animation: google.maps.Animation.DROP
+                        });
+                        publicMarkers.push(marker);
+                    }
+                });
             }
         }
 
@@ -387,7 +483,7 @@
         function renderParticipantsUI() {
             const container = document.getElementById('participants-tags');
             container.innerHTML = currentParticipants.map(p => `
-                <span style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">
+                <span style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem;">
                     ${p.name}
                 </span>
             `).join('');
@@ -411,10 +507,10 @@
             container.innerHTML = currentSharedExpenses.map(exp => {
                 const payer = currentParticipants.find(p => p.id === exp.paid_by);
                 return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border: 1px solid var(--border-color);">
                         <div>
                             <strong style="color: var(--text-main);">${exp.title}</strong>
-                            <div style="color: var(--text-muted); font-size: 0.75rem;">Payé par ${payer ? payer.name : 'Inconnu'}</div>
+                            <div style="color: var(--text-muted); font-size: 0.7rem;">Payé par ${payer ? payer.name : 'Inconnu'}</div>
                         </div>
                         <span style="color: var(--color-gold); font-weight: 600;">${Number(exp.amount).toFixed(2)} €</span>
                     </div>
@@ -457,7 +553,7 @@
                 let paidAmount = Math.min(debtor.amount, creditor.amount);
                 
                 transactions.push(`
-                    <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 4px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 0.4rem; border-radius: 4px; margin-bottom: 3px; border: 1px solid var(--border-color);">
                         <span>${debtor.name} doit à ${creditor.name}</span>
                         <strong style="color: var(--color-torii);">${paidAmount.toFixed(2)} €</strong>
                     </div>
