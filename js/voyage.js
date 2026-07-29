@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!window.activeTrip.documents) window.activeTrip.documents = [];
     if (!window.activeTrip.expenses) window.activeTrip.expenses = [];
     if (!window.activeTrip.bookingNotes) window.activeTrip.bookingNotes = [];
-    if (!window.activeTrip.gallery) window.activeTrip.gallery = []; // <--- AJOUTÉ ICI !
+    if (!window.activeTrip.gallery) window.activeTrip.gallery = []; 
     if (!window.activeTrip.checklist) window.activeTrip.checklist = [
         { id: 1, text: "Passeport / Carte d'identité", done: false },
         { id: 2, text: "Billets de réservation", done: false }
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 9. Rendu Dépenses Classiques
+    // 9. Rendu Dépenses Classiques & Gestion Jauge Budget Réel/Estimé
     const renderExpenses = () => {
         const listEl = document.getElementById('expenses-list');
         if (!listEl) return;
@@ -237,9 +237,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 listEl.appendChild(row);
             });
         }
+
+        const estimatedBudget = parseFloat(window.activeTrip.budget) || totalB;
         if (document.getElementById('expenses-total-spent')) document.getElementById('expenses-total-spent').textContent = `${totalSpent.toFixed(2)} €`;
-        if (document.getElementById('expenses-target-budget')) document.getElementById('expenses-target-budget').textContent = `${parseFloat(window.activeTrip.budget) || totalB} €`;
-        if (document.getElementById('expenses-progress-bar')) document.getElementById('expenses-progress-bar').style.width = `${Math.min(100, Math.round((totalSpent / (parseFloat(window.activeTrip.budget) || totalB)) * 100))}%`;
+        if (document.getElementById('expenses-target-budget')) document.getElementById('expenses-target-budget').textContent = `${estimatedBudget.toLocaleString()} €`;
+        
+        const progressBar = document.getElementById('expenses-progress-bar');
+        const statusText = document.getElementById('budget-status-text');
+        
+        if (progressBar) {
+            let percentage = estimatedBudget > 0 ? Math.round((totalSpent / estimatedBudget) * 100) : 0;
+            progressBar.style.width = `${Math.min(percentage, 100)}%`;
+
+            if (totalSpent > estimatedBudget && estimatedBudget > 0) {
+                progressBar.style.backgroundColor = 'var(--color-torii)';
+                if (statusText) {
+                    statusText.textContent = `⚠️ Dépassement de ${(totalSpent - estimatedBudget).toFixed(2)} € !`;
+                    statusText.style.color = 'var(--color-torii)';
+                }
+            } else {
+                progressBar.style.backgroundColor = 'var(--color-gold)';
+                if (statusText) {
+                    statusText.textContent = `${percentage}% du budget consommé`;
+                    statusText.style.color = 'var(--text-muted)';
+                }
+            }
+        }
     };
     renderExpenses();
     const expenseForm = document.getElementById('add-expense-form');
