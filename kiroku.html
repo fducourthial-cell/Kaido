@@ -183,13 +183,28 @@
         // On considère un voyage comme complété s'il a une date passée ou un statut validé
         const completedTrips = localTrips.filter(t => t.status === 'completed' || (t.dateEnd && new Date(t.dateEnd) < new Date())).length;
 
-        // Calcul du budget cumulé
-        const totalBudget = localTrips.reduce((acc, t) => acc + (parseFloat(t.budget) || 0), 0);
+        // Calcul du budget cumulé ET des dépenses réelles
+        let totalBudget = 0;
+        let totalRealSpent = 0;
+
+        localTrips.forEach(t => {
+            totalBudget += parseFloat(t.budget) || 0;
+            if (t.expenses && Array.isArray(t.expenses)) {
+                t.expenses.forEach(exp => {
+                    totalRealSpent += parseFloat(exp.amount) || 0;
+                });
+            }
+        });
 
         // Affichage des stats de base
         document.getElementById('stat-total-trips').textContent = totalTrips;
         document.getElementById('stat-completed-trips').textContent = completedTrips;
-        document.getElementById('stat-total-budget').textContent = `${totalBudget.toLocaleString()} €`;
+        
+        // Mise à jour de l'affichage du budget (Comparatif Estimé / Réel)
+        document.getElementById('stat-total-budget').innerHTML = `
+            <span style="font-size: 1.8rem; color: var(--color-gold);">${totalRealSpent.toLocaleString()} €</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); display: block; font-weight: normal; margin-top: 4px;">Estimé global : ${totalBudget.toLocaleString()} €</span>
+        `;
 
         // Évolution du grade selon le nombre de voyages
         const rankTitleEl = document.getElementById('profile-rank-title');
