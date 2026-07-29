@@ -458,6 +458,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof activeTrip.budgetDetails === 'string') {
         try { activeTrip.budgetDetails = JSON.parse(activeTrip.budgetDetails); } catch (e) {}
     }
+    if (typeof activeTrip.documents === 'string') {
+        try { activeTrip.documents = JSON.parse(activeTrip.documents); } catch (e) { activeTrip.documents = []; }
+    }
+    if (!activeTrip.documents) activeTrip.documents = [];
 
     if (!activeTrip.checklist) {
         activeTrip.checklist = [
@@ -484,7 +488,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     checklist: activeTrip.checklist,
                     itinerary: activeTrip.itinerary,
                     expenses: activeTrip.expenses || [],
-                    booking_notes: activeTrip.bookingNotes || []
+                    booking_notes: activeTrip.bookingNotes || [],
+                    documents: activeTrip.documents || []
                 }).eq('id', activeTrip.id);
             } catch (e) {
                 console.warn("Sauvegarde locale uniquement.");
@@ -1344,6 +1349,125 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (activeBtn) activeBtn.click();
                 exportBtn.textContent = originalText;
             });
+        });
+    }
+                // ==========================================
+    // --- MODULE TRAVEL WALLET (DOCUMENTS) ---
+    // ==========================================
+    
+    const renderDocuments = () => {
+        const container = document.getElementById('documents-list');
+        if (!container) return;
+        
+        container.innerHTML = '';
+
+        if (activeTrip.documents.length === 0) {
+            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem; grid-column: 1 / -1; text-align: center;">Aucun document sauvegardé pour ce voyage.</span>`;
+            return;
+        }
+
+        activeTrip.documents.forEach(doc => {
+            const isPDF = doc.url.toLowerCase().includes('.pdf');
+            const icon = isPDF ? '📄' : '🖼️';
+
+            const card = document.createElement('div');
+            card.style.cssText = `background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;`;
+            
+            card.innerHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem;">
+                    <span style="font-size: 1.5rem;">${icon}</span>
+                    <strong style="color: var(--text-main); font-size: 0.9rem; word-break: break-word;">${doc.title}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(212,175,55,0.1); padding-top: 0.8rem;">
+                    <a href="${doc.url}" target="_blank" style="color: var(--color-gold); text-decoration: none; font-size: 0.85rem; font-weight: bold; background: rgba(212,175,55,0.1); padding: 0.3rem 0.6rem; border-radius: 4px;">Ouvrir</a>
+                    <button class="btn-delete-doc" data-id="${doc.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.9rem;" title="Supprimer">🗑️</button>
+                </div>
+            `;
+
+            card.querySelector('.btn-delete-doc').addEventListener('click', async () => {
+                if(confirm(`Supprimer le document "${doc.title}" ?`)) {
+                    // Supprimer du Storage Supabase
+                    const filePath = doc.url.split('travel_docs/')[1];
+                    if (filePath) {
+                        await supabase.storage.from('travel_docs').remove([filePath]);
+                    }
+                    
+                    // Supprimer de la BDD locale
+                    activeTrip.documents = activeTrip.documents.filter(d => d.id !== doc.id);
+                    await saveTrip();
+                    renderDocuments();
+                }
+            });
+
+            container.appendChild(card);
+        });
+    };
+
+    // Rendu initial
+    renderDocuments();
+
+    // Gestion de l'upload
+    const docForm = document.getElementById('upload-doc-form');
+    if (docForm) {
+        docForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('doc-file-input');
+            const titleInput = document.getElementById('doc-title-input');
+            const submitBtn = document.getElementById('btn-upload-doc');
+
+            const file = fileInput.files[0];
+            const title = titleInput.value.trim();
+
+            if (!file || !title) return;
+
+            // Rendu visuel du chargement
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = "⏳ Téléversement...";
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.7";
+
+            try {
+                // Créer un nom de fichier unique pour éviter d'écraser des fichiers existants
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `${activeTrip.id}/${fileName}`; // Organisé par ID de voyage
+
+                // 1. Upload vers Supabase Storage
+                const { error: uploadError } = await supabase.storage
+                    .from('travel_docs')
+                    .upload(filePath, file);
+
+                if (uploadError) throw uploadError;
+
+                // 2. Récupérer l'URL publique
+                const { data: urlData } = supabase.storage
+                    .from('travel_docs')
+                    .getPublicUrl(filePath);
+
+                // 3. Sauvegarder dans la table Trips
+                activeTrip.documents.push({
+                    id: Date.now(),
+                    title: title,
+                    url: urlData.publicUrl
+                });
+
+                await saveTrip();
+                renderDocuments();
+
+                // Nettoyer le formulaire
+                fileInput.value = '';
+                titleInput.value = '';
+
+            } catch (err) {
+                console.error("Erreur lors de l'upload :", err);
+                alert("Une erreur est survenue lors de l'ajout du document.");
+            } finally {
+                // Rétablir le bouton
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+            }
         });
     }
 });
