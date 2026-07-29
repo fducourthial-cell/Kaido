@@ -9,7 +9,7 @@
     <!-- CONFIGURATION PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0D0B09">
-    <meta name="mobile-web-app-capable" content="yes"> <!-- CORRECTION CONSOLE -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="image/logo kaido v7.2.png">
@@ -39,7 +39,7 @@
 <body>
 
     <div class="container">
-        <!-- HEADER UNIFIÉ KAIDO (Sans bouton retour) -->
+        <!-- HEADER UNIFIÉ KAIDO -->
         <header class="kaido-header">
             <!-- GAUCHE : Navigation -->
             <div class="header-left">
@@ -53,70 +53,78 @@
                 </a>
             </div>
 
-            <!-- DROITE : Actions -->
-<!-- DROITE : Menu Options (Langues + Thème) -->
-<div class="header-right" style="display: flex; align-items: center; position: relative;">
-    
-    <!-- Bouton Principal du Menu (Burger / Options) -->
-    <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
-        ⚙️
-    </button>
-
-    <!-- Panneau déroulant caché par défaut -->
-    <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; display: none; flex-direction: column; gap: 8px;">
-        
-        <!-- Option : Thème -->
-        <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-            <span>🌓</span> Changer de thème
-        </button>
-
-        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
-
-        <!-- Options : Langues avec drapeaux -->
-        <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
-        
-        <button type="button" onclick="changeLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-            <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
-        </button>
-        <button type="button" onclick="changeLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-            <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
-        </button>
-        <button type="button" onclick="changeLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-            <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
-        </button>
-    </div>
-</div>
-
-<script>
-    // Logique d'ouverture/fermeture du menu déroulant au clic
-    const menuBtn = document.getElementById('options-menu-btn');
-    const dropdown = document.getElementById('options-dropdown');
-
-    menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
-    });
-
-    // Fermer le menu si on clique ailleurs sur la page
-    window.addEventListener('click', () => {
-        if (dropdown) dropdown.style.display = 'none';
-    });
-
-    if (dropdown) {
-        dropdown.addEventListener('click', (e) => {
-            e.stopPropagation(); // Empêche la fermeture si on clique à l'intérieur du menu
-        });
-    }
-</script>
-
-                <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
-                    <!-- CORRECTION CONSOLE : photo-profil.png au lieu de photo profil.png -->
-                    <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            <!-- DROITE : Menu Options (Langues + Thème) -->
+            <div class="header-right" style="display: flex; align-items: center; position: relative;">
+                
+                <!-- Bouton Principal du Menu (Burger / Options) -->
+                <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                    ⚙️
                 </button>
+
+                <!-- Panneau déroulant -->
+                <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                    
+                    <!-- Option : Thème -->
+                    <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <span>🌓</span> Changer de thème
+                    </button>
+
+                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+                    <!-- Options : Langues avec drapeaux -->
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+                    
+                    <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+                    </button>
+                    <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+                    </button>
+                    <button type="button" onclick="selectLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+                    </button>
+                </div>
             </div>
+
+            <script>
+                // Logique d'ouverture/fermeture du menu déroulant au clic
+                const menuBtn = document.getElementById('options-menu-btn');
+                const dropdown = document.getElementById('options-dropdown');
+
+                if (menuBtn && dropdown) {
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                    });
+
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Empêche la fermeture si on clique à l'intérieur
+                    });
+                }
+
+                // Fermer le menu si on clique ailleurs sur la page
+                window.addEventListener('click', () => {
+                    if (dropdown) dropdown.style.display = 'none';
+                });
+
+                // Fonction sécurisée pour changer la langue et fermer le menu
+                function selectLanguage(lang) {
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(lang);
+                    } else {
+                        localStorage.setItem('kaido_global_lang', lang);
+                        location.reload();
+                    }
+                    if (dropdown) dropdown.style.display = 'none';
+                }
+            </script>
+
+            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            </button>
         </header>
 
-        <!-- TITRE PRINCIPAL ÉPURÉ AVEC PORTE ET SOUS-TITRE JAPONAIS -->
+        <!-- TITRE PRINCIPAL ÉPURÉ -->
         <div class="dashboard-title-wrapper">
             <h1 class="dashboard-title">
                 ⛩️ <span data-i18n="navTitle">Mes futurs voyages</span> 
@@ -126,20 +134,16 @@
 
         <!-- GRILLE DE VOYAGES -->
         <section class="dashboard-grid" id="trips-grid">
-            
-            <!-- Zone fixe pour ajouter un voyage -->
             <a href="creer.html" class="create-trip-zone">
                 <div class="plus-icon">+</div>
                 <h3 data-i18n="newRoute">Tracer une nouvelle route</h3>
             </a>
-
         </section>
     </div>
 
     <!-- LOGIQUE DE RENDU -->
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        // --- CHARGEMENT DYNAMIQUE DU NOM DE L'UTILISATEUR ---
         if (typeof supabase !== 'undefined') {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
@@ -160,7 +164,6 @@
         if (grid) {
             const createZone = grid.querySelector('.create-trip-zone');
 
-            // Fonction pour dessiner les cartes dans la grille
             const drawCards = (trips) => {
                 const dynamicCards = grid.querySelectorAll('.dynamic-trip');
                 dynamicCards.forEach(card => card.remove());
@@ -172,7 +175,6 @@
                     const cityName = trip.destination || trip.title || 'Destination';
                     const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
-                    // Budget estimatif
                     let displayBudget = parseFloat(trip.budget) || 0;
                     if (displayBudget <= 0) {
                         let daysCount = 3;
@@ -269,7 +271,6 @@
                                                 destination_lng: localTrip.destinationLng || null,
                                                 itinerary: localTrip.itinerary || [],
                                                 checklist: localTrip.checklist || [],
-                                                // --- CORRECTION : AJOUT DES DOCUMENTS ET DE LA GALERIE ---
                                                 documents: localTrip.documents || [],
                                                 gallery: localTrip.gallery || []
                                             }])
@@ -297,7 +298,6 @@
                                 destinationLng: ct.destination_lng,
                                 itinerary: ct.itinerary,
                                 checklist: ct.checklist,
-                                // --- CORRECTION : RÉCUPÉRATION DES DOCUMENTS ET DE LA GALERIE ---
                                 documents: ct.documents || [],
                                 gallery: ct.gallery || []
                             }));
