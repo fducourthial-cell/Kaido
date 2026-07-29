@@ -172,8 +172,12 @@
         const localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
 
         const totalTrips = localTrips.length;
-        const completedTrips = localTrips.filter(t => t.status === 'completed' || (t.dateEnd && new Date(t.dateEnd) < new Date())).length;
+        // On compte comme bouclé si explicitement 'completed' ou si la date de fin est dépassée
+const completedTrips = localTrips.filter(t => 
+    t.status === 'completed' || (t.dateEnd && new Date(t.dateEnd) < new Date())
+).length;
 
+document.getElementById('stat-completed-trips').textContent = completedTrips;
         let totalBudget = 0;
         let totalRealSpent = 0;
 
