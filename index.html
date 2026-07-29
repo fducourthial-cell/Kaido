@@ -54,22 +54,60 @@
             </div>
 
             <!-- DROITE : Actions -->
-            <div class="header-right">
-                <button id="global-theme-toggle" class="header-icon-btn" title="Changer de thème">🌓</button>
-                
-               
-                    <div class="language-selector" style="display: flex; gap: 10px; align-items: center;">
-    <button onclick="changeLanguage('fr')" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
-        <img src="https://flagcdn.com/24x18/fr.png" width="18" alt="Français"> FR
+<!-- DROITE : Menu Options (Langues + Thème) -->
+<div class="header-right" style="display: flex; align-items: center; position: relative;">
+    
+    <!-- Bouton Principal du Menu (Burger / Options) -->
+    <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+        ⚙️
     </button>
-    <button onclick="changeLanguage('en')" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
-        <img src="https://flagcdn.com/24x18/gb.png" width="18" alt="English"> EN
-    </button>
-    <button onclick="changeLanguage('es')" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
-        <img src="https://flagcdn.com/24x18/es.png" width="18" alt="Español"> ES
-    </button>
+
+    <!-- Panneau déroulant caché par défaut -->
+    <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; display: none; flex-direction: column; gap: 8px;">
+        
+        <!-- Option : Thème -->
+        <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+            <span>🌓</span> Changer de thème
+        </button>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+        <!-- Options : Langues avec drapeaux -->
+        <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+        
+        <button type="button" onclick="changeLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+            <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+        </button>
+        <button type="button" onclick="changeLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+            <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+        </button>
+        <button type="button" onclick="changeLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+            <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+        </button>
+    </div>
 </div>
-            
+
+<script>
+    // Logique d'ouverture/fermeture du menu déroulant au clic
+    const menuBtn = document.getElementById('options-menu-btn');
+    const dropdown = document.getElementById('options-dropdown');
+
+    menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    // Fermer le menu si on clique ailleurs sur la page
+    window.addEventListener('click', () => {
+        if (dropdown) dropdown.style.display = 'none';
+    });
+
+    if (dropdown) {
+        dropdown.addEventListener('click', (e) => {
+            e.stopPropagation(); // Empêche la fermeture si on clique à l'intérieur du menu
+        });
+    }
+</script>
 
                 <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
                     <!-- CORRECTION CONSOLE : photo-profil.png au lieu de photo profil.png -->
