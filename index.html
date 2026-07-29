@@ -9,6 +9,7 @@
     <!-- CONFIGURATION PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0D0B09">
+    <meta name="mobile-web-app-capable" content="yes"> <!-- CORRECTION CONSOLE -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="image/logo kaido v7.2.png">
@@ -63,7 +64,8 @@
                 </select>
 
                 <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
-                    <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+                    <!-- CORRECTION CONSOLE : photo-profil.png au lieu de photo profil.png -->
+                    <img src="image/photo-profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
                 </button>
             </div>
         </header>
@@ -220,7 +222,10 @@
                                                 destination_lat: localTrip.destinationLat || null,
                                                 destination_lng: localTrip.destinationLng || null,
                                                 itinerary: localTrip.itinerary || [],
-                                                checklist: localTrip.checklist || []
+                                                checklist: localTrip.checklist || [],
+                                                // --- CORRECTION : AJOUT DES DOCUMENTS ET DE LA GALERIE ---
+                                                documents: localTrip.documents || [],
+                                                gallery: localTrip.gallery || []
                                             }])
                                             .select();
 
@@ -245,7 +250,10 @@
                                 destinationLat: ct.destination_lat,
                                 destinationLng: ct.destination_lng,
                                 itinerary: ct.itinerary,
-                                checklist: ct.checklist
+                                checklist: ct.checklist,
+                                // --- CORRECTION : RÉCUPÉRATION DES DOCUMENTS ET DE LA GALERIE ---
+                                documents: ct.documents || [],
+                                gallery: ct.gallery || []
                             }));
 
                             const mergedMap = new Map();
