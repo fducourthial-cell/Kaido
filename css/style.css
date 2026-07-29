@@ -276,7 +276,7 @@ body:has(.create-hero) header {
     color: var(--color-gold);
     opacity: 0.85;
     letter-spacing: 0.15em;
-    text-transform: none;
+    text-transform: none !important;
 }
 
 .dashboard-grid {
@@ -389,7 +389,7 @@ body:has(.create-hero) header {
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.08em;
-    text-transform: uppercase;
+    text-transform: none !important;
     transition: color 0.3s ease;
 }
 
@@ -500,7 +500,7 @@ body:has(.create-hero) header {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    text-transform: uppercase;
+    text-transform: none !important;
     letter-spacing: 0.05em;
     color: var(--text-muted);
     margin-bottom: 0.6rem;
@@ -535,7 +535,7 @@ gmp-place-autocomplete::part(input):focus {
     color: white;
     border: 1px solid rgba(166, 58, 43, 0.4);
     font-weight: 700;
-    text-transform: uppercase;
+    text-transform: none !important;
     letter-spacing: 0.1em;
     cursor: pointer;
     transition: all 0.3s ease;
