@@ -18,7 +18,8 @@ window.saveTrip = async function() {
                 itinerary: window.activeTrip.itinerary,
                 expenses: window.activeTrip.expenses || [],
                 booking_notes: window.activeTrip.bookingNotes || [],
-                documents: window.activeTrip.documents || []
+                documents: window.activeTrip.documents || [],
+                gallery: window.activeTrip.gallery || []
             }).eq('id', window.activeTrip.id);
         } catch (e) { console.warn("Sauvegarde locale uniquement."); }
     }
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Parsing sécurisé des données
-    ['itinerary', 'checklist', 'expenses', 'budgetDetails', 'documents'].forEach(key => {
+    ['itinerary', 'checklist', 'expenses', 'budgetDetails', 'documents', 'gallery'].forEach(key => {
         if (typeof window.activeTrip[key] === 'string') {
             try { window.activeTrip[key] = JSON.parse(window.activeTrip[key]); } catch (e) { window.activeTrip[key] = key === 'budgetDetails' ? null : []; }
         }
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Lancement des sous-modules
     if (typeof initTricountModule === 'function') initTricountModule(window.activeTrip.id);
     if (typeof initDocumentsModule === 'function') initDocumentsModule();
+    if (typeof initGalleryModule === 'function') initGalleryModule();
 
     // 3. Bouton Partager
     const shareBtn = document.getElementById('btn-share-trip');
