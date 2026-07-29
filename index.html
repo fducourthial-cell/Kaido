@@ -303,11 +303,12 @@
                                 checklist: ct.checklist,
                                 documents: ct.documents || [],
                                 gallery: ct.gallery || [],
-                                expenses: row.expenses || [],
-                                bookingNotes: row.booking_notes || [],
-                                status: row.status || 'ongoing',
-                                final_rank: row.final_rank || null,
-                                completion_rate: row.completion_rate || 0
+                                // CORRECTIONS APPLIQUÉES ICI (ct au lieu de row)
+                                expenses: ct.expenses || [],
+                                bookingNotes: ct.booking_notes || [],
+                                status: ct.status || 'ongoing',
+                                final_rank: ct.final_rank || null,
+                                completion_rate: ct.completion_rate || 0
                             }));
 
                             const mergedMap = new Map();
