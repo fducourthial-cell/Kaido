@@ -163,9 +163,17 @@
                     <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">Chargement du registre...</div>
                 </div>
             </div>
-        </main>
+       
     </div>
-
+    <!-- BLOC 4 : SUCCÈS & TITRES DÉBLOQUABLES -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem;">
+                <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1.5rem;">🏅 Titres & Succès du Voyageur</h3>
+                
+                <div id="kiroku-achievements-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                    <!-- Injecté dynamiquement par JavaScript -->
+                </div>
+            </div>
+ </main>
     <!-- LOGIQUE DE CALCUL DU PROJET KIROKU -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
