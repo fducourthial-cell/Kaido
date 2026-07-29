@@ -23,7 +23,7 @@
       }
     </script>
 
-    <!-- 1. SDK CLIENT SUPABASE & CONFIGURATION -->
+    <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
@@ -34,39 +34,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    
 </head>
 <body>
 
     <div class="container">
-        <!-- BARRE DE NAVIGATION -->
+        <!-- HEADER UNIFIÉ KAIDO (Sans bouton retour) -->
         <header class="kaido-header">
+            <!-- GAUCHE : Navigation -->
             <div class="header-left">
-                <a href="index.html" class="brand-name">KAIDO</a>
+                <a href="index.html" class="header-brand-text">KAIDO</a>
             </div>
 
+            <!-- CENTRE : Logo -->
             <div class="header-center">
                 <a href="index.html">
-                    <img src="image/logo kaido v7.2.png" alt="Logo Kaido" class="header-logo">
+                    <img src="image/logo kaido v7.2.png" alt="Logo Kaido" style="height: 50px; width: auto;">
                 </a>
             </div>
 
+            <!-- DROITE : Actions -->
             <div class="header-right">
-                <!-- BOUTON TOGGLE THÈME (SYMBOLES JAPONAIS 🌙 / 📜) -->
-                <button id="global-theme-toggle" type="button" title="Changer de thème"></button>
-
-                <!-- SÉLECTEUR DE LANGUE GLOBAL -->
-                <select id="global-lang-selector">
-                    <option value="fr">FR</option>
-                    <option value="en">EN</option>
-                    <option value="es">ES</option>
+                <button id="global-theme-toggle" class="header-icon-btn" title="Changer de thème">🌓</button>
+                
+                <select id="global-lang-selector" class="header-lang-select">
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
                 </select>
 
-                <!-- BOUTON PROFIL DYNAMIQUE -->
-                <a href="#" class="user-profile-btn" id="user-profile-link" title="Profil">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span class="user-name-text" id="user-display-name">Mon Profil</span>
-                </a>
+                <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                    <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+                </button>
             </div>
         </header>
 
