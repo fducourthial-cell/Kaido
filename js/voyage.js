@@ -89,6 +89,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) { alert("Une erreur est survenue lors de la création du lien de partage."); }
         });
     }
+
+    // Bouton Exporter PDF (Mode Rouleau Ancien)
+    const exportPdfBtn = document.getElementById('btn-export-pdf');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
+
     // Bouton Clôturer l'aventure
     const completeBtn = document.getElementById('btn-complete-trip');
     if (completeBtn) {
