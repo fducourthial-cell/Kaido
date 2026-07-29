@@ -9,7 +9,7 @@ window.saveTrip = async function() {
 
     if (typeof supabase !== 'undefined') {
         try {
-            await supabase.from('trips').update({
+            const { error: updateError } = await supabase.from('trips').update({
                 date_start: window.activeTrip.dateStart,
                 date_end: window.activeTrip.dateEnd,
                 budget: window.activeTrip.budget,
@@ -21,7 +21,15 @@ window.saveTrip = async function() {
                 documents: window.activeTrip.documents || [],
                 gallery: window.activeTrip.gallery || []
             }).eq('id', window.activeTrip.id);
-        } catch (e) { console.warn("Sauvegarde locale uniquement."); }
+
+            if (updateError) {
+                console.error("❌ Erreur Supabase lors de la sauvegarde :", updateError.message);
+            } else {
+                console.log("✅ Sauvegarde Supabase réussie pour la galerie !");
+            }
+        } catch (e) { 
+            console.warn("⚠️ Exception attrapée pendant la sauvegarde Supabase:", e); 
+        }
     }
 };
 
@@ -45,6 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!window.activeTrip.documents) window.activeTrip.documents = [];
     if (!window.activeTrip.expenses) window.activeTrip.expenses = [];
     if (!window.activeTrip.bookingNotes) window.activeTrip.bookingNotes = [];
+    if (!window.activeTrip.gallery) window.activeTrip.gallery = []; // <--- AJOUTÉ ICI !
     if (!window.activeTrip.checklist) window.activeTrip.checklist = [
         { id: 1, text: "Passeport / Carte d'identité", done: false },
         { id: 2, text: "Billets de réservation", done: false }
