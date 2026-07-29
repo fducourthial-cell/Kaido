@@ -220,8 +220,25 @@
         localTrips.forEach(trip => {
             const cityName = trip.destination || trip.title || 'Destination';
             const rank = trip.final_rank || 'A'; // Par défaut A si non défini
-            const completion = trip.completion_rate || 0;
+
+            // --- CALCUL DYNAMIQUE DU TAUX DE COMPLÉTION RÉEL ---
+            let completedSteps = 0;
+            let totalSteps = 0;
+            if (trip.itinerary && Array.isArray(trip.itinerary)) {
+                trip.itinerary.forEach(day => {
+                    if (day.steps && Array.isArray(day.steps)) {
+                        day.steps.forEach(step => {
+                            totalSteps++;
+                            if (step.done === true) {
+                                completedSteps++;
+                            }
+                        });
+                    }
+                });
+            }
+            const completion = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
             totalCompletionSum += completion;
+            // ---------------------------------------------------
 
             const rankColor = rank === 'S' ? '#D4AF37' : (rank === 'A' ? '#4ade80' : '#a78bfa');
 
