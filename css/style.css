@@ -550,36 +550,52 @@ gmp-place-autocomplete::part(input):focus {
 /* ==========================================================================
    6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
    ========================================================================== */
-/* Style par défaut des onglets (s'adapte au thème clair/sombre automatiquement) */
+/* Navigation de base (Par défaut horizontale) */
+.trip-nav-tabs {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.trip-nav-tabs::-webkit-scrollbar { display: none; }
+
+/* Style des onglets (Adaptés aux thèmes clair et sombre) */
 .tab-btn {
     background: none;
     border: none;
-    color: var(--text-main); /* <-- C'est cette ligne qui rendra le texte blanc en mode dark */
-    opacity: 0.7; /* Légèrement transparent pour montrer qu'ils sont inactifs */
-    font-size: 0.95rem;
-    padding: 0.8rem 1rem;
+    color: var(--text-main);
+    opacity: 0.85;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.2rem;
     cursor: pointer;
     font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-kaido);
     display: flex;
     align-items: center;
     gap: 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
-/* Effet au survol */
 .tab-btn:hover {
     opacity: 1;
-    color: var(--text-main);
+    color: var(--color-gold);
 }
 
-/* Style de l'onglet ACTIF */
 .tab-btn.active {
+    background: rgba(212, 175, 55, 0.15);
     color: var(--color-gold);
     opacity: 1;
-    background: rgba(212, 175, 55, 0.1); /* Fond doré très léger */
-    border-radius: 20px; /* Ou la bordure que tu avais déjà définie */
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    font-weight: 600;
 }
+
 .itinerary-split-layout {
     display: flex;
     flex-direction: column;
@@ -842,31 +858,6 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     .itinerary-split-layout { flex-direction: row; align-items: flex-start; gap: 2rem; }
     .itinerary-list-col { flex: 1.2; }
     .itinerary-map-col { flex: 1; position: sticky; top: 2rem; z-index: 10; }
-
-    /* Navigation version bureau (Pilules horizontales) */
-    .trip-nav-tabs {
-        position: relative; top: auto; bottom: auto; left: auto; right: auto;
-        width: auto; height: auto; flex-direction: row;
-        background: transparent; border: none;
-        border-bottom: 1px solid var(--border-color);
-        border-radius: 0; justify-content: flex-start; gap: 0.5rem;
-        margin-top: 0; margin-bottom: 1.5rem; padding-bottom: 0.8rem; box-shadow: none;
-        overflow-x: auto; scrollbar-width: none;
-    }
-    .trip-nav-tabs::-webkit-scrollbar { display: none; }
-
-    .tab-btn {
-        flex: initial; min-width: auto; flex-direction: row; gap: 8px;
-        font-size: 0.9rem; padding: 0.5rem 1.2rem; background: none;
-        border: none; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
-    }
-    .tab-btn.active {
-        background: rgba(212, 175, 55, 0.15);
-        color: var(--color-gold);
-        border: 1px solid rgba(212, 175, 55, 0.4);
-        font-weight: 600;
-    }
-    .tab-btn span:not(.tab-icon) { display: inline; }
 }
 
 /* --- VERSION MOBILE APP (Smartphones Portrait & Navigation en bas) --- */
