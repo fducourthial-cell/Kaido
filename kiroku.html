@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet Kiroku - Statistiques & Rang - Kaido</title>
+    <link rel="icon" type="image/png" href="image/logo kaido v7.2.png">
+
+    <!-- CONFIGURATION PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0D0B09">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="image/logo kaido v7.2.png">
+
+    <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/i18n.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER UNIFIÉ KAIDO (Avec bouton retour) -->
+        <header class="kaido-header">
+            <div class="header-left">
+                <a href="index.html" class="header-btn-back" title="Retour à l'accueil">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </a>
+                <a href="index.html" class="header-brand-text">KAIDO</a>
+            </div>
+
+            <div class="header-center">
+                <a href="index.html">
+                    <img src="image/logo kaido v7.2.png" alt="Logo Kaido" style="height: 50px; width: auto;">
+                </a>
+            </div>
+
+            <!-- DROITE : Menu Options (Langues + Thème) -->
+            <div class="header-right" style="display: flex; align-items: center; position: relative;">
+                
+                <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                    ⚙️
+                </button>
+
+                <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                    
+                    <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <span>🌓</span> Changer de thème
+                    </button>
+
+                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+                    
+                    <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+                    </button>
+                    <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+                    </button>
+                    <button type="button" onclick="selectLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+                    </button>
+                </div>
+            </div>
+
+            <script>
+                const menuBtn = document.getElementById('options-menu-btn');
+                const dropdown = document.getElementById('options-dropdown');
+
+                if (menuBtn && dropdown) {
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                    });
+
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                }
+
+                window.addEventListener('click', () => {
+                    if (dropdown) dropdown.style.display = 'none';
+                });
+
+                function selectLanguage(lang) {
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(lang);
+                    } else {
+                        localStorage.setItem('kaido_global_lang', lang);
+                        location.reload();
+                    }
+                    if (dropdown) dropdown.style.display = 'none';
+                }
+            </script>
+
+            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            </button>
+        </header>
+
+        <!-- TITRE DE LA PAGE KIROKU -->
+        <div class="dashboard-title-wrapper" style="text-align: center; margin-top: 2rem;">
+            <h1 class="dashboard-title">
+                🏆 <span data-i18n="kirokuTitle">Projet Kiroku</span> 
+                <span class="dashboard-subtitle-jp">記録 — Le Registre du Voyageur</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Votre palmarès, vos rangs et l'historique de vos aventures.</p>
+        </div>
+
+        <!-- CONTENU DES STATISTIQUES -->
+        <main style="max-width: 900px; margin: 2rem auto 5rem auto; display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- BLOC 1 : CARTE DU GRADE / PROFIL -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 2.5rem; text-align: center; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--color-gold), transparent);"></div>
+                
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;" id="profile-badge-icon">⛩️</div>
+                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 0.3rem;">Rang Actuel du Voyageur</div>
+                <h2 id="profile-rank-title" style="font-family: 'Playfair Display', serif; color: var(--color-gold); font-size: 2rem; margin: 0 0 1rem 0;">Tabibito (Novice)</h2>
+                
+                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <div>
+                        <span id="stat-total-trips" style="font-size: 1.8rem; font-weight: bold; color: var(--text-main); font-family: 'Playfair Display', serif; display: block;">0</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Voyages planifiés</span>
+                    </div>
+                    <div style="border-left: 1px solid var(--border-color); padding-left: 2rem;">
+                        <span id="stat-completed-trips" style="font-size: 1.8rem; font-weight: bold; color: var(--color-gold); font-family: 'Playfair Display', serif; display: block;">0</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Aventures bouclées</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOC 2 : GRILLE DES STATISTIQUES AVANCÉES -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+                
+                <!-- Taux de réussite moyen -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem;">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">📊</div>
+                    <h3 style="font-family: 'Playfair Display', serif; color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0;">Taux de complétion</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Moyenne des étapes validées sur vos carnets</p>
+                    <div id="stat-completion-avg" style="font-size: 2rem; font-weight: bold; color: var(--color-gold); font-family: 'Playfair Display', serif;">--</div>
+                </div>
+
+                <!-- Budget global géré -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem;">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">💶</div>
+                    <h3 style="font-family: 'Playfair Display', serif; color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0;">Volume Financier</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Budget cumulé de vos projets de voyage</p>
+                    <div id="stat-total-budget" style="font-size: 2rem; font-weight: bold; color: var(--color-gold); font-family: 'Playfair Display', serif;">0 €</div>
+                </div>
+
+            </div>
+
+            <!-- BLOC 3 : HISTORIQUE DES RANGS S / A / B -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem;">
+                <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1.5rem;">📜 Registre des Rangs par Voyage</h3>
+                
+                <div id="kiroku-history-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Injecté dynamiquement par JavaScript -->
+                    <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">Chargement du registre...</div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- LOGIQUE DE CALCUL DU PROJET KIROKU -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Récupération des voyages stockés en local ou via Supabase
+        const localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+
+        const totalTrips = localTrips.length;
+        // On considère un voyage comme complété s'il a une date passée ou un statut validé
+        const completedTrips = localTrips.filter(t => t.status === 'completed' || (t.dateEnd && new Date(t.dateEnd) < new Date())).length;
+
+        // Calcul du budget cumulé
+        const totalBudget = localTrips.reduce((acc, t) => acc + (parseFloat(t.budget) || 0), 0);
+
+        // Affichage des stats de base
+        document.getElementById('stat-total-trips').textContent = totalTrips;
+        document.getElementById('stat-completed-trips').textContent = completedTrips;
+        document.getElementById('stat-total-budget').textContent = `${totalBudget.toLocaleString()} €`;
+
+        // Évolution du grade selon le nombre de voyages
+        const rankTitleEl = document.getElementById('profile-rank-title');
+        const badgeIconEl = document.getElementById('profile-badge-icon');
+
+        if (totalTrips >= 5) {
+            rankTitleEl.textContent = "Kaido-Master (Grand Nomade)";
+            badgeIconEl.textContent = "⛩️";
+        } else if (totalTrips >= 3) {
+            rankTitleEl.textContent = "Tansa-sha (Explorateur)";
+            badgeIconEl.textContent = "🗺️";
+        } else {
+            rankTitleEl.textContent = "Tabibito (Voyageur Novice)";
+            badgeIconEl.textContent = "🌱";
+        }
+
+        // Rendu de l'historique des voyages dans le registre
+        const historyContainer = document.getElementById('kiroku-history-list');
+        if (localTrips.length === 0) {
+            historyContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem; text-align: center; display: block;">Aucun voyage enregistré pour le moment. Tracez votre première route !</span>`;
+            document.getElementById('stat-completion-avg').textContent = "0%";
+            return;
+        }
+
+        let totalCompletionSum = 0;
+        historyContainer.innerHTML = '';
+
+        localTrips.forEach(trip => {
+            const cityName = trip.destination || trip.title || 'Destination';
+            const rank = trip.final_rank || 'A'; // Par défaut A si non défini
+            const completion = trip.completion_rate || 85;
+            totalCompletionSum += completion;
+
+            const rankColor = rank === 'S' ? '#D4AF37' : (rank === 'A' ? '#4ade80' : '#a78bfa');
+
+            historyContainer.innerHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px;">
+                    <div>
+                        <h4 style="margin: 0 0 0.2rem 0; color: var(--text-main); font-family: 'Playfair Display', serif; font-size: 1.1rem;">${cityName}</h4>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">📅 ${trip.dates || 'Dates personnalisées'} • Complétion : ${completion}%</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Rang</span>
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); border: 1px solid ${rankColor}; color: ${rankColor}; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: 'Playfair Display', serif; font-size: 1.1rem;">
+                            ${rank}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        const avgCompletion = Math.round(totalCompletionSum / localTrips.length);
+        document.getElementById('stat-completion-avg').textContent = `${avgCompletion}%`;
+    });
+    </script>
+</body>
+</html>
