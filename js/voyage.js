@@ -89,6 +89,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) { alert("Une erreur est survenue lors de la création du lien de partage."); }
         });
     }
+    // Bouton Clôturer l'aventure
+    const completeBtn = document.getElementById('btn-complete-trip');
+    if (completeBtn) {
+        completeBtn.addEventListener('click', async () => {
+            if (!window.activeTrip) return;
+            window.activeTrip.status = 'completed';
+            window.activeTrip.final_rank = window.activeTrip.final_rank || 'A'; // Attribue un rang par défaut si non défini
+            await window.saveTrip();
+            alert("🎉 Félicitations ! Cette aventure est désormais officiellement bouclée et enregistrée dans votre Registre Kiroku.");
+            window.location.href = "index.html";
+        });
+    }
 
     // 4. Remplissage des données d'en-tête et Budget
     const destination = window.activeTrip.destination || window.activeTrip.title || "Destination";
