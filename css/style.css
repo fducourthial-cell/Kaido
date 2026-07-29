@@ -550,7 +550,36 @@ gmp-place-autocomplete::part(input):focus {
 /* ==========================================================================
    6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
    ========================================================================== */
+/* Style par défaut des onglets (s'adapte au thème clair/sombre automatiquement) */
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-main); /* <-- C'est cette ligne qui rendra le texte blanc en mode dark */
+    opacity: 0.7; /* Légèrement transparent pour montrer qu'ils sont inactifs */
+    font-size: 0.95rem;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
 
+/* Effet au survol */
+.tab-btn:hover {
+    opacity: 1;
+    color: var(--text-main);
+}
+
+/* Style de l'onglet ACTIF */
+.tab-btn.active {
+    color: var(--color-gold);
+    opacity: 1;
+    background: rgba(212, 175, 55, 0.1); /* Fond doré très léger */
+    border-radius: 20px; /* Ou la bordure que tu avais déjà définie */
+}
 .itinerary-split-layout {
     display: flex;
     flex-direction: column;
@@ -570,7 +599,7 @@ gmp-place-autocomplete::part(input):focus {
     list-style: none;
     padding: 0;
     margin: 1rem 0;
-    max-height: 220px;
+    max-height: 250px;
     overflow-y: auto;
 }
 .checklist-item {
