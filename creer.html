@@ -38,7 +38,7 @@
 <body>
 
     <div class="container">
-        <!-- HEADER UNIFIÉ KAIDO (Avec bouton retour) -->
+        <!-- HEADER UNIFIÉ KAIDO -->
         <header class="kaido-header">
             <div class="header-left">
                 <a href="index.html" class="header-btn-back" title="Retour à l'accueil">
@@ -53,24 +53,73 @@
                 </a>
             </div>
 
-            <div class="header-right">
-                <button id="global-theme-toggle" class="header-icon-btn" title="Changer de thème">🌓</button>
+            <!-- DROITE : Menu Options (Langues + Thème) -->
+            <div class="header-right" style="display: flex; align-items: center; position: relative;">
                 
-                <select id="global-lang-selector" class="header-lang-select">
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="es">🇪🇸 ES</option>
-                </select>
-
-                <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
-                    <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+                <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                    ⚙️
                 </button>
+
+                <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                    
+                    <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <span>🌓</span> Changer de thème
+                    </button>
+
+                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+                    
+                    <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+                    </button>
+                    <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+                    </button>
+                    <button type="button" onclick="selectLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+                    </button>
+                </div>
             </div>
+
+            <script>
+                const menuBtn = document.getElementById('options-menu-btn');
+                const dropdown = document.getElementById('options-dropdown');
+
+                if (menuBtn && dropdown) {
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                    });
+
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                }
+
+                window.addEventListener('click', () => {
+                    if (dropdown) dropdown.style.display = 'none';
+                });
+
+                function selectLanguage(lang) {
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(lang);
+                    } else {
+                        localStorage.setItem('kaido_global_lang', lang);
+                        location.reload();
+                    }
+                    if (dropdown) dropdown.style.display = 'none';
+                }
+            </script>
+
+            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            </button>
         </header>
 
         <!-- EN-TÊTE IMMERSIF -->
         <section class="create-hero">
-            <div class="bg-kanji">創造</div> <!-- Kanji signifiant "Création" -->
+            <div class="bg-kanji">創造</div>
             <h1>⛩️ Tracer une nouvelle route</h1>
             <p>L'intelligence de Kaido conçoit votre carnet de voyage sur-mesure.</p>
         </section>
@@ -79,7 +128,6 @@
         <main class="container" style="max-width: 850px; margin-bottom: 5rem;">
             <form id="create-trip-form" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 
-                <!-- BLOC 1 : LA DESTINATION -->
                 <div class="day-block-card" style="padding: 2rem;">
                     <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">📍 La Destination</h3>
                     
@@ -95,7 +143,6 @@
                     </div>
                 </div>
 
-                <!-- BLOC 2 : LE CALENDRIER & BUDGET -->
                 <div class="day-block-card" style="padding: 2rem;">
                     <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">⏳ Le Calendrier</h3>
                     
@@ -119,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- BLOC 3 : PRÉFÉRENCES -->
                 <div class="day-block-card" style="padding: 2rem;">
                     <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">🎨 Vos Envies</h3>
                     
@@ -129,7 +175,6 @@
                     </div>
                 </div>
 
-                <!-- BOUTON DE SOUMISSION -->
                 <button type="submit" class="kaido-submit-btn" style="padding: 1.2rem; font-size: 1.05rem; border-radius: 8px; margin-top: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
                     <span style="font-size: 1.3rem;">✨</span> Concevoir mon itinéraire sur-mesure
                 </button>
@@ -137,7 +182,6 @@
         </main>
     </div>
 
-    <!-- OVERLAY DE CHARGEMENT ROTATIF -->
     <div id="kaido-loader-overlay">
         <img src="image/logo kaido v7.2.png" alt="Kaido Loading" class="loader-logo-spin">
         <div class="loader-text-title">Tracer votre route...</div>
@@ -283,7 +327,6 @@
                     const notesInput = document.getElementById('trip-notes');
                     const desc = notesInput ? notesInput.value : '';
                     
-                    // Récupération de la langue globale sélectionnée (stockée par i18n.js)
                     const selectedLang = localStorage.getItem('kaido_global_lang') || 'fr';
 
                     if (!dateStart || !dateEnd) {
@@ -309,7 +352,6 @@
                         return;
                     }
 
-                    // 1. Appel Netlify avec la langue globale
                     const response = await fetch(NETLIFY_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -352,10 +394,7 @@
                         done: false
                     }));
 
-                    // 2. Infos photo & géolocalisation
                     const destInfo = await getDestinationInfo(cleanDestination);
-
-                    // 3. Calcul de notre budget intelligent
                     const calculatedBudget = calculateSmartBudget(cleanDestination, totalDays, desc, userBudget);
 
                     const newTrip = {
