@@ -34,29 +34,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    
 </head>
 <body>
 
     <div class="container">
+        <!-- HEADER UNIFIÉ KAIDO (Avec bouton retour) -->
         <header class="kaido-header">
             <div class="header-left">
-                <a href="index.html" class="brand-name">KAIDO</a>
+                <a href="index.html" class="header-btn-back" title="Retour à l'accueil">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </a>
+                <a href="index.html" class="header-brand-text">KAIDO</a>
             </div>
 
             <div class="header-center">
                 <a href="index.html">
-                    <img src="image/logo kaido v7.2.png" alt="Logo Kaido" class="header-logo">
+                    <img src="image/logo kaido v7.2.png" alt="Logo Kaido" style="height: 50px; width: auto;">
                 </a>
             </div>
 
-            <div class="header-right" style="display: flex; align-items: center; gap: 1rem;">
-                <!-- SÉLECTEUR DE LANGUE GLOBAL -->
-                <select id="global-lang-selector" style="background: var(--bg-dark); color: var(--color-gold); border: 1px solid rgba(212, 175, 55, 0.3); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+            <div class="header-right">
+                <button id="global-theme-toggle" class="header-icon-btn" title="Changer de thème">🌓</button>
+                
+                <select id="global-lang-selector" class="header-lang-select">
                     <option value="fr">🇫🇷 FR</option>
                     <option value="en">🇬🇧 EN</option>
                     <option value="es">🇪🇸 ES</option>
                 </select>
+
+                <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                    <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+                </button>
             </div>
         </header>
 
@@ -343,7 +351,7 @@
                         itinerary: formattedItinerary,
                         checklist: formattedChecklist,
                         expenses: [],
-                        lang: selectedLang // On enregistre la langue du voyage pour l'affichage ultérieur
+                        lang: selectedLang
                     };
 
                     const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
@@ -363,7 +371,6 @@
         }
     });
 
-    // MOTEUR DE CALCUL BUDGÉTAIRE INTELLIGENT
     function calculateSmartBudget(destination, totalDays, notes, userBudget) {
         const destLower = destination.toLowerCase();
         const notesLower = notes.toLowerCase();
