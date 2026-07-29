@@ -40,7 +40,7 @@
 </head>
 <body>
 
-    <!-- HEADER UNIFIÉ KAIDO (Avec bouton retour) -->
+    <!-- HEADER UNIFIÉ KAIDO -->
     <header class="kaido-header">
         <div class="header-left">
             <a href="index.html" class="header-btn-back" title="Retour à l'accueil">
@@ -55,24 +55,73 @@
             </a>
         </div>
 
-        <div class="header-right">
-            <button id="global-theme-toggle" class="header-icon-btn" title="Changer de thème">🌓</button>
+        <!-- DROITE : Menu Options (Langues + Thème) -->
+        <div class="header-right" style="display: flex; align-items: center; position: relative;">
             
-            <select id="global-lang-selector" class="header-lang-select">
-                <option value="fr">🇫🇷 FR</option>
-                <option value="en">🇬🇧 EN</option>
-                <option value="es">🇪🇸 ES</option>
-            </select>
-
-            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
-                <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                ⚙️
             </button>
+
+            <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                
+                <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <span>🌓</span> Changer de thème
+                </button>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+                <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+                
+                <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+                </button>
+                <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+                </button>
+                <button type="button" onclick="selectLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+                </button>
+            </div>
         </div>
+
+        <script>
+            const menuBtn = document.getElementById('options-menu-btn');
+            const dropdown = document.getElementById('options-dropdown');
+
+            if (menuBtn && dropdown) {
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                });
+
+                dropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+
+            window.addEventListener('click', () => {
+                if (dropdown) dropdown.style.display = 'none';
+            });
+
+            function selectLanguage(lang) {
+                if (typeof changeLanguage === 'function') {
+                    changeLanguage(lang);
+                } else {
+                    localStorage.setItem('kaido_global_lang', lang);
+                    location.reload();
+                }
+                if (dropdown) dropdown.style.display = 'none';
+            }
+        </script>
+
+        <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+            <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+        </button>
     </header>
 
     <main class="container" style="margin-top: 1.5rem;">
 
-        <!-- EN-TÊTE ÉPURÉ DU VOYAGE (Remplace la grande Card Hero) -->
+        <!-- EN-TÊTE ÉPURÉ DU VOYAGE -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h1 id="trip-main-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0; color: var(--text-main);">Chargement...</h1>
@@ -87,7 +136,7 @@
             </div>
         </div>
 
-        <!-- NAVIGATION PAR ONGLETS (Code HTML épuré) -->
+        <!-- NAVIGATION PAR ONGLETS -->
         <nav class="trip-nav-tabs">
             <button class="tab-btn active" data-tab="tab-itinerary">
                 <span class="tab-icon">✨</span>
@@ -101,7 +150,6 @@
                 <span class="tab-icon">🎒</span>
                 <span class="tab-text">Infos</span>
             </button>
-            <!-- Onglet Carte (uniquement mobile) -->
             <button class="tab-btn mobile-only-tab" data-tab="tab-map">
                 <span class="tab-icon">📍</span>
                 <span class="tab-text">Carte</span>
@@ -120,7 +168,6 @@
 
         <!-- CONTENU DES ONGLETS -->
         <div class="trip-tab-wrapper">
-            <!-- ONGLET GALERIE COLLABORATIVE -->
             <div id="tab-gallery" class="tab-content" style="display: none;">
                 <div class="map-card" style="margin-bottom: 2rem;">
                     <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
@@ -130,7 +177,6 @@
                         Partagez vos meilleurs souvenirs de voyage.
                     </p>
 
-                    <!-- Zone d'upload -->
                     <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 2rem; cursor: pointer; transition: all 0.3s;" id="gallery-dropzone">
                         <input type="file" id="gallery-file-input" accept="image/*" multiple style="display: none;">
                         <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">☁️</div>
@@ -139,23 +185,16 @@
                         <div id="gallery-upload-progress" style="display: none; color: var(--color-torii); font-weight: bold; margin-top: 1rem;">⏳ Envoi en cours...</div>
                     </div>
 
-                    <!-- Grille de photos -->
-                    <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
-                        <!-- Injectées par JavaScript -->
-                    </div>
+                    <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"></div>
                 </div>
             </div>
 
-            <!-- ONGLET 1 : ITINÉRAIRE (+ CARTE STICKY IMMÉDIATEMENT VISIBLE) -->
             <div id="tab-itinerary" class="tab-content active-content">
                 <div class="itinerary-split-layout">
-                    
-                    <!-- COLONNE ITINÉRAIRE -->
                     <div class="itinerary-list-col">
                         <div id="itinerary-days-container"></div>
                     </div>
 
-                    <!-- COLONNE CARTE STICKY (PC) -->
                     <div class="itinerary-map-col">
                         <div class="map-card sticky-map-box">
                             <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
@@ -169,15 +208,12 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <!-- ONGLET 2 : BUDGET & DÉPENSES -->
             <div id="tab-budget" class="tab-content" style="display: none;">
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
                     
-                    <!-- Colonne 1 : Budget & Estimation globale -->
                     <div class="card-box budget-card" style="flex: 1; min-width: 300px; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;">Budget & Estimation</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Estimation globale du séjour</p>
@@ -205,13 +241,11 @@
                         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
                     </div>
 
-                    <!-- Colonne 2 : Dépenses sur place -->
                     <div class="card-box expenses-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Dépenses sur place</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Suivi du budget consommé</p>
 
                        <div style="margin-bottom: 1rem;">
-                            <!-- BARRE DE PROGRESSION -->
                             <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-bottom: 0.6rem;">
                                 <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
                             </div>
@@ -235,7 +269,6 @@
 
                 </div>
 
-                <!-- SECTION 3 : DÉPENSES PARTAGÉES -->
                 <div class="card-box shared-expenses-card" style="margin-top: 1.5rem; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">⚖️ Dépenses partagées</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1.2rem 0;">Gérez les comptes du groupe et l'équilibre des remboursements</p>
@@ -281,7 +314,6 @@
                 </div>
             </div>
 
-            <!-- ONGLET 3 : LOGISTIQUE & MÉTÉO -->
             <div id="tab-logistics" class="tab-content" style="display: none;">
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
                     <div class="checklist-card" style="flex: 1; min-width: 300px; margin-top: 0;">
@@ -304,7 +336,6 @@
                 </div>
             </div>
 
-            <!-- ONGLET 4 : RÉSERVATIONS & LIENS -->
             <div id="tab-reservations" class="tab-content" style="display: none;">
                 <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
                     <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">✈️ Liens de réservation & Partenaires</h3>
@@ -359,10 +390,8 @@
                 </div>
             </div>
 
-            <!-- ONGLET 5 : CARTE INTERACTIVE (MOBILE) -->
             <div id="tab-map" class="tab-content" style="display: none;"></div>
             
-            <!-- ONGLET DOCUMENTS (TRAVEL WALLET) -->
             <div id="tab-documents" class="tab-content" style="display: none;">
                 <div class="map-card" style="margin-bottom: 2rem;">
                     <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
@@ -373,7 +402,6 @@
                         Centralise tes billets, réservations et passeports. Ils seront accessibles ici même hors connexion (si déjà ouverts une fois).
                     </p>
 
-                    <!-- Formulaire d'upload -->
                     <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 1.5rem; border-radius: 8px; text-align: center; margin-bottom: 2rem;">
                         <form id="upload-doc-form" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
                             <input type="file" id="doc-file-input" accept=".pdf, image/png, image/jpeg" required style="color: var(--text-main); font-size: 0.9rem;">
@@ -384,10 +412,7 @@
                         </form>
                     </div>
 
-                    <!-- Liste des documents -->
-                    <div id="documents-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
-                        <!-- Les documents injectés par le JS apparaîtront ici -->
-                    </div>
+                    <div id="documents-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;"></div>
                 </div>
             </div>
         </div>
@@ -422,17 +447,14 @@
         </div>
     </div>
 
-    <!-- SCRIPT GOOGLE MAPS JAVASCRIPT -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
     
-    <!-- SOUS-MODULES KAIDO -->
     <script src="js/modules/map.js"></script>
     <script src="js/modules/weather.js"></script>
     <script src="js/modules/tricount.js"></script>
     <script src="js/modules/documents.js"></script>
     <script src="js/modules/gallery.js"></script>
     
-    <!-- SCRIPT PRINCIPAL -->
     <script src="js/voyage.js"></script>
 </body>
 </html>
