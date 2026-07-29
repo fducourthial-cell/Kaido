@@ -459,7 +459,18 @@
     <script src="js/modules/tricount.js"></script>
     <script src="js/modules/documents.js"></script>
     <script src="js/modules/gallery.js"></script>
-    
+    <!-- Dans les scripts en bas de voyage.html -->
+<script src="js/modules/kiroku.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Supposons que 'currentTrip' est chargé depuis le localStorage
+        const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
+        if (activeTrip && typeof calculateTripKiroku === 'function') {
+            // Calcule et met à jour le statut/rang en arrière-plan
+            await calculateTripKiroku(activeTrip);
+        }
+    });
+</script>
     <script src="js/voyage.js"></script>
 </body>
 </html>
