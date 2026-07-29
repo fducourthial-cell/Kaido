@@ -220,7 +220,7 @@
         localTrips.forEach(trip => {
             const cityName = trip.destination || trip.title || 'Destination';
             const rank = trip.final_rank || 'A'; // Par défaut A si non défini
-            const completion = trip.completion_rate || 85;
+            const completion = trip.completion_rate || 0;
             totalCompletionSum += completion;
 
             const rankColor = rank === 'S' ? '#D4AF37' : (rank === 'A' ? '#4ade80' : '#a78bfa');
