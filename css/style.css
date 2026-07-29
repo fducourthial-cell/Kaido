@@ -276,7 +276,7 @@ body:has(.create-hero) header {
     color: var(--color-gold);
     opacity: 0.85;
     letter-spacing: 0.15em;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .dashboard-grid {
