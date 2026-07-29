@@ -964,3 +964,67 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     color: var(--color-gold);
     border: 2px dashed #8E847A;
 }
+/* ==========================================================================
+   10. EXPORT PDF - MODE ROULEAU ANCIEN & MISE EN PAGE PROPRE
+   ========================================================================== */
+
+/* Styles appliqués uniquement lors de l'impression ou de l'export PDF */
+@media print {
+    /* Masquer les éléments de navigation, boutons et menus */
+    .kaido-header, 
+    .trip-nav-tabs, 
+    .btn-delete, 
+    button, 
+    .checklist-form {
+        display: none !important;
+    }
+
+    body {
+        background-color: #F2EBD9 !important; /* Fond couleur parchemin à l'impression */
+        color: #2C241D !important;
+        background-image: none !important;
+    }
+
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    /* Éviter de couper les images ou les blocs d'activités au milieu d'un saut de page */
+    .day-block-card, 
+    .step-item, 
+    .trip-card, 
+    .activity-preview-box {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        background-color: #FAF6ED !important;
+        border: 1px solid #C2B49A !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    /* Forcer un saut de page propre entre chaque grand jour de l'itinéraire */
+    .day-block-card {
+        page-break-before: always;
+        break-before: page;
+    }
+}
+
+/* Style visuel de la modale ou de la vue d'export "Rouleau Ancien" */
+.ancient-scroll-view {
+    background: #F2EBD9;
+    color: #2C241D;
+    border: 3px double #8C6D23;
+    padding: 3rem;
+    font-family: var(--font-serif);
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.ancient-scroll-view::before, .ancient-scroll-view::after {
+    content: "📜";
+    display: block;
+    text-align: center;
+    font-size: 2rem;
+    margin: 1rem 0;
+}
