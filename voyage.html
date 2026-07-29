@@ -248,18 +248,20 @@
                     </div>
 
                     <div class="card-box expenses-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Dépenses sur place</h3>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Suivi du budget consommé</p>
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Budget & Dépenses Réelles</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Comparatif et suivi du coût du voyage</p>
 
-                       <div style="margin-bottom: 1rem;">
-                            <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-bottom: 0.6rem;">
-                                <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
+                        <!-- Barre de progression comparative -->
+                        <div style="margin-bottom: 1.2rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;">
+                                <span style="color: var(--text-muted);">Réel : <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></span>
+                                <span style="color: var(--text-muted);">Estimé : <strong id="expenses-target-budget" style="color: var(--text-main);">0 €</strong></span>
                             </div>
                             
-                            <div style="display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; color: var(--text-main);">
-                                <div>Dépensé : <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem;">Budget max : <span id="expenses-target-budget">0 €</span></div>
+                            <div style="width: 100%; height: 10px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 5px; overflow: hidden;">
+                                <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease, background-color 0.3s ease;"></div>
                             </div>
+                            <div id="budget-status-text" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; text-align: right;">Dans les clous</div>
                         </div>
 
                         <div id="expenses-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
