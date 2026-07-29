@@ -918,3 +918,49 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
         height: 65vh !important; 
     }
 }
+/* ==========================================================================
+   9. SCEAUX TRADITIONNELS (PROJET KIROKU - HANKO/INKAN)
+   ========================================================================== */
+.kiroku-stamp {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px; /* Forme légèrement carrée/arrondie typique des sceaux */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 1.25rem;
+    position: relative;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+    user-select: none;
+    transform: rotate(-3deg); /* Légère inclinaison naturelle d'un vrai tampon manuel */
+    transition: transform 0.2s ease;
+}
+
+.kiroku-stamp:hover {
+    transform: rotate(0deg) scale(1.05);
+}
+
+/* Sceau Rang S (Or Légendaire) */
+.kiroku-stamp-s {
+    background: radial-gradient(circle, #e6ca65 0%, #b89728 100%);
+    color: #0D0B09;
+    border: 2px dashed #5a450c;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4), inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+/* Sceau Rang A (Rouge Torii / Encre traditionnelle) */
+.kiroku-stamp-a {
+    background: radial-gradient(circle, #bd4535 0%, #8c2a1c 100%);
+    color: #F4EFEA;
+    border: 2px dashed #42110b;
+    box-shadow: 0 0 8px rgba(166, 58, 43, 0.4), inset 0 0 4px rgba(0,0,0,0.3);
+}
+
+/* Sceau Rang B / C (Encre sombre / Neutre) */
+.kiroku-stamp-b {
+    background: radial-gradient(circle, #3d3630 0%, #1c1815 100%);
+    color: var(--color-gold);
+    border: 2px dashed #8E847A;
+}
