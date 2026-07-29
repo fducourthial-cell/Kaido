@@ -232,7 +232,7 @@
         let totalCompletionSum = 0;
         historyContainer.innerHTML = '';
 
-        localTrips.forEach(trip => {
+    localTrips.forEach(trip => {
             const cityName = trip.destination || trip.title || 'Destination';
             const rank = trip.final_rank || 'A'; // Par défaut A si non défini
 
@@ -254,6 +254,27 @@
             const completion = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
             totalCompletionSum += completion;
             // ---------------------------------------------------
+
+            // Attribution de la classe CSS du sceau selon le rang
+            let stampClass = 'kiroku-stamp-b';
+            if (rank === 'S') stampClass = 'kiroku-stamp-s';
+            else if (rank === 'A') stampClass = 'kiroku-stamp-a';
+
+            historyContainer.innerHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px;">
+                    <div>
+                        <h4 style="margin: 0 0 0.2rem 0; color: var(--text-main); font-family: 'Playfair Display', serif; font-size: 1.1rem;">${cityName}</h4>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">📅 ${trip.dates || 'Dates personnalisées'} • Complétion : ${completion}%</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Sceau</span>
+                        <div class="kiroku-stamp ${stampClass}" title="Rang ${rank}">
+                            ${rank}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
 
             const rankColor = rank === 'S' ? '#D4AF37' : (rank === 'A' ? '#4ade80' : '#a78bfa');
 
