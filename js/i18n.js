@@ -1,199 +1,105 @@
-// Dictionnaire multilingue global de l'interface du site (Index + Voyage + Créer)
-const globalTranslations = {
-    fr: {
-        // --- INDEX.HTML ---
-        "navTitle": "Mes futurs voyages",
-        "newRoute": "Tracer une nouvelle route",
-        "btn_see_trip": "Voir l'itinéraire",
-        "trip_status_completed": "Aventure bouclée",
-        
-        // --- CREER.HTML (Formulaire) ---
-        "create_title": "Tracer une nouvelle route",
-        "create_dest_label": "Où allez-vous ?",
-        "create_dest_placeholder": "Ex: Kyoto, Japon...",
-        "create_dates_label": "Dates du séjour",
-        "create_budget_label": "Budget estimé (€)",
-        "create_desc_label": "Notes & Envies",
-        "create_desc_placeholder": "Ce que vous voulez absolument voir...",
-        "create_submit_btn": "Créer le voyage",
-        "create_cancel_btn": "Annuler",
-        
-        // --- VOYAGE.HTML (Onglets & Actions) ---
-        "itinerary": "Itinéraire",
-        "budget": "Budget",
-        "info": "Infos",
-        "map": "Carte",
-        "reservations": "Liens",
-        "tab_documents": "Documents",
-        "tab_gallery": "Galerie",
-        "pdfBtn": "📄 Exporter PDF",
-        "editBtn": "⚙️ Modifier",
-        "btn_share": "Partager",
-        "btn_complete": "Clôturer",
+// Dictionnaire en mémoire des traductions dynamiques par session/cache
+window.kaidoDynamicDict = JSON.parse(localStorage.getItem('kaido_dynamic_dict') || '{}');
 
-        // --- VOYAGE.HTML (Titres des sections) ---
-        "notesTitle": "Notes de voyage",
-        "map_title": "Carte interactive",
-        "budget_title": "Budget & Estimation",
-        "expenses_title": "Budget & Dépenses Réelles",
-        "checklist_title": "Check-list de voyage",
-        "weather_title": "Météo prévue",
-        "documents_title": "Portefeuille Documentaire",
-        "gallery_title": "Galerie Collaborative"
-    },
-    en: {
-        // --- INDEX.HTML ---
-        "navTitle": "My Future Trips",
-        "newRoute": "Chart a New Route",
-        "btn_see_trip": "View Itinerary",
-        "trip_status_completed": "Completed Adventure",
-        
-        // --- CREER.HTML (Formulaire) ---
-        "create_title": "Chart a New Route",
-        "create_dest_label": "Where are you going?",
-        "create_dest_placeholder": "e.g., Kyoto, Japan...",
-        "create_dates_label": "Travel Dates",
-        "create_budget_label": "Estimated Budget (€)",
-        "create_desc_label": "Notes & Desires",
-        "create_desc_placeholder": "Things you absolutely want to see...",
-        "create_submit_btn": "Create Trip",
-        "create_cancel_btn": "Cancel",
-        
-        // --- VOYAGE.HTML (Onglets & Actions) ---
-        "itinerary": "Itinerary",
-        "budget": "Budget",
-        "info": "Info",
-        "map": "Map",
-        "reservations": "Links",
-        "tab_documents": "Documents",
-        "tab_gallery": "Gallery",
-        "pdfBtn": "📄 Export PDF",
-        "editBtn": "⚙️ Edit",
-        "btn_share": "Share",
-        "btn_complete": "Complete",
+// Endpoint de ton IA (tu peux utiliser ta fonction Netlify existante ou un prompt dédié)
+const TRANSLATE_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/translate-texts';
 
-        // --- VOYAGE.HTML (Titres des sections) ---
-        "notesTitle": "Travel Notes",
-        "map_title": "Interactive Map",
-        "budget_title": "Budget & Estimation",
-        "expenses_title": "Budget & Actual Expenses",
-        "checklist_title": "Travel Checklist",
-        "weather_title": "Weather Forecast",
-        "documents_title": "Document Wallet",
-        "gallery_title": "Collaborative Gallery"
-    },
-    es: {
-        // --- INDEX.HTML ---
-        "navTitle": "Mis próximos viajes",
-        "newRoute": "Trazar una nueva ruta",
-        "btn_see_trip": "Ver Itinerario",
-        "trip_status_completed": "Aventura completada",
-        
-        // --- CREER.HTML (Formulario) ---
-        "create_title": "Trazar una nueva ruta",
-        "create_dest_label": "¿A dónde vas?",
-        "create_dest_placeholder": "Ej: Kioto, Japón...",
-        "create_dates_label": "Fechas del viaje",
-        "create_budget_label": "Presupuesto estimado (€)",
-        "create_desc_label": "Notas y Deseos",
-        "create_desc_placeholder": "Lo que absolutamente quieres ver...",
-        "create_submit_btn": "Crear Viaje",
-        "create_cancel_btn": "Cancelar",
-        
-        // --- VOYAGE.HTML (Pestañas y Acciones) ---
-        "itinerary": "Itinerario",
-        "budget": "Presupuesto",
-        "info": "Info",
-        "map": "Mapa",
-        "reservations": "Enlaces",
-        "tab_documents": "Documentos",
-        "tab_gallery": "Galería",
-        "pdfBtn": "📄 Exportar PDF",
-        "editBtn": "⚙️ Editar",
-        "btn_share": "Compartir",
-        "btn_complete": "Cerrar",
-
-        // --- VOYAGE.HTML (Títulos de secciones) ---
-        "notesTitle": "Notas de viaje",
-        "map_title": "Mapa interactivo",
-        "budget_title": "Presupuesto y Estimación",
-        "expenses_title": "Presupuesto y Gastos Reales",
-        "checklist_title": "Lista de Viaje",
-        "weather_title": "Pronóstico del Tiempo",
-        "documents_title": "Cartera de Documentos",
-        "gallery_title": "Galería Colaborativa"
-    }
-};
-
-// Fonction globale d'application de la langue
-function applyGlobalLanguage(lang) {
+async function applyGlobalLanguage(lang) {
     localStorage.setItem('kaido_global_lang', lang);
 
-    // Met à jour la valeur du select classique (s'il existe)
-    const selector = document.getElementById('global-lang-selector');
-    if (selector) selector.value = lang;
+    // Si c'est du français (langue d'origine du code), on remet les textes originaux ou on recharge
+    if (lang === 'fr') {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            if (el.dataset.originalText) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = el.dataset.originalText;
+                } else {
+                    el.textContent = el.dataset.originalText;
+                }
+            }
+        });
+        return;
+    }
 
-    // Traduit tous les éléments portant l'attribut data-i18n
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (globalTranslations[lang] && globalTranslations[lang][key]) {
-            // Magie ici : on vérifie si c'est un champ de saisie pour changer le placeholder
-            if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.hasAttribute('placeholder')) {
-                el.placeholder = globalTranslations[lang][key];
+    // 1. Vérifier si on a déjà le dictionnaire pour cette langue en cache
+    if (!window.kaidoDynamicDict[lang]) {
+        window.kaidoDynamicDict[lang] = {};
+    }
+
+    // 2. Collecter tous les textes de la page possédant l'attribut [data-i18n]
+    const elementsToTranslate = document.querySelectorAll('[data-i18n]');
+    const textsToTranslate = [];
+
+    elementsToTranslate.forEach(el => {
+        // Sauvegarder le texte français d'origine si ce n'est pas déjà fait
+        if (!el.dataset.originalText) {
+            const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+            el.dataset.originalText = isInput ? el.placeholder : el.textContent.trim();
+        }
+
+        const originalText = el.dataset.originalText;
+        
+        // Si on n'a pas encore la traduction de ce texte précis pour cette langue, on l'ajoute à la liste
+        if (!window.kaidoDynamicDict[lang][originalText]) {
+            if (!textsToTranslate.includes(originalText)) {
+                textsToTranslate.push(originalText);
+            }
+        }
+    });
+
+    // 3. S'il y a de nouveaux textes à traduire, on appelle l'IA
+    if (textsToTranslate.length > 0) {
+        // Afficher un petit indicateur discret de chargement de langue si tu veux
+        try {
+            const response = await fetch(TRANSLATE_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    targetLang: lang,
+                    texts: textsToTranslate
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // data.translations doit être un objet ou un tableau associant { "Texte fr": "Texte traduit" }
+                if (data.translations) {
+                    Object.keys(data.translations).forEach(frText => {
+                        window.kaidoDynamicDict[lang][frText] = data.translations[frText];
+                    });
+                    // Sauvegarder dans le localStorage pour les prochaines sessions
+                    localStorage.setItem('kaido_dynamic_dict', JSON.stringify(window.kaidoDynamicDict));
+                }
+            }
+        } catch (err) {
+            console.warn("Erreur lors de la traduction dynamique par l'IA :", err);
+        }
+    }
+
+    // 4. Appliquer les traductions sur tous les éléments de la page
+    elementsToTranslate.forEach(el => {
+        const originalText = el.dataset.originalText;
+        const translatedText = window.kaidoDynamicDict[lang][originalText];
+
+        if (translatedText) {
+            const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+            if (isInput) {
+                el.placeholder = translatedText;
             } else {
-                el.textContent = globalTranslations[lang][key];
+                el.textContent = translatedText;
             }
         }
     });
 }
 
-// Fonction de bascule de langue (appelée par les nouveaux menus)
 window.changeLanguage = function(lang) {
     applyGlobalLanguage(lang);
 };
 
-// Fonction globale d'application du thème (Sombre / Papyrus) avec symboles japonais
-function applyGlobalTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem('kaido_theme', theme);
-
-    // Met à jour l'icône du bouton toggle avec les symboles
-    const themeBtn = document.getElementById('global-theme-toggle');
-    if (themeBtn) {
-        if (theme === 'papyrus') {
-            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">🌙</span>';
-            themeBtn.title = "Passer au thème sombre";
-        } else {
-            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">☀️</span>';
-            themeBtn.title = "Passer au thème papyrus";
-        }
-    }
-}
-
-// Initialisation au chargement de chaque page
+// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initialisation de la langue
     const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
-    applyGlobalLanguage(savedLang);
-
-    // Écouteur pour l'ancien menu déroulant select (si toujours présent)
-    const selector = document.getElementById('global-lang-selector');
-    if (selector) {
-        selector.addEventListener('change', (e) => {
-            applyGlobalLanguage(e.target.value);
-        });
-    }
-
-    // 2. Initialisation du thème (Sombre / Papyrus)
-    const savedTheme = localStorage.getItem('kaido_theme') || 'dark';
-    applyGlobalTheme(savedTheme);
-
-    const themeToggleBtn = document.getElementById('global-theme-toggle');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
-            const newTheme = currentTheme === 'dark' ? 'papyrus' : 'dark';
-            applyGlobalTheme(newTheme);
-        });
+    if (savedLang !== 'fr') {
+        applyGlobalLanguage(savedLang);
     }
 });
