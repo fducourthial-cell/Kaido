@@ -65,17 +65,17 @@
                 <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
                     <!-- NOUVEAU : Lien vers le Projet Kiroku -->
                     <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
-                        <span>🏆</span> <span data-i18n="kirokuTitle">Projet Kiroku</span>
+                        <span>🏆</span> <span data-i18n>Projet Kiroku</span>
                     </a>
                     <!-- Option : Thème -->
                     <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-                        <span>🌓</span> Changer de thème
+                        <span>🌓</span> <span data-i18n>Changer de thème</span>
                     </button>
 
                     <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
 
                     <!-- Options : Langues avec drapeaux -->
-                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Langue</div>
                     
                     <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
@@ -130,7 +130,7 @@
         <!-- TITRE PRINCIPAL ÉPURÉ -->
         <div class="dashboard-title-wrapper">
             <h1 class="dashboard-title">
-                ⛩️ <span data-i18n="navTitle">Mes futurs voyages</span> 
+                ⛩️ <span data-i18n>Mes futurs voyages</span> 
                 <span class="dashboard-subtitle-jp">旅 — Korekara no tabi</span>
             </h1>
         </div>
@@ -139,7 +139,7 @@
         <section class="dashboard-grid" id="trips-grid">
             <a href="creer.html" class="create-trip-zone">
                 <div class="plus-icon">+</div>
-                <h3 data-i18n="newRoute">Tracer une nouvelle route</h3>
+                <h3 data-i18n>Tracer une nouvelle route</h3>
             </a>
         </section>
     </div>
@@ -213,7 +213,7 @@
                                 <span class="trip-budget">~ ${displayBudget} €</span>
                                 <div class="trip-actions">
                                     <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
-                                    <a href="voyage.html" class="btn-view" data-id="${trip.id}"><span data-i18n="btn_see_trip">VOIR L'ITINÉRAIRE</span> →</a>
+                                    <a href="voyage.html" class="btn-view" data-id="${trip.id}"><span data-i18n>VOIR L'ITINÉRAIRE</span> →</a>
                                 </div>
                             </div>
                         </div>
