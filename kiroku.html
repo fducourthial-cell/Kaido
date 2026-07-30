@@ -226,7 +226,6 @@
                 </div>
             </div>
        
-    </div>
     <!-- BLOC 4 : SUCCÈS & TITRES DÉBLOQUABLES -->
             <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem;">
                 <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1.5rem;">🏅 Titres & Succès du Voyageur</h3>
@@ -332,7 +331,7 @@ document.getElementById('stat-completed-trips').textContent = completedTrips;
                     </div>
                 </div>
             `;
-        }); // SEULEMENT UNE SEULE BOUCLE FERMÉE ICI ! TOUT EST OK.
+        });
 
         const avgCompletion = Math.round(totalCompletionSum / localTrips.length);
         document.getElementById('stat-completion-avg').textContent = `${avgCompletion}%`;
