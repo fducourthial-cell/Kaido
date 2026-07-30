@@ -11,8 +11,11 @@ window.initGalleryModule = function() {
     const CLOUD_NAME = 'extb0gyo';
     const UPLOAD_PRESET = 'e65nihpw';
 
+    // Cache local pour les URL objets créées (pour éviter les fuites de mémoire)
+    const objectUrls = new Map();
+
     // 1. Fonction pour afficher la galerie
-    const renderGallery = () => {
+    const renderGallery = async () => {
         if (!grid) return;
         grid.innerHTML = '';
 
@@ -21,17 +24,34 @@ window.initGalleryModule = function() {
             return;
         }
 
-        window.activeTrip.gallery.forEach(photo => {
+        for (const photo of window.activeTrip.gallery) {
             const item = document.createElement('div');
             item.style.cssText = `position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color);`;
             
+            let displayUrl = photo.url;
+
+            // Si la photo est en attente (hors-ligne), on récupère son Blob depuis IndexedDB
+            if (photo.isPending && window.KaidoDB) {
+                try {
+                    const record = await window.KaidoDB.getPhoto(photo.id);
+                    if (record && record.fileBlob) {
+                        if (!objectUrls.has(photo.id)) {
+                            objectUrls.set(photo.id, URL.createObjectURL(record.fileBlob));
+                        }
+                        displayUrl = objectUrls.get(photo.id);
+                    }
+                } catch (e) {
+                    console.error("Erreur lecture IndexedDB pour la photo", photo.id, e);
+                }
+            }
+
             // Badge visuel si la photo attend d'être envoyée sur le Cloud
             const syncBadge = photo.isPending ? `<div style="position: absolute; top: 5px; left: 5px; background: var(--color-torii); color: white; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; font-weight: bold; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="En attente de réseau">⏳ Hors-ligne</div>` : '';
 
             item.innerHTML = `
                 ${syncBadge}
-                <a href="${photo.url}" target="_blank" style="display: block; width: 100%; height: 100%;">
-                    <img src="${photo.url}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; ${photo.isPending ? 'filter: brightness(0.8);' : ''}">
+                <a href="${displayUrl}" target="_blank" style="display: block; width: 100%; height: 100%;">
+                    <img src="${displayUrl}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; ${photo.isPending ? 'filter: brightness(0.8);' : ''}">
                 </a>
                 <button class="btn-delete-photo" data-id="${photo.id}" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); border: none; color: #fff; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; z-index: 10;" title="Supprimer">✖</button>
             `;
@@ -42,13 +62,18 @@ window.initGalleryModule = function() {
                 e.stopPropagation();
                 if(confirm("Supprimer cette photo de la galerie ?")) {
                     window.activeTrip.gallery = window.activeTrip.gallery.filter(p => p.id !== photo.id);
+                    if (window.KaidoDB) await window.KaidoDB.deletePhoto(photo.id);
+                    if (objectUrls.has(photo.id)) {
+                        URL.revokeObjectURL(objectUrls.get(photo.id));
+                        objectUrls.delete(photo.id);
+                    }
                     await window.saveTrip();
                     renderGallery();
                 }
             });
 
             grid.appendChild(item);
-        });
+        }
     };
 
     renderGallery();
@@ -63,8 +88,8 @@ window.initGalleryModule = function() {
         });
     }
 
-    // 3. Compression de l'image
-    const compressImage = (file) => {
+    // 3. Compression de l'image sortant un Blob (optimisé IndexedDB)
+    const compressImageToBlob = (file) => {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -89,16 +114,17 @@ window.initGalleryModule = function() {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    resolve(dataUrl);
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', 0.8);
                 };
             };
         });
     };
 
-    // 4. Fonction de synchronisation en arrière-plan
+    // 4. Fonction de synchronisation en arrière-plan via IndexedDB
     const processPendingUploads = async () => {
-        if (!navigator.onLine) return; // Arrêt si pas de réseau
+        if (!navigator.onLine || !window.KaidoDB) return; // Arrêt si pas de réseau ou DB absente
         
         const pendingPhotos = window.activeTrip.gallery.filter(p => p.isPending);
         if (pendingPhotos.length === 0) return;
@@ -107,8 +133,11 @@ window.initGalleryModule = function() {
 
         for (let photo of pendingPhotos) {
             try {
+                const record = await window.KaidoDB.getPhoto(photo.id);
+                if (!record || !record.fileBlob) continue;
+
                 const formData = new FormData();
-                formData.append('file', photo.url); // Base64
+                formData.append('file', record.fileBlob); // Fichier Blob brut
                 formData.append('upload_preset', UPLOAD_PRESET);
 
                 const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
@@ -119,9 +148,16 @@ window.initGalleryModule = function() {
                 const data = await response.json();
                 
                 if (data.secure_url) {
-                    // Remplacement de l'URL Base64 locale par l'URL Cloudinary
+                    // Remplacement de l'URL vide par l'URL Cloudinary officielle
                     photo.url = data.secure_url;
                     photo.isPending = false;
+
+                    // Nettoyage IndexedDB et mémoire
+                    await window.KaidoDB.deletePhoto(photo.id);
+                    if (objectUrls.has(photo.id)) {
+                        URL.revokeObjectURL(objectUrls.get(photo.id));
+                        objectUrls.delete(photo.id);
+                    }
                     dataUpdated = true;
                 }
             } catch (error) {
@@ -159,16 +195,21 @@ window.initGalleryModule = function() {
             try {
                 let photosAdded = false;
 
-                // On stocke d'abord toutes les photos en local
+                // On stocke d'abord toutes les photos dans IndexedDB
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     progressText.textContent = `⏳ Traitement de l'image ${i+1}/${files.length}...`;
                     
-                    const base64Image = await compressImage(file);
+                    const imgBlob = await compressImageToBlob(file);
+                    const photoId = Date.now() + i;
+
+                    if (window.KaidoDB) {
+                        await window.KaidoDB.savePhoto(photoId, window.activeTrip.id, imgBlob);
+                    }
 
                     window.activeTrip.gallery.push({
-                        id: Date.now() + i,
-                        url: base64Image,
+                        id: photoId,
+                        url: '', // Vide car géré par IndexedDB localement en attendant le Cloud
                         date: new Date().toISOString(),
                         isPending: true // Tag vital pour le hors-ligne
                     });
@@ -179,14 +220,14 @@ window.initGalleryModule = function() {
                 if (photosAdded) {
                     progressText.textContent = `✅ Sauvegarde locale réussie...`;
                     await window.saveTrip();
-                    renderGallery(); // Affichage immédiat dans l'interface
+                    await renderGallery(); // Affichage immédiat dans l'interface
 
                     // Tentative d'envoi en arrière-plan si réseau présent
                     if (navigator.onLine) {
                         progressText.textContent = `☁️ Synchronisation cloud en cours...`;
                         await processPendingUploads();
                     } else {
-                        progressText.textContent = `📵 Synchronisation en attente de réseau.`;
+                        progressText.textContent = `📵 Mode avion : stocké en local sécurisé.`;
                     }
                 }
             } catch (error) {
