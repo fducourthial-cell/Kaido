@@ -64,9 +64,9 @@
                 <!-- Panneau déroulant -->
                 <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
                     <!-- NOUVEAU : Lien vers le Projet Kiroku -->
-        <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
-            <span>🏆</span> Projet Kiroku
-        </a>
+                    <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
+                        <span>🏆</span> <span data-i18n="kirokuTitle">Projet Kiroku</span>
+                    </a>
                     <!-- Option : Thème -->
                     <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <span>🌓</span> Changer de thème
@@ -213,7 +213,7 @@
                                 <span class="trip-budget">~ ${displayBudget} €</span>
                                 <div class="trip-actions">
                                     <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
-                                    <a href="voyage.html" class="btn-view" data-id="${trip.id}">VOIR L'ITINÉRAIRE →</a>
+                                    <a href="voyage.html" class="btn-view" data-id="${trip.id}"><span data-i18n="btn_see_trip">VOIR L'ITINÉRAIRE</span> →</a>
                                 </div>
                             </div>
                         </div>
@@ -231,6 +231,12 @@
                         grid.insertBefore(card, createZone);
                     } else {
                         grid.appendChild(card);
+                    }
+
+                    // Forcer la traduction du bouton ajouté dynamiquement
+                    if (typeof applyGlobalLanguage === 'function') {
+                        const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
+                        applyGlobalLanguage(savedLang);
                     }
                 });
 
