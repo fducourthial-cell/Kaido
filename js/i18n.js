@@ -492,6 +492,20 @@ async function applyGlobalLanguage(lang) {
     const selector = document.getElementById('global-lang-selector');
     if (selector) selector.value = lang;
 
+    // Si c'est le français, on restaure les textes d'origine et on s'arrête net
+    if (lang === 'fr') {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            if (el.dataset.originalText) {
+                const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+                if (isInput) {
+                    el.placeholder = el.dataset.originalText;
+                } else {
+                    el.textContent = el.dataset.originalText;
+                }
+            }
+        });
+        return;
+    }
     // Étape A : Application de la banque de mots statique instantanée
     document.querySelectorAll('[data-i18n]').forEach(el => {
         if (!el.dataset.originalText) {
