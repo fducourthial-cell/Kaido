@@ -2,7 +2,7 @@
 window.kaidoDynamicDict = JSON.parse(localStorage.getItem('kaido_dynamic_dict') || '{}');
 
 // Endpoint de la fonction Netlify qui gère la traduction par l'IA
-const TRANSLATE_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/translate-texts';
+const TRANSLATE_ENDPOINT = '/.netlify/functions/translate-texts';
 
 async function applyGlobalLanguage(lang) {
     localStorage.setItem('kaido_global_lang', lang);
