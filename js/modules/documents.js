@@ -1,4 +1,5 @@
 window.initDocumentsModule = function() {
+     if (!window.activeTrip.documents) window.activeTrip.documents = [];
     const renderDocuments = () => {
         const container = document.getElementById('documents-list');
         if (!container) return;
