@@ -1,8 +1,7 @@
-const OpenAI = require("openai");
+const { GoogleGenAI } = require("@google/genai");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialisation de Gemini avec ta variable d'environnement existante
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
@@ -16,7 +15,6 @@ exports.handler = async function(event, context) {
             return { statusCode: 400, body: JSON.stringify({ error: "Paramètres manquants (targetLang ou texts)" }) };
         }
 
-        // Map des codes de langue vers des noms lisibles pour l'IA
         const langNames = {
             en: "English",
             es: "Spanish",
@@ -29,7 +27,6 @@ exports.handler = async function(event, context) {
         };
         const targetLanguageName = langNames[targetLang] || targetLang;
 
-        // Prompt strict demandant à l'IA de renvoyer un JSON pur sous forme de dictionnaire
         const prompt = `You are a professional translator for a high-end travel application called Kaido. 
 Translate the following array of French texts into ${targetLanguageName}. 
 Keep the tone professional, elegant, and consistent with a luxury travel app. 
@@ -38,15 +35,15 @@ CRITICAL: Return ONLY a valid JSON object where keys are the exact original Fren
 Texts to translate:
 ${JSON.stringify(texts, null, 2)}`;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini", // Ou ton modèle habituel (ex: gpt-4o)
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.3,
+        // Appel à l'API Gemini
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash', // Modèle rapide et idéal pour ce type de tâche textuelle
+            contents: prompt,
         });
 
-        const rawContent = response.choices[0].message.content.trim();
+        const rawContent = response.text.trim();
         
-        // Nettoyage au cas où l'IA ajoute des balises markdown de code
+        // Nettoyage au cas où le modèle ajoute des balises markdown de code
         const cleanJsonStr = rawContent.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/\s*```$/, "");
         const translationsMap = JSON.parse(cleanJsonStr);
 
@@ -57,7 +54,7 @@ ${JSON.stringify(texts, null, 2)}`;
         };
 
     } catch (error) {
-        console.error("Erreur de traduction Netlify Function:", error);
+        console.error("Erreur de traduction Netlify Function (Gemini):", error);
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
