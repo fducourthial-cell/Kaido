@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const { error } = await client.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + window.location.pathname
+                        redirectTo: 'https://kaido-translate.netlify.app'
                     }
                 });
                 if (error) throw error;
