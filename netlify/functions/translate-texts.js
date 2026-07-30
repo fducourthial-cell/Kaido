@@ -1,5 +1,5 @@
 exports.handler = async (event, context) => {
-  // Configuration des entêtes CORS pour autoriser l'appel depuis ton front-end
+  // Configuration des entêtes CORS pour autoriser l'appel depuis ton front-end,
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
