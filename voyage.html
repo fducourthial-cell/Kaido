@@ -1,345 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Itinéraire - Kaido</title>
+    <link rel="icon" type="image/png" href="image/logo kaido v7.2.png">
+    <link rel="stylesheet" href="css/style.css">
 
-window.activeTrip = null;
-window.allTrips = [];
-window.saveTrip = async function() {
-    const idx = window.allTrips.findIndex(t => String(t.id) === String(window.activeTrip.id));
-    if (idx !== -1) window.allTrips[idx] = window.activeTrip;
-    localStorage.setItem('kaido_trips', JSON.stringify(window.allTrips));
-    localStorage.setItem('kaido_active_trip', JSON.stringify(window.activeTrip));
+    <!-- CONFIGURATION PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0D0B09">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="image/logo kaido v7.2.png">
 
-    if (typeof supabase !== 'undefined') {
-        try {
-            const { error: updateError } = await supabase.from('trips').update({
-                date_start: window.activeTrip.dateStart,
-                date_end: window.activeTrip.dateEnd,
-                budget: window.activeTrip.budget,
-                desc_text: window.activeTrip.desc,
-                checklist: window.activeTrip.checklist,
-                itinerary: window.activeTrip.itinerary,
-                expenses: window.activeTrip.expenses || [],
-                booking_notes: window.activeTrip.bookingNotes || [],
-                documents: window.activeTrip.documents || [],
-                gallery: window.activeTrip.gallery || []
-            }).eq('id', window.activeTrip.id);
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((reg) => console.log('✅ Service Worker enregistré avec succès !', reg.scope))
+            .catch((err) => console.error('❌ Échec enregistrement Service Worker:', err));
+        });
+      }
+    </script>
+    
+    <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/i18n.js"></script>
 
-            if (updateError) {
-                console.error("❌ Erreur Supabase lors de la sauvegarde :", updateError.message);
-            } else {
-                console.log("✅ Sauvegarde Supabase réussie pour la galerie !");
+    <!-- LIBRAIRIE EXPORT PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- HEADER UNIFIÉ KAIDO -->
+    <header class="kaido-header">
+        <div class="header-left">
+            <a href="index.html" class="header-btn-back" title="Retour à l'accueil">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <a href="index.html" class="header-brand-text">KAIDO</a>
+        </div>
+
+        <div class="header-center">
+            <a href="index.html">
+                <img src="image/logo kaido v7.2.png" alt="Logo Kaido" style="height: 50px; width: auto;">
+            </a>
+        </div>
+
+        <!-- DROITE : Menu Options (Langues + Thème) -->
+        <div class="header-right" style="display: flex; align-items: center; position: relative;">
+            
+            <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                ⚙️
+            </button>
+
+            <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                <!-- Lien vers le Projet Kiroku -->
+                <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
+                    <span>🏆</span> Projet Kiroku
+                </a>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+                
+                <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <span>🌓</span> Changer de thème
+                </button>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+                <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">Langue</div>
+                
+                <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+                </button>
+                <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+                </button>
+                <button type="button" onclick="selectLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+                </button>
+            </div>
+        </div>
+
+        <script>
+            const menuBtn = document.getElementById('options-menu-btn');
+            const dropdown = document.getElementById('options-dropdown');
+
+            if (menuBtn && dropdown) {
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                });
+
+                dropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
             }
-        } catch (e) { 
-            console.warn("⚠️ Exception attrapée pendant la sauvegarde Supabase:", e); 
-        }
-    }
-};
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Initialisation du voyage actif
-    window.activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
-    window.allTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+            window.addEventListener('click', () => {
+                if (dropdown) dropdown.style.display = 'none';
+            });
 
-    if (!window.activeTrip) {
-        alert("Aucun voyage sélectionné.");
-        window.location.href = "index.html";
-        return;
-    }
-
-    // Parsing sécurisé des données
-    ['itinerary', 'checklist', 'expenses', 'budgetDetails', 'documents', 'gallery', 'bookingNotes'].forEach(key => {
-        if (typeof window.activeTrip[key] === 'string') {
-            try { window.activeTrip[key] = JSON.parse(window.activeTrip[key]); } catch (e) { window.activeTrip[key] = key === 'budgetDetails' ? null : []; }
-        }
-    });
-    if (!window.activeTrip.documents) window.activeTrip.documents = [];
-    if (!window.activeTrip.expenses) window.activeTrip.expenses = [];
-    if (!window.activeTrip.bookingNotes) window.activeTrip.bookingNotes = [];
-    if (!window.activeTrip.gallery) window.activeTrip.gallery = []; 
-    if (!window.activeTrip.checklist) window.activeTrip.checklist = [
-        { id: 1, text: "Passeport / Carte d'identité", done: false },
-        { id: 2, text: "Billets de réservation", done: false }
-    ];
-
-    // 2. Lancement des sous-modules
-    if (typeof initTricountModule === 'function') initTricountModule(window.activeTrip.id);
-    if (typeof initDocumentsModule === 'function') initDocumentsModule();
-    if (typeof initGalleryModule === 'function') initGalleryModule();
-
-    // 3. Bouton Partager
-    const shareBtn = document.getElementById('btn-share-trip');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            if (!window.activeTrip || !window.activeTrip.id) return alert("Erreur : Impossible d'identifier ce voyage.");
-            try {
-                const { data: tripData, error: fetchError } = await supabase.from('trips').select('share_token').eq('id', window.activeTrip.id).single();
-                if (fetchError) throw fetchError;
-
-                let token = tripData.share_token;
-                if (!token) {
-                    token = crypto.randomUUID();
-                    const { error: updateError } = await supabase.from('trips').update({ share_token: token }).eq('id', window.activeTrip.id);
-                    if (updateError) throw updateError;
+            function selectLanguage(lang) {
+                if (typeof changeLanguage === 'function') {
+                    changeLanguage(lang);
+                } else {
+                    localStorage.setItem('kaido_global_lang', lang);
+                    location.reload();
                 }
-
-                const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-                await navigator.clipboard.writeText(`${baseUrl}/voyage-public.html?token=${token}`);
-
-                const originalText = shareBtn.textContent;
-                shareBtn.textContent = "✅ Lien copié !"; shareBtn.style.color = "#2ecc71";
-                setTimeout(() => { shareBtn.textContent = originalText; shareBtn.style.color = "var(--color-gold)"; }, 3000);
-            } catch (err) { alert("Une erreur est survenue lors de la création du lien de partage."); }
-        });
-    }
-
-    // Bouton Exporter PDF (Mode Rouleau Ancien)
-    const exportPdfBtn = document.getElementById('btn-export-pdf');
-    if (exportPdfBtn) {
-        exportPdfBtn.addEventListener('click', () => {
-            window.print();
-        });
-    }
-
-    // Bouton Clôturer l'aventure
-    const completeBtn = document.getElementById('btn-complete-trip');
-    if (completeBtn) {
-        completeBtn.addEventListener('click', async () => {
-            if (!window.activeTrip) return;
-            window.activeTrip.status = 'completed';
-            window.activeTrip.final_rank = window.activeTrip.final_rank || 'A'; // Attribue un rang par défaut si non défini
-            await window.saveTrip();
-            alert("🎉 Félicitations ! Cette aventure est désormais officiellement bouclée et enregistrée dans votre Registre Kiroku.");
-            window.location.href = "index.html";
-        });
-    }
-
-    // 4. Remplissage des données d'en-tête et Budget
-    const destination = window.activeTrip.destination || window.activeTrip.title || "Destination";
-    if (document.getElementById('trip-main-title')) document.getElementById('trip-main-title').textContent = destination;
-    if (document.getElementById('trip-main-dates')) document.getElementById('trip-main-dates').textContent = `📅 ${window.activeTrip.dates || ''}`;
-    if (document.getElementById('trip-main-desc')) document.getElementById('trip-main-desc').textContent = window.activeTrip.desc || "Aucune note ajoutée pour ce voyage.";
-    if (document.getElementById('trip-cover-img') && window.activeTrip.image) document.getElementById('trip-cover-img').src = window.activeTrip.image;
-
-    let totalB = parseFloat(window.activeTrip.budget) || ((window.activeTrip.itinerary?.length || 3) * 150 + 200);
-    const flights = window.activeTrip.budgetDetails ? window.activeTrip.budgetDetails.flights : Math.round(totalB * 0.30);
-    const hotel = window.activeTrip.budgetDetails ? window.activeTrip.budgetDetails.hotel : Math.round(totalB * 0.40);
-    const rest = window.activeTrip.budgetDetails ? window.activeTrip.budgetDetails.rest : (totalB - (flights + hotel));
-
-    if (document.getElementById('trip-budget-total')) document.getElementById('trip-budget-total').textContent = `${totalB} €`;
-    if (document.getElementById('budget-flights')) document.getElementById('budget-flights').textContent = `${flights} €`;
-    if (document.getElementById('budget-hotel')) document.getElementById('budget-hotel').textContent = `${hotel} €`;
-    if (document.getElementById('budget-rest')) document.getElementById('budget-rest').textContent = `${rest} €`;
-
-    // Liens de Réservation dynamiques
-    const destClean = encodeURIComponent(destination.split(',')[0].trim());
-    if (document.getElementById('res-btn-booking')) document.getElementById('res-btn-booking').href = `https://www.booking.com/searchresults.fr.html?ss=${destClean}`;
-    if (document.getElementById('res-btn-airbnb')) document.getElementById('res-btn-airbnb').href = `https://www.airbnb.fr/s/${destClean}/homes`;
-    if (document.getElementById('res-btn-car')) document.getElementById('res-btn-car').href = `https://www.kayak.fr/cars/${destClean}`;
-
-    // 5. Appels APIs externes (Cartes et Météo)
-    if (typeof initGoogleMap === 'function') initGoogleMap(destination, window.activeTrip.destinationLat, window.activeTrip.destinationLng);
-    if (typeof fetchAndRenderWeather === 'function') fetchAndRenderWeather(window.activeTrip.destinationLat, window.activeTrip.destinationLng, destination, window.activeTrip.dateStart, window.activeTrip.dateEnd);
-
-    // 6. Navigation par onglets (Tabs)
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTabId = btn.getAttribute('data-tab');
-            tabButtons.forEach(b => b.classList.remove('active')); btn.classList.add('active');
-            tabContents.forEach(content => { content.style.display = content.id === targetTabId ? 'block' : 'none'; });
-            if ((targetTabId === 'tab-map' || targetTabId === 'tab-itinerary') && typeof map !== 'undefined') {
-                setTimeout(() => google.maps.event.trigger(map, 'resize'), 100);
+                if (dropdown) dropdown.style.display = 'none';
             }
-        });
-    });
+        </script>
 
-    // 7. Rendu ITINÉRAIRE
-    const renderItinerary = () => {
-        const daysContainer = document.getElementById('itinerary-days-container');
-        if (!daysContainer) return;
-        daysContainer.innerHTML = '';
+        <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+            <img src="image/photo profil.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+        </button>
+    </header>
 
-        if (window.activeTrip.itinerary && window.activeTrip.itinerary.length > 0) {
-            window.activeTrip.itinerary.forEach((day, dayIdx) => {
-                const block = document.createElement('div');
-                block.className = 'day-block-card'; block.dataset.dayIdx = dayIdx;
-                block.style.cssText = `background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem;`;
+    <main class="container" style="margin-top: 1.5rem;">
 
-                let stepsHTML = '';
-                if (day.steps) {
-                    day.steps.forEach((step, idx) => {
-                        const loc = step.location || destination;
-                        const actName = step.activity || step.title || step.name || 'Étape';
-                        const isDone = step.done || false;
-                        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${actName} ${loc}`)}`;
+        <!-- EN-TÊTE ÉPURÉ DU VOYAGE -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 id="trip-main-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0; color: var(--text-main);">Chargement...</h1>
+                <p id="trip-main-dates" style="color: var(--color-gold); font-weight: 600; margin: 0.3rem 0 0 0; font-size: 0.95rem;">📅 --/--/---- au --/--/----</p>
+            </div>
 
-                        stepsHTML += `
-                            <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab; opacity: ${isDone ? '0.5' : '1'};">
-                                <span style="color:var(--text-muted);">⠿</span>
-                                <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;">
-                                <div style="flex: 1; cursor:pointer;" class="step-click-target">
-                                    <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
-                                    <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
-                                </div>
-                                <a href="${googleSearchUrl}" target="_blank" class="step-google-link" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); text-decoration: none; display: flex; align-items: center; justify-content: center;">🌐</a>
-                            </div>`;
-                    });
-                }
+            <!-- BOUTONS D'ACTION RAPIDE HAUT DE PAGE -->
+            <div style="display: flex; gap: 0.6rem;">
+                <button id="btn-share-trip" style="background: rgba(212, 175, 55, 0.15); color: var(--color-gold); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.82rem;">🔗 Partager</button>
+                <button id="btn-export-pdf" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.82rem;">📄 Exporter PDF</button>
+                <button id="btn-open-edit" style="background: var(--color-torii); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.82rem;">⚙️ Modifier</button>
+                <button id="btn-complete-trip" style="background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.4); padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.82rem;">🏁 Clôturer</button>
+            </div>
+        </div>
 
-                block.innerHTML = `
-                    <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom: 0.5rem;">
-                        <span style="background:var(--color-torii); color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem;" class="day-map-trigger">${day.day}</span>
-                        <span style="color:var(--text-main); font-weight:500;" class="day-map-trigger">${day.dateText || ''}</span>
-                        <span style="color:var(--color-gold); font-size:0.8rem; margin-left: auto; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
+        <!-- NAVIGATION PAR ONGLETS -->
+        <nav class="trip-nav-tabs">
+            <button class="tab-btn active" data-tab="tab-itinerary">
+                <span class="tab-icon">✨</span>
+                <span class="tab-text">Itinéraire</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-budget">
+                <span class="tab-icon">💶</span>
+                <span class="tab-text">Budget</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-logistics">
+                <span class="tab-icon">🎒</span>
+                <span class="tab-text">Infos</span>
+            </button>
+            <button class="tab-btn mobile-only-tab" data-tab="tab-map">
+                <span class="tab-icon">📍</span>
+                <span class="tab-text">Carte</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-reservations">
+                <span class="tab-icon">🛎️</span>
+                <span class="tab-text">Liens</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-documents">🗂️ Documents</button>
+            <button class="tab-btn" data-tab="tab-gallery">
+                <span class="tab-icon">📸</span>
+                <span class="tab-text">Galerie</span>
+            </button>
+        </nav>
+        
+
+        <!-- CONTENU DES ONGLETS -->
+        <div class="trip-tab-wrapper">
+            <div id="tab-gallery" class="tab-content" style="display: none;">
+                <div class="map-card" style="margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                        📸 Galerie Collaborative
+                    </h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Partagez vos meilleurs souvenirs de voyage.
+                    </p>
+
+                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 2rem; cursor: pointer; transition: all 0.3s;" id="gallery-dropzone">
+                        <input type="file" id="gallery-file-input" accept="image/*" multiple style="display: none;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">☁️</div>
+                        <div style="color: var(--color-gold); font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;">Cliquez pour ajouter des photos</div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem;">Vous pouvez sélectionner plusieurs photos à la fois</div>
+                        <div id="gallery-upload-progress" style="display: none; color: var(--color-torii); font-weight: bold; margin-top: 1rem;">⏳ Envoi en cours...</div>
                     </div>
-                    <div style="margin-top: 0.5rem;">${stepsHTML}</div>`;
 
-                // Events Itinéraire (Checkbox & Map Select)
-                block.querySelectorAll('.step-done-checkbox').forEach(cb => {
-                    cb.addEventListener('change', async (e) => {
-                        window.activeTrip.itinerary[cb.getAttribute('data-day')].steps[cb.getAttribute('data-idx')].done = e.target.checked;
-                        await window.saveTrip(); renderItinerary();
-                    });
-                });
-                block.querySelectorAll('.step-click-target').forEach((target, index) => {
-                    target.addEventListener('click', () => {
-                        const stepData = day.steps[index];
-                        if (typeof selectActivityOnMap === 'function') selectActivityOnMap(stepData, stepData ? stepData.location : destination, destination);
-                    });
-                });
-                block.querySelectorAll('.day-map-trigger').forEach(trigger => {
-                    trigger.addEventListener('click', () => {
-                        if (typeof displayDayOnMap === 'function') displayDayOnMap(day.steps, destination);
-                    });
-                });
-
-                daysContainer.appendChild(block);
-            });
-        }
-    };
-    renderItinerary();
-
-    // 8. Rendu Checklist Globale
-    function renderChecklist() {
-        const container = document.getElementById('checklist-container');
-        if (!container) return;
-        container.innerHTML = '';
-        window.activeTrip.checklist.forEach(item => {
-            const li = document.createElement('li');
-            li.className = `checklist-item ${item.done ? 'completed' : ''}`;
-            li.innerHTML = `<label><input type="checkbox" data-id="${item.id}" ${item.done ? 'checked' : ''}> <span>${item.text}</span></label>
-                            <button class="btn-delete-task" data-id="${item.id}">✖</button>`;
-            li.querySelector('input').addEventListener('change', async (e) => { item.done = e.target.checked; await window.saveTrip(); renderChecklist(); });
-            li.querySelector('.btn-delete-task').addEventListener('click', async () => { window.activeTrip.checklist = window.activeTrip.checklist.filter(t => t.id !== item.id); await window.saveTrip(); renderChecklist(); });
-            container.appendChild(li);
-        });
-    }
-    renderChecklist();
-    const addTaskForm = document.getElementById('add-task-form');
-    if (addTaskForm) {
-        addTaskForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const input = document.getElementById('new-task-input');
-            if (input && input.value.trim()) { window.activeTrip.checklist.push({ id: Date.now(), text: input.value.trim(), done: false }); await window.saveTrip(); renderChecklist(); input.value = ''; }
-        });
-    }
-
-    // 9. Rendu Dépenses Classiques & Gestion Jauge Budget Réel/Estimé
-    const renderExpenses = () => {
-        const listEl = document.getElementById('expenses-list');
-        if (!listEl) return;
-        let totalSpent = 0; listEl.innerHTML = '';
-        if (window.activeTrip.expenses.length === 0) listEl.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense.</span>`;
-        else {
-            window.activeTrip.expenses.forEach(expense => {
-                totalSpent += parseFloat(expense.amount) || 0;
-                const row = document.createElement('div');
-                row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.82rem;`;
-                row.innerHTML = `<span style="color: var(--text-main); font-weight: 500;">${expense.title}</span><div style="display: flex; align-items: center; gap: 8px;"><strong style="color: var(--color-gold);">${parseFloat(expense.amount).toFixed(2)} €</strong><button class="btn-delete-expense" data-id="${expense.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.75rem;">✖</button></div>`;
-                row.querySelector('.btn-delete-expense').addEventListener('click', async () => { window.activeTrip.expenses = window.activeTrip.expenses.filter(e => String(e.id) !== String(expense.id)); await window.saveTrip(); renderExpenses(); });
-                listEl.appendChild(row);
-            });
-        }
-
-        const estimatedBudget = parseFloat(window.activeTrip.budget) || totalB;
-        if (document.getElementById('expenses-total-spent')) document.getElementById('expenses-total-spent').textContent = `${totalSpent.toFixed(2)} €`;
-        if (document.getElementById('expenses-target-budget')) document.getElementById('expenses-target-budget').textContent = `${estimatedBudget.toLocaleString()} €`;
-        
-        const progressBar = document.getElementById('expenses-progress-bar');
-        const statusText = document.getElementById('budget-status-text');
-        
-        if (progressBar) {
-            let percentage = estimatedBudget > 0 ? Math.round((totalSpent / estimatedBudget) * 100) : 0;
-            progressBar.style.width = `${Math.min(percentage, 100)}%`;
-
-            if (totalSpent > estimatedBudget && estimatedBudget > 0) {
-                progressBar.style.backgroundColor = 'var(--color-torii)';
-                if (statusText) {
-                    statusText.textContent = `⚠️ Dépassement de ${(totalSpent - estimatedBudget).toFixed(2)} € !`;
-                    statusText.style.color = 'var(--color-torii)';
-                }
-            } else {
-                progressBar.style.backgroundColor = 'var(--color-gold)';
-                if (statusText) {
-                    statusText.textContent = `${percentage}% du budget consommé`;
-                    statusText.style.color = 'var(--text-muted)';
-                }
-            }
-        }
-    };
-    renderExpenses();
-    const expenseForm = document.getElementById('add-expense-form');
-    if (expenseForm) {
-        expenseForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const title = document.getElementById('expense-title-input'); const amount = document.getElementById('expense-amount-input');
-            if (title && amount && title.value.trim() && amount.value) { window.activeTrip.expenses.push({ id: Date.now(), title: title.value.trim(), amount: parseFloat(amount.value) }); await window.saveTrip(); renderExpenses(); title.value = ''; amount.value = ''; }
-        });
-    }
-
-    // 10. Rendu Notes de Réservation
-    const renderBookingNotes = () => {
-        const container = document.getElementById('booking-notes-list');
-        if (!container) return;
-        container.innerHTML = '';
-
-        if (!window.activeTrip.bookingNotes || window.activeTrip.bookingNotes.length === 0) {
-            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Aucune note de réservation.</span>`;
-            return;
-        }
-
-        window.activeTrip.bookingNotes.forEach(note => {
-            const row = document.createElement('div');
-            row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.5rem 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;`;
-            row.innerHTML = `
-                <div>
-                    <strong style="color: var(--text-main);">${note.title}</strong>
-                    ${note.link ? `<a href="${note.link}" target="_blank" style="color: var(--color-gold); margin-left: 8px; font-size: 0.78rem;">🔗 Ouvrir</a>` : ''}
+                    <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"></div>
                 </div>
-                <button class="btn-delete-booking-note" data-id="${note.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.85rem;">🗑️</button>`;
-            row.querySelector('.btn-delete-booking-note').addEventListener('click', async () => {
-                window.activeTrip.bookingNotes = window.activeTrip.bookingNotes.filter(n => String(n.id) !== String(note.id));
-                await window.saveTrip();
-                renderBookingNotes();
-            });
-            container.appendChild(row);
-        });
-    };
-    renderBookingNotes();
+            </div>
 
-    const bookingNoteForm = document.getElementById('add-booking-note-form');
-    if (bookingNoteForm) {
-        bookingNoteForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const titleInput = document.getElementById('booking-title-input');
-            const linkInput = document.getElementById('booking-link-input');
-            const title = titleInput ? titleInput.value.trim() : '';
-            const link = linkInput ? linkInput.value.trim() : '';
-            if (!title) return;
+            <div id="tab-itinerary" class="tab-content active-content">
+                <div class="itinerary-split-layout">
+                    <div class="itinerary-list-col">
+                        <div id="itinerary-days-container"></div>
+                    </div>
 
-            if (!window.activeTrip.bookingNotes) window.activeTrip.bookingNotes = [];
-            window.activeTrip.bookingNotes.push({ id: Date.now(), title, link });
-            await window.saveTrip();
-            renderBookingNotes();
-            titleInput.value = '';
-            if (linkInput) linkInput.value = '';
+                    <div class="itinerary-map-col">
+                        <div class="map-card sticky-map-box">
+                            <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">📍 Carte interactive</h3>
+                            <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;">Cliquez sur une étape pour la localiser</p>
+                            <div id="map"></div>
+                            
+                            <div id="activity-preview" class="activity-preview-box">
+                                <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
+                                <div id="activity-loading" class="activity-preview-loading">Recherche de la photo...</div>
+                                <div id="activity-title" class="activity-preview-title"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-budget" class="tab-content" style="display: none;">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    
+                    <div class="card-box budget-card" style="flex: 1; min-width: 300px; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;">Budget & Estimation</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">Estimation globale du séjour</p>
+                        
+                        <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1.2rem; text-align: center;">
+                            <span id="trip-budget-total" style="color: var(--color-gold); font-size: 2rem; font-weight: bold; display: block;">0 €</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Budget Total Estimé</span>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.2rem; font-size: 0.88rem; color: var(--text-main);">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>✈️ Transports & Vols</span>
+                                <span id="budget-flights" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>🏨 Hébergement</span>
+                                <span id="budget-hotel" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>🍽️ Repas & Activités</span>
+                                <span id="budget-rest" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                            </div>
+                        </div>
+
+                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
+                    </div>
+
+                    <div class="card-box expenses-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">💸 Budget & Dépenses Réelles</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Comparatif et suivi du coût du voyage</p>
+
+                        <!-- Barre de progression comparative -->
+                        <div style="margin-bottom: 1.2rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;">
+                                <span style="color: var(--text-muted);">Réel : <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></span>
+                                <span style="color: var(--text-muted);">Estimé : <strong id="expenses-target-budget" style="color: var(--text-main);">0 €</strong></span>
+                            </div>
+                            
+                            <div style="width: 100%; height: 10px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 5px; overflow: hidden;">
+                                <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease, background-color 0.3s ease;"></div>
+                            </div>
+                            <div id="budget-status-text" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; text-align: right;">Dans les clous</div>
+                        </div>
+
+                        <div id="expenses-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense enregistrée.</span>
+                        </div>
+
+                        <form id="add-expense-form" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <input type="text" id="expense-title-input" placeholder="Ex: Restaurant..." style="flex: 2; min-width: 120px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; min-width: 70px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 0.9rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">+</button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <div class="card-box shared-expenses-card" style="margin-top: 1.5rem; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">⚖️ Dépenses partagées</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1.2rem 0;">Gérez les comptes du groupe et l'équilibre des remboursements</p>
+
+                    <div style="margin-bottom: 1.2rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 6px;">
+                        <label style="display: block; font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.4rem;">Participants du voyage :</label>
+                        <div id="participants-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem;"></div>
+                        <form id="add-participant-form" style="display: flex; gap: 6px;">
+                            <input type="text" id="participant-name-input" placeholder="Prénom..." style="flex: 1; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">+ Ajouter</button>
+                        </form>
+                    </div>
+
+                    <form id="add-shared-expense-form" style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.2rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 6px;">
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <input type="text" id="shared-title-input" placeholder="Intitulé (ex: Resto...)" style="flex: 2; min-width: 130px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <input type="number" step="0.01" id="shared-amount-input" placeholder="Montant €" style="flex: 1; min-width: 70px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <select id="shared-paidby-select" style="flex: 1.5; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem; border-radius: 4px; font-size: 0.8rem;" required>
+                                <option value="">Payé par...</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Partagé entre :</label>
+                            <div id="shared-splits-checkboxes" style="display: flex; gap: 0.8rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-main);">
+                                <span style="color: var(--text-muted); font-style: italic;">Ajoutez des participants d'abord.</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; align-self: flex-end;">Ajouter la dépense</button>
+                    </form>
+
+                    <div id="shared-expenses-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <span style="color: var(--text-muted); font-size: 0.8rem;">Aucune dépense partagée pour le moment.</span>
+                    </div>
+
+                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px;">
+                        <h4 style="margin: 0 0 0.6rem 0; color: var(--color-gold); font-size: 0.95rem; font-family: 'Playfair Display', serif;">🤝 Équilibre des comptes</h4>
+                        <div id="settlement-results" style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 0.3rem;">
+                            <span style="color: var(--text-muted);">Ajoutez des participants et des dépenses pour calculer les remboursements.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-logistics" class="tab-content" style="display: none;">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    <div class="checklist-card" style="flex: 1; min-width: 300px; margin-top: 0;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🎒 Check-list de voyage</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">À ne pas oublier</p>
+                        <ul class="checklist-items" id="checklist-container"></ul>
+                        <form class="checklist-form" id="add-task-form">
+                            <input type="text" id="new-task-input" class="checklist-input" placeholder="Ajouter un élément..." required>
+                            <button type="submit" class="btn-add-task">+</button>
+                        </form>
+                    </div>
+
+                    <div class="card-box weather-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🌤️ Météo prévue</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" id="weather-subtitle">Prévisions sur place</p>
+                        <div id="weather-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Chargement de la météo...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-reservations" class="tab-content" style="display: none;">
+                <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">✈️ Liens de réservation & Partenaires</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Préparez votre voyage en un clic. Les dates et la destination de votre séjour sont automatiquement prises en compte.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <a id="res-btn-flights" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.5rem;">✈️</span>
+                            <div>
+                                <div style="font-weight: 600; color: var(--color-gold);">Google Flights</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Trouver les meilleurs vols</div>
+                            </div>
+                        </a>
+
+                        <a id="res-btn-booking" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.5rem;">🏨</span>
+                            <div>
+                                <div style="font-weight: 600; color: var(--color-gold);">Booking.com</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Hôtels & Hébergements</div>
+                            </div>
+                        </a>
+
+                        <a id="res-btn-airbnb" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.5rem;">🏠</span>
+                            <div>
+                                <div style="font-weight: 600; color: var(--color-gold);">Airbnb</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Apparts & Logements insolites</div>
+                            </div>
+                        </a>
+
+                        <a id="res-btn-car" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.5rem;">🚗</span>
+                            <div>
+                                <div style="font-weight: 600; color: var(--color-gold);">Location de voiture</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Comparer les loueurs (Kayak)</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">📋 Mes notes de réservation personnelles</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Ajoutez ici vos numéros de vol, codes de réservation d'hôtel ou liens directs vers vos billets.</p>
+                    
+                    <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="booking-title-input" placeholder="Ex : Vol AF1234 - Réservation Hôtel ABC..." style="flex: 2; min-width: 250px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
+                        <input type="text" id="booking-link-input" placeholder="Lien (optionnel, ex: https://...)" style="flex: 2; min-width: 200px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
+                        <button type="submit" style="flex: 1; min-width: 100px; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Ajouter</button>
+                    </form>
+
+                    <div id="booking-notes-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                </div>
+            </div>
+
+            <div id="tab-map" class="tab-content" style="display: none;"></div>
+            
+            <div id="tab-documents" class="tab-content" style="display: none;">
+                <div class="map-card" style="margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                        🗂️ Portefeuille Documentaire
+                    </h2>
+                    
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Centralise tes billets, réservations et passeports. Ils seront accessibles ici même hors connexion (si déjà ouverts une fois).
+                    </p>
+
+                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 1.5rem; border-radius: 8px; text-align: center; margin-bottom: 2rem;">
+                        <form id="upload-doc-form" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                            <input type="file" id="doc-file-input" accept=".pdf, image/png, image/jpeg" required style="color: var(--text-main); font-size: 0.9rem;">
+                            <input type="text" id="doc-title-input" placeholder="Nom du document (ex: Billets d'avion)" required style="width: 100%; max-width: 300px; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
+                            <button type="submit" id="btn-upload-doc" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem 1.5rem; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                                ⬆️ Uploader le document
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="documents-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODALE DE MODIFICATION -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--color-gold); font-family: 'Playfair Display', serif;">Modifier le voyage</h3>
+            <form id="edit-trip-form">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📅 Date Aller</label>
+                    <input type="date" id="edit-date-start" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;" required>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📅 Date Retour</label>
+                    <input type="date" id="edit-date-end" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;" required>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">💶 Budget (€)</label>
+                    <input type="number" id="edit-budget" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">📝 Notes & Description</label>
+                    <textarea id="edit-desc" rows="3" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" id="btn-close-edit" style="background: #333; color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Annuler</button>
+                    <button type="submit" style="background: var(--color-torii); color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
+    
+    <script src="js/modules/map.js"></script>
+    <script src="js/modules/weather.js"></script>
+    <script src="js/modules/tricount.js"></script>
+    <script src="js/modules/documents.js"></script>
+    <script src="js/modules/kaidoDB.js"></script>
+    <script src="js/modules/gallery.js"></script>
+    
+    <!-- Module Kiroku et exécution en arrière-plan -->
+    <script src="js/modules/kiroku.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
+            if (activeTrip && typeof calculateTripKiroku === 'function') {
+                await calculateTripKiroku(activeTrip);
+            }
         });
-    }
-});
+    </script>
+    
+    <script src="js/voyage.js"></script>
+</body>
+</html>
