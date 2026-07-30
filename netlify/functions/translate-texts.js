@@ -1,77 +1,372 @@
-const { GoogleGenAI } = require("@google/genai");
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes carnets de route - Kaido</title>
+    <link rel="icon" type="image/png" href="image/logo kaido v7.2.png">
 
-// Initialisation de Gemini avec ta variable d'environnement existante
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    <!-- CONFIGURATION PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0D0B09">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="image/logo kaido v7.2.png">
 
-// Headers CORS communs à toutes les réponses
-const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
-};
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((reg) => console.log('✅ Service Worker enregistré avec succès !', reg.scope))
+            .catch((err) => console.error('❌ Échec enregistrement Service Worker:', err));
+        });
+      }
+    </script>
 
-exports.handler = async function(event, context) {
-    // Répondre au preflight CORS envoyé par le navigateur avant le vrai POST
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers: CORS_HEADERS, body: '' };
-    }
+    <!-- SDK CLIENT SUPABASE & CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/i18n.js"></script>
 
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, headers: CORS_HEADERS, body: 'Method Not Allowed' };
-    }
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
-    try {
-        const { targetLang, texts } = JSON.parse(event.body);
+    <div class="container">
+        <!-- HEADER UNIFIÉ KAIDO -->
+        <header class="kaido-header">
+            <!-- GAUCHE : Navigation -->
+            <div class="header-left">
+                <a href="index.html" class="header-brand-text">KAIDO</a>
+            </div>
 
-        if (!targetLang || !texts || !Array.isArray(texts)) {
-            return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Paramètres manquants (targetLang ou texts)" }) };
+            <!-- CENTRE : Logo -->
+            <div class="header-center">
+                <a href="index.html">
+                    <img src="image/logo kaido v7.2.png" alt="Logo Kaido" style="height: 50px; width: auto;">
+                </a>
+            </div>
+
+            <!-- DROITE : Menu Options (Langues + Thème) -->
+            <div class="header-right" style="display: flex; align-items: center; position: relative;">
+                
+                <!-- Bouton Principal du Menu (Burger / Options) -->
+                <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                    ⚙️
+                </button>
+
+                <!-- Panneau déroulant -->
+                <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                    <!-- NOUVEAU : Lien vers le Projet Kiroku -->
+                    <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
+                        <span>🏆</span> <span data-i18n>Projet Kiroku</span>
+                    </a>
+                    <!-- Option : Thème -->
+                    <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <span>🌓</span> <span data-i18n>Changer de thème</span>
+                    </button>
+
+                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
+
+                    <!-- Options : Langues avec drapeaux -->
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Langue</div>
+                    
+                    <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
+                    </button>
+                    <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/gb.png" width="16" alt="EN"> English
+                    </button>
+                    <button type="button" onclick="selectLanguage('es')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
+                    </button>
+                </div>
+            </div>
+
+            <script>
+                // Logique d'ouverture/fermeture du menu déroulant au clic
+                const menuBtn = document.getElementById('options-menu-btn');
+                const dropdown = document.getElementById('options-dropdown');
+
+                if (menuBtn && dropdown) {
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                    });
+
+                    dropdown.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Empêche la fermeture si on clique à l'intérieur
+                    });
+                }
+
+                // Fermer le menu si on clique ailleurs sur la page
+                window.addEventListener('click', () => {
+                    if (dropdown) dropdown.style.display = 'none';
+                });
+
+                // Fonction sécurisée pour changer la langue et fermer le menu
+                function selectLanguage(lang) {
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(lang);
+                    } else {
+                        localStorage.setItem('kaido_global_lang', lang);
+                        location.reload();
+                    }
+                    if (dropdown) dropdown.style.display = 'none';
+                }
+            </script>
+
+            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            </button>
+        </header>
+
+        <!-- TITRE PRINCIPAL ÉPURÉ -->
+        <div class="dashboard-title-wrapper">
+            <h1 class="dashboard-title">
+                ⛩️ <span data-i18n>Mes futurs voyages</span> 
+                <span class="dashboard-subtitle-jp">旅 — Korekara no tabi</span>
+            </h1>
+        </div>
+
+        <!-- GRILLE DE VOYAGES -->
+        <section class="dashboard-grid" id="trips-grid">
+            <a href="creer.html" class="create-trip-zone">
+                <div class="plus-icon">+</div>
+                <h3 data-i18n>Tracer une nouvelle route</h3>
+            </a>
+        </section>
+    </div>
+
+    <!-- LOGIQUE DE RENDU -->
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (typeof supabase !== 'undefined') {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const nameSpan = document.getElementById('user-display-name');
+                    if (nameSpan) {
+                        const userName = user.user_metadata?.full_name || user.email.split('@')[0].toUpperCase();
+                        nameSpan.textContent = userName;
+                    }
+                }
+            } catch (err) {
+                console.warn("Impossible de récupérer l'utilisateur connecté.", err);
+            }
         }
 
-        const langNames = {
-            en: "English",
-            es: "Spanish",
-            it: "Italian",
-            de: "German",
-            ja: "Japanese",
-            zh: "Chinese",
-            cs: "Czech",
-            ru: "Russian"
-        };
-        const targetLanguageName = langNames[targetLang] || targetLang;
-
-        const prompt = `You are a professional translator for a high-end travel application called Kaido. 
-Translate the following array of French texts into ${targetLanguageName}. 
-Keep the tone professional, elegant, and consistent with a luxury travel app. 
-CRITICAL: Return ONLY a valid JSON object where keys are the exact original French texts and values are the translated texts. Do not add markdown formatting like \`\`\`json, just output the raw JSON object.
-
-Texts to translate:
-${JSON.stringify(texts, null, 2)}`;
-
-        // Appel à l'API Gemini
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash', // Modèle rapide et idéal pour ce type de tâche textuelle
-            contents: prompt,
-        });
-
-        const rawContent = response.text.trim();
+        const grid = document.getElementById('trips-grid');
         
-        // Nettoyage au cas où le modèle ajoute des balises markdown de code
-        const cleanJsonStr = rawContent.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/\s*```$/, "");
-        const translationsMap = JSON.parse(cleanJsonStr);
+        if (grid) {
+            const createZone = grid.querySelector('.create-trip-zone');
 
-        return {
-            statusCode: 200,
-            headers: CORS_HEADERS,
-            body: JSON.stringify({ translations: translationsMap })
-        };
+            const drawCards = (trips) => {
+                const dynamicCards = grid.querySelectorAll('.dynamic-trip');
+                dynamicCards.forEach(card => card.remove());
 
-    } catch (error) {
-        console.error("Erreur de traduction Netlify Function (Gemini):", error);
-        return {
-            statusCode: 500,
-            headers: CORS_HEADERS,
-            body: JSON.stringify({ error: error.message })
-        };
-    }
-};
+                trips.forEach(trip => {
+                    const card = document.createElement('article');
+                    card.className = 'trip-card dynamic-trip';
+                    
+                    const cityName = trip.destination || trip.title || 'Destination';
+                    const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
+
+                    // --- AJOUT DU BADGE DE STATUT ---
+                    const isCompleted = trip.status === 'completed' || (trip.dateEnd && new Date(trip.dateEnd) < new Date());
+                    const statusBadge = isCompleted ? `<span style="background: rgba(46, 204, 113, 0.15); color: #2ecc71; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">✅ Aventure accomplie</span>` : `<span style="color: var(--color-gold); font-size: 0.75rem;">En cours</span>`;
+
+                    let displayBudget = parseFloat(trip.budget) || 0;
+                    if (displayBudget <= 0) {
+                        let daysCount = 3;
+                        if (trip.itinerary && trip.itinerary.length > 0) {
+                            daysCount = trip.itinerary.length;
+                        } else if (trip.dateStart && trip.dateEnd) {
+                            const start = new Date(trip.dateStart);
+                            const end = new Date(trip.dateEnd);
+                            const diff = end.getTime() - start.getTime();
+                            daysCount = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)) + 1);
+                        }
+                        displayBudget = (daysCount * 150) + 200;
+                    }
+
+                    card.innerHTML = `
+                        <div class="trip-banner" style="background-image: url('${finalImage}');">
+                            <div style="position: absolute; top: 12px; right: 12px; z-index: 2;">
+                                ${statusBadge}
+                            </div>
+                        </div>
+                        <div class="trip-details">
+                            <div>
+                                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.5rem;">${cityName}</h3>
+                                <p class="trip-meta">📅 ${trip.dates || 'Dates non définies'}</p>
+                                ${trip.desc ? `<p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">${trip.desc}</p>` : ''}
+                            </div>
+                            
+                            <div class="trip-footer">
+                                <span class="trip-budget">~ ${displayBudget} €</span>
+                                <div class="trip-actions">
+                                    <button class="btn-delete" data-id="${trip.id}" title="Supprimer ce voyage">🗑️</button>
+                                    <a href="voyage.html" class="btn-view" data-id="${trip.id}"><span data-i18n>VOIR L'ITINÉRAIRE</span> →</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    const viewLink = card.querySelector('.btn-view');
+                    if (viewLink) {
+                        viewLink.addEventListener('click', () => {
+                            localStorage.setItem('currentTrip', JSON.stringify(trip));
+                            localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
+                        });
+                    }
+                    
+                    if (createZone) {
+                        grid.insertBefore(card, createZone);
+                    } else {
+                        grid.appendChild(card);
+                    }
+                });
+
+                // Forcer la traduction des cartes ajoutées dynamiquement.
+                // Un seul appel après avoir inséré toutes les cartes (et non un
+                // par carte) pour éviter de déclencher plusieurs appels API
+                // redondants en parallèle vers la fonction de traduction.
+                const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
+                if (savedLang !== 'fr' && typeof applyGlobalLanguage === 'function') {
+                    applyGlobalLanguage(savedLang);
+                }
+
+                const deleteButtons = grid.querySelectorAll('.btn-delete');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const tripId = button.getAttribute('data-id');
+                        if (confirm("Êtes-vous sûr de vouloir supprimer cet itinéraire de Kaido ?")) {
+                            await deleteTrip(tripId);
+                        }
+                    });
+                });
+            };
+
+            const renderTrips = async () => {
+                let localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                drawCards(localTrips);
+
+                if (typeof supabase !== 'undefined') {
+                    try {
+                        const { data: { user } } = await supabase.auth.getUser();
+
+                        const { data: cloudTrips, error } = await supabase
+                            .from('trips')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        if (!error && cloudTrips) {
+                            const cloudIds = new Set(cloudTrips.map(ct => String(ct.id)));
+
+                            if (user) {
+                                for (const localTrip of localTrips) {
+                                    if (!cloudIds.has(String(localTrip.id))) {
+                                        const { data: inserted, error: insertErr } = await supabase
+                                            .from('trips')
+                                            .insert([{
+                                                user_id: user.id,
+                                                title: localTrip.destination || localTrip.title,
+                                                destination: localTrip.destination || localTrip.title,
+                                                departure: localTrip.departure || 'Paris',
+                                                date_start: localTrip.dateStart || null,
+                                                date_end: localTrip.dateEnd || null,
+                                                budget: localTrip.budget || 0,
+                                                desc_text: localTrip.desc || '',
+                                                image: localTrip.image || '',
+                                                destination_lat: localTrip.destinationLat || null,
+                                                destination_lng: localTrip.destinationLng || null,
+                                                itinerary: localTrip.itinerary || [],
+                                                checklist: localTrip.checklist || [],
+                                                documents: localTrip.documents || [],
+                                                gallery: localTrip.gallery || []
+                                            }])
+                                            .select();
+
+                                        if (!insertErr && inserted && inserted[0]) {
+                                            localTrip.id = inserted[0].id;
+                                        }
+                                    }
+                                }
+                            }
+
+                            const formattedCloud = cloudTrips.map(ct => ({
+                                id: ct.id,
+                                title: ct.title,
+                                destination: ct.destination,
+                                departure: ct.departure,
+                                dateStart: ct.date_start,
+                                dateEnd: ct.date_end,
+                                dates: `${ct.date_start || ''} au ${ct.date_end || ''}`,
+                                budget: ct.budget,
+                                desc: ct.desc_text,
+                                image: ct.image,
+                                destinationLat: ct.destination_lat,
+                                destinationLng: ct.destination_lng,
+                                itinerary: ct.itinerary,
+                                checklist: ct.checklist,
+                                documents: ct.documents || [],
+                                gallery: ct.gallery || [],
+                                expenses: ct.expenses || [],
+                                bookingNotes: ct.booking_notes || [],
+                                status: ct.status || 'ongoing',
+                                final_rank: ct.final_rank || null,
+                                completion_rate: ct.completion_rate || 0
+                            }));
+
+                            const mergedMap = new Map();
+                            localTrips.forEach(t => mergedMap.set(String(t.id), t));
+                            formattedCloud.forEach(t => mergedMap.set(String(t.id), t));
+
+                            const mergedTrips = Array.from(mergedMap.values());
+                            
+                            localStorage.setItem('kaido_trips', JSON.stringify(mergedTrips));
+                            drawCards(mergedTrips);
+                        }
+                    } catch (e) {
+                        console.warn("Maintien de l'affichage local (mode hors-ligne actif).", e);
+                    }
+                }
+            };
+
+            const deleteTrip = async (id) => {
+                if (typeof supabase !== 'undefined') {
+                    try {
+                        await supabase.from('trips').delete().eq('id', id);
+                    } catch (err) {
+                        console.warn("Suppression Cloud échouée, suppression locale effectuée.");
+                    }
+                }
+
+                let customTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                customTrips = customTrips.filter(trip => String(trip.id) !== String(id));
+                localStorage.setItem('kaido_trips', JSON.stringify(customTrips));
+                
+                const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip'));
+                if (activeTrip && String(activeTrip.id) === String(id)) {
+                    localStorage.removeItem('kaido_active_trip');
+                    localStorage.removeItem('currentTrip');
+                }
+                
+                await renderTrips();
+            };
+
+            await renderTrips();
+        }
+    });
+    </script>
+</body>
+</html>
