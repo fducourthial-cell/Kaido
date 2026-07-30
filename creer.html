@@ -53,7 +53,7 @@
                 </a>
             </div>
 
-            <!-- DROITE : Menu Options -->
+            <!-- DROITE : Menu Options (Langues + Thème) -->
             <div class="header-right" style="display: flex; align-items: center; position: relative;">
                 
                 <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
@@ -61,6 +61,7 @@
                 </button>
 
                 <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                    <!-- Lien vers le Projet Kiroku -->
                     <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
                         <span>🏆</span> <span data-i18n="kirokuTitle">Projet Kiroku</span>
                     </a>
@@ -175,7 +176,7 @@
                     
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>📝 Notes, mode de transport & activités souhaitées</label>
-                        <textarea id="trip-notes" class="kaido-input" data-i18n="create_desc_placeholder" rows="4" placeholder="Ex: Road-trip en van..."></textarea>
+                        <textarea id="trip-notes" class="kaido-input" rows="4" data-i18n="create_desc_placeholder" placeholder="Ex: Road-trip en van, beaucoup de randonnées, visite de musées... Plus vous détaillez, plus l'IA sera précise."></textarea>
                     </div>
                 </div>
 
@@ -185,12 +186,295 @@
             </form>
         </main>
     </div>
-    
-    <!-- Reste des scripts existants inchangés -->
+
     <div id="kaido-loader-overlay">
-        <!-- Contenu du loader -->
+        <img src="image/logo kaido v7.2.png" alt="Kaido Loading" class="loader-logo-spin">
+        <div class="loader-text-title">Tracer votre route...</div>
+        <div class="loader-text-subtitle">L'intelligence de Kaido conçoit votre carnet de voyage sur-mesure. Veuillez patienter.</div>
     </div>
+
     <div id="hidden-places-helper" style="display:none;"></div>
-    <!-- Scripts Google et API inchangés -->
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('create-trip-form');
+        const modernField = document.getElementById('trip-destination-modern');
+        const departureModernField = document.getElementById('trip-departure-modern');
+        const NETLIFY_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/generate-trip';
+
+        let selectedDestinationName = "";
+        let selectedDepartureName = "";
+        let placesService = null;
+
+        function getPlacesService() {
+            if (!placesService && typeof google !== 'undefined' && google.maps && google.maps.places) {
+                placesService = new google.maps.places.PlacesService(document.getElementById('hidden-places-helper'));
+            }
+            return placesService;
+        }
+
+        function buildFallbackImage(name) {
+            const initial = (name || '?').trim().charAt(0).toUpperCase();
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600">
+                    <defs>
+                        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#A63A2B"/>
+                            <stop offset="100%" stop-color="#0D0B09"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="1200" height="600" fill="url(#g)"/>
+                    <text x="50%" y="52%" font-family="Georgia, serif" font-size="220" fill="#D4AF37" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">${initial}</text>
+                </svg>`;
+            return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+        }
+
+        function getDestinationInfo(destinationName) {
+            return new Promise((resolve) => {
+                const service = getPlacesService();
+                if (!service || !destinationName) {
+                    resolve({ image: buildFallbackImage(destinationName), lat: null, lng: null });
+                    return;
+                }
+
+                service.findPlaceFromQuery(
+                    { query: destinationName, fields: ['photos', 'name', 'geometry'] },
+                    (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+                            const place = results[0];
+                            const image = (place.photos && place.photos.length > 0)
+                                ? place.photos[0].getUrl({ maxWidth: 1200, maxHeight: 600 })
+                                : buildFallbackImage(destinationName);
+                            const lat = (place.geometry && place.geometry.location) ? place.geometry.location.lat() : null;
+                            const lng = (place.geometry && place.geometry.location) ? place.geometry.location.lng() : null;
+                            resolve({ image, lat, lng });
+                        } else {
+                            resolve({ image: buildFallbackImage(destinationName), lat: null, lng: null });
+                        }
+                    }
+                );
+            });
+        }
+
+        if (modernField) {
+            modernField.addEventListener('gmp-placeselect', (event) => {
+                const place = event.detail.place;
+                if (place) {
+                    selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
+                }
+            });
+        }
+
+        if (departureModernField) {
+            departureModernField.addEventListener('gmp-placeselect', (event) => {
+                const place = event.detail.place;
+                if (place) {
+                    selectedDepartureName = place.displayName || place.formattedAddress || place.name || "";
+                }
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn ? submitBtn.textContent : "Concevoir mon itinéraire";
+
+                const loaderOverlay = document.getElementById('kaido-loader-overlay');
+                if (loaderOverlay) loaderOverlay.style.display = 'flex';
+
+                try {
+                    let destinationText = "";
+                    if (modernField) {
+                        if (typeof modernField.value === 'string' && modernField.value.trim() !== '') {
+                            destinationText = modernField.value;
+                        } else if (typeof modernField.value === 'object' && modernField.value !== null) {
+                            destinationText = modernField.value.displayName || modernField.value.formattedAddress || modernField.value.name || "";
+                        }
+                        if (!destinationText) {
+                            const innerInput = modernField.shadowRoot ? modernField.shadowRoot.querySelector('input') : modernField.querySelector('input');
+                            if (innerInput && innerInput.value) destinationText = innerInput.value;
+                        }
+                    }
+                    if (!destinationText) {
+                        const backupInput = document.getElementById('trip-destination');
+                        if (backupInput) destinationText = backupInput.value;
+                    }
+
+                    const cleanDestination = String(destinationText || selectedDestinationName).trim();
+                    if (!cleanDestination) {
+                        alert("Veuillez sélectionner ou saisir une destination de voyage.");
+                        if (loaderOverlay) loaderOverlay.style.display = 'none';
+                        return;
+                    }
+
+                    let departureText = "";
+                    if (departureModernField) {
+                        if (typeof departureModernField.value === 'string' && departureModernField.value.trim() !== '') {
+                            departureText = departureModernField.value;
+                        } else if (typeof departureModernField.value === 'object' && departureModernField.value !== null) {
+                            departureText = departureModernField.value.displayName || departureModernField.value.formattedAddress || departureModernField.value.name || "";
+                        }
+                        if (!departureText) {
+                            const innerInput = departureModernField.shadowRoot ? departureModernField.shadowRoot.querySelector('input') : departureModernField.querySelector('input');
+                            if (innerInput && innerInput.value) departureText = innerInput.value;
+                        }
+                    }
+
+                    const departure = String(departureText || selectedDepartureName || 'Paris').trim();
+                    const dateStart = document.getElementById('trip-date-start').value;
+                    const dateEnd = document.getElementById('trip-date-end').value;
+                    const budgetInput = document.getElementById('trip-budget-input');
+                    const userBudget = budgetInput ? parseFloat(budgetInput.value) : 0;
+                    const notesInput = document.getElementById('trip-notes');
+                    const desc = notesInput ? notesInput.value : '';
+                    
+                    const selectedLang = localStorage.getItem('kaido_global_lang') || 'fr';
+
+                    if (!dateStart || !dateEnd) {
+                        alert("Veuillez renseigner les dates aller et retour.");
+                        if (loaderOverlay) loaderOverlay.style.display = 'none';
+                        return;
+                    }
+
+                    if (submitBtn) {
+                        submitBtn.textContent = "🧠 L'IA conçoit votre voyage...";
+                        submitBtn.disabled = true;
+                    }
+
+                    const start = new Date(dateStart);
+                    const end = new Date(dateEnd);
+                    const timeDiff = end.getTime() - start.getTime();
+                    const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+                    if (totalDays <= 0) {
+                        alert("La date de retour doit être après la date de départ !");
+                        if (loaderOverlay) loaderOverlay.style.display = 'none';
+                        if (submitBtn) { submitBtn.textContent = originalBtnText; submitBtn.disabled = false; }
+                        return;
+                    }
+
+                    const response = await fetch(NETLIFY_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            destination: cleanDestination,
+                            departure: departure,
+                            totalDays: totalDays,
+                            descText: desc,
+                            lang: selectedLang
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error || "Erreur de génération par l'IA Netlify.");
+                    }
+
+                    const aiData = await response.json();
+                    const formatDate = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+                    const formattedItinerary = (aiData.itinerary || []).map((dayObj, index) => {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + index);
+                        return {
+                            day: dayObj.day || `Jour ${index + 1}`,
+                            dateText: formatDate(currentDate),
+                            steps: (dayObj.steps || []).map(step => ({
+                                time: step.time || "10:00",
+                                activity: step.activity || step.title || "Activité",
+                                location: step.location || cleanDestination,
+                                lat: null,
+                                lng: null
+                            }))
+                        };
+                    });
+
+                    const formattedChecklist = (aiData.checklist || []).map((item, idx) => ({
+                        id: Date.now() + idx,
+                        text: item,
+                        done: false
+                    }));
+
+                    const destInfo = await getDestinationInfo(cleanDestination);
+                    const calculatedBudget = calculateSmartBudget(cleanDestination, totalDays, desc, userBudget);
+
+                    const newTrip = {
+                        id: Date.now(),
+                        title: cleanDestination,
+                        destination: cleanDestination,
+                        destinationLat: destInfo.lat,
+                        destinationLng: destInfo.lng,
+                        departure: departure,
+                        dates: `${formattedItinerary[0].dateText} au ${formattedItinerary[formattedItinerary.length - 1].dateText}`,
+                        dateStart: dateStart,
+                        dateEnd: dateEnd,
+                        budget: calculatedBudget.total,
+                        budgetDetails: calculatedBudget,
+                        desc: desc,
+                        image: destInfo.image,
+                        itinerary: formattedItinerary,
+                        checklist: formattedChecklist,
+                        expenses: [],
+                        lang: selectedLang
+                    };
+
+                    const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+                    currentTrips.push(newTrip);
+                    localStorage.setItem('kaido_trips', JSON.stringify(currentTrips));
+                    localStorage.setItem('kaido_active_trip', JSON.stringify(newTrip));
+
+                    window.location.href = 'voyage.html';
+
+                } catch (error) {
+                    console.error(error);
+                    if (loaderOverlay) loaderOverlay.style.display = 'none';
+                    alert("Erreur lors de la création : " + error.message);
+                    if (submitBtn) { submitBtn.textContent = originalBtnText; submitBtn.disabled = false; }
+                }
+            });
+        }
+    });
+
+    function calculateSmartBudget(destination, totalDays, notes, userBudget) {
+        const destLower = destination.toLowerCase();
+        const notesLower = notes.toLowerCase();
+
+        let dailyCostPerPerson = 90;
+        let baseFlightCost = 250;
+
+        if (destLower.includes('islande') || destLower.includes('suisse') || destLower.includes('norvège') || destLower.includes('japon') || destLower.includes('tokyo') || destLower.includes('new york')) {
+            dailyCostPerPerson = 160;
+            baseFlightCost = 600;
+        } else if (destLower.includes('asie') || destLower.includes('thaïlande') || destLower.includes('vietnam') || destLower.includes('indonésie') || destLower.includes('maroc')) {
+            dailyCostPerPerson = 45;
+            baseFlightCost = 500;
+        }
+
+        const isRoadTrip = notesLower.includes('road') || notesLower.includes('voiture') || notesLower.includes('camion') || notesLower.includes('louer') || notesLower.includes('véhicule');
+        let carRentalTotal = isRoadTrip ? (totalDays * 65) : 0;
+
+        const lodgingAndFood = totalDays * dailyCostPerPerson;
+        const transportTotal = baseFlightCost + carRentalTotal;
+        
+        let estimatedTotal = lodgingAndFood + transportTotal;
+        if (userBudget && userBudget > 0) estimatedTotal = userBudget;
+
+        const flightsPart = Math.round(transportTotal * 0.7);
+        const hotelPart = Math.round(lodgingAndFood * 0.55);
+        const restPart = estimatedTotal - (flightsPart + hotelPart);
+
+        return {
+            total: Math.round(estimatedTotal),
+            flights: Math.max(50, flightsPart),
+            hotel: Math.max(50, hotelPart),
+            rest: Math.max(50, restPart),
+            isRoadTrip: isRoadTrip
+        };
+    }
+    </script>
 </body>
 </html>
