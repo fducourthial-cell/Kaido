@@ -1,55 +1,53 @@
-// Dictionnaire en mémoire des traductions dynamiques par session/cache
+// Dictionnaire en mémoire des traductions dynamiques stockées en local
 window.kaidoDynamicDict = JSON.parse(localStorage.getItem('kaido_dynamic_dict') || '{}');
 
-// Endpoint de ton IA (tu peux utiliser ta fonction Netlify existante ou un prompt dédié)
+// Endpoint de la fonction Netlify qui gère la traduction par l'IA
 const TRANSLATE_ENDPOINT = 'https://quiet-hamster-f904c2.netlify.app/.netlify/functions/translate-texts';
 
 async function applyGlobalLanguage(lang) {
     localStorage.setItem('kaido_global_lang', lang);
 
-    // Si c'est du français (langue d'origine du code), on remet les textes originaux ou on recharge
+    // Mettre à jour la valeur du select de langue s'il existe sur la page
+    const selector = document.getElementById('global-lang-selector');
+    if (selector) selector.value = lang;
+
+    // Si c'est le français (langue d'origine), on restitue les textes d'origine
     if (lang === 'fr') {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             if (el.dataset.originalText) {
-                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                    el.placeholder = el.dataset.originalText;
-                } else {
-                    el.textContent = el.dataset.originalText;
-                }
+                const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+                if (isInput) el.placeholder = el.dataset.originalText;
+                else el.textContent = el.dataset.originalText;
             }
         });
         return;
     }
 
-    // 1. Vérifier si on a déjà le dictionnaire pour cette langue en cache
     if (!window.kaidoDynamicDict[lang]) {
         window.kaidoDynamicDict[lang] = {};
     }
 
-    // 2. Collecter tous les textes de la page possédant l'attribut [data-i18n]
+    // 1. Collecter tous les textes de la page possédant l'attribut [data-i18n]
     const elementsToTranslate = document.querySelectorAll('[data-i18n]');
     const textsToTranslate = [];
 
     elementsToTranslate.forEach(el => {
-        // Sauvegarder le texte français d'origine si ce n'est pas déjà fait
+        // Enregistrer le texte français d'origine la première fois
         if (!el.dataset.originalText) {
             const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
-            el.dataset.originalText = isInput ? el.placeholder : el.textContent.trim();
+            el.dataset.originalText = isInput ? (el.placeholder || '') : el.textContent.trim();
         }
 
         const originalText = el.dataset.originalText;
-        
-        // Si on n'a pas encore la traduction de ce texte précis pour cette langue, on l'ajoute à la liste
-        if (!window.kaidoDynamicDict[lang][originalText]) {
+        if (originalText && !window.kaidoDynamicDict[lang][originalText]) {
             if (!textsToTranslate.includes(originalText)) {
                 textsToTranslate.push(originalText);
             }
         }
     });
 
-    // 3. S'il y a de nouveaux textes à traduire, on appelle l'IA
+    // 2. S'il y a des textes inédits pour cette langue, on interroge l'IA
     if (textsToTranslate.length > 0) {
-        // Afficher un petit indicateur discret de chargement de langue si tu veux
         try {
             const response = await fetch(TRANSLATE_ENDPOINT, {
                 method: 'POST',
@@ -62,21 +60,20 @@ async function applyGlobalLanguage(lang) {
 
             if (response.ok) {
                 const data = await response.json();
-                // data.translations doit être un objet ou un tableau associant { "Texte fr": "Texte traduit" }
                 if (data.translations) {
                     Object.keys(data.translations).forEach(frText => {
                         window.kaidoDynamicDict[lang][frText] = data.translations[frText];
                     });
-                    // Sauvegarder dans le localStorage pour les prochaines sessions
+                    // Sauvegarde dans le cache local pour les prochaines visites
                     localStorage.setItem('kaido_dynamic_dict', JSON.stringify(window.kaidoDynamicDict));
                 }
             }
         } catch (err) {
-            console.warn("Erreur lors de la traduction dynamique par l'IA :", err);
+            console.warn("Mode hors-ligne ou erreur de traduction IA : utilisation du cache local.", err);
         }
     }
 
-    // 4. Appliquer les traductions sur tous les éléments de la page
+    // 3. Appliquer les traductions sur tous les éléments de la page
     elementsToTranslate.forEach(el => {
         const originalText = el.dataset.originalText;
         const translatedText = window.kaidoDynamicDict[lang][originalText];
@@ -96,10 +93,39 @@ window.changeLanguage = function(lang) {
     applyGlobalLanguage(lang);
 };
 
-// Initialisation au chargement de la page
+// Fonction de bascule du thème (Sombre / Papyrus) avec symboles japonais
+function applyGlobalTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('kaido_theme', theme);
+
+    const themeBtn = document.getElementById('global-theme-toggle');
+    if (themeBtn) {
+        if (theme === 'papyrus') {
+            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">🌙</span>';
+            themeBtn.title = "Passer au thème sombre";
+        } else {
+            themeBtn.innerHTML = '<span style="font-size: 1.1rem;">☀️</span>';
+            themeBtn.title = "Passer au thème papyrus";
+        }
+    }
+}
+
+// Initialisation globale au chargement de chaque page
 document.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
     if (savedLang !== 'fr') {
         applyGlobalLanguage(savedLang);
+    }
+
+    const savedTheme = localStorage.getItem('kaido_theme') || 'dark';
+    applyGlobalTheme(savedTheme);
+
+    const themeToggleBtn = document.getElementById('global-theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'papyrus' : 'dark';
+            applyGlobalTheme(newTheme);
+        });
     }
 });
