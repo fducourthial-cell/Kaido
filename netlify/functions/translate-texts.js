@@ -3,16 +3,29 @@ const { GoogleGenAI } = require("@google/genai");
 // Initialisation de Gemini avec ta variable d'environnement existante
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Headers CORS communs à toutes les réponses
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json'
+};
+
 exports.handler = async function(event, context) {
+    // Répondre au preflight CORS envoyé par le navigateur avant le vrai POST
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers: CORS_HEADERS, body: '' };
+    }
+
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
+        return { statusCode: 405, headers: CORS_HEADERS, body: 'Method Not Allowed' };
     }
 
     try {
         const { targetLang, texts } = JSON.parse(event.body);
 
         if (!targetLang || !texts || !Array.isArray(texts)) {
-            return { statusCode: 400, body: JSON.stringify({ error: "Paramètres manquants (targetLang ou texts)" }) };
+            return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Paramètres manquants (targetLang ou texts)" }) };
         }
 
         const langNames = {
@@ -49,7 +62,7 @@ ${JSON.stringify(texts, null, 2)}`;
 
         return {
             statusCode: 200,
-            headers: { 'Content-Type': 'application/json' },
+            headers: CORS_HEADERS,
             body: JSON.stringify({ translations: translationsMap })
         };
 
@@ -57,7 +70,7 @@ ${JSON.stringify(texts, null, 2)}`;
         console.error("Erreur de traduction Netlify Function (Gemini):", error);
         return {
             statusCode: 500,
-            headers: { 'Content-Type': 'application/json' },
+            headers: CORS_HEADERS,
             body: JSON.stringify({ error: error.message })
         };
     }
