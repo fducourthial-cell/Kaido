@@ -177,8 +177,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span style="color:var(--text-muted);">⠿</span>
                                 <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;">
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
-                                    <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
-                                    <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
+                                    <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};" data-i18n>${actName}</div>
+                                    <div style="color:var(--text-muted); font-size:0.8rem;" data-i18n>📍 ${loc}</div>
                                 </div>
                                 <a href="${googleSearchUrl}" target="_blank" class="step-google-link" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); text-decoration: none; display: flex; align-items: center; justify-content: center;">🌐</a>
                             </div>`;
