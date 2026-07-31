@@ -58,7 +58,7 @@ RÈGLES IMPÉRATIVES DE LOGISTIQUE ET DE GÉOGRAPHIE :
 
 11. NOMBRE DE JOURS : Le tableau "itinerary" DOIT contenir exactement ${totalDays} éléments, ni plus ni moins — un par jour du voyage.
 
-EXIGENCE ABSOLUE : Retourne UNIQUEMENT un objet JSON valide, sans aucune balise markdown (pas de ```json), sans texte avant ni après.
+EXIGENCE ABSOLUE : Retourne UNIQUEMENT un objet JSON valide, sans aucune balise markdown, sans texte avant ni après.
 
 Structure stricte à respecter :
 {
