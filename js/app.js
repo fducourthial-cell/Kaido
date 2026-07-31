@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('article');
                 card.className = 'trip-card dynamic-trip'; // Classe repère pour le nettoyage
                 
-                // Reprise stricte de ton HTML fonctionnel + ajout du bouton poubelle inline
                 card.innerHTML = `
                     <div class="trip-banner" style="background-image: url('${trip.image || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'}');"></div>
                     <div class="trip-details">
@@ -68,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 
-                // Petit effet au survol de la corbeille
                 button.addEventListener('mouseenter', () => button.style.transform = 'scale(1.2)');
                 button.addEventListener('mouseleave', () => button.style.transform = 'scale(1)');
             });
@@ -91,50 +89,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderTrips();
     }
-});
-let deferredPrompt;
-const installBtn = document.getElementById('btn-install-pwa');
 
-// RÈGLE 1 : Si on est DÉJÀ dans l'application installée, on s'assure que le bouton est caché
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-if (isStandalone && installBtn) {
-    installBtn.style.display = 'none';
-}
+    // ==========================================================================
+    // 2. GESTION PROPRE DU BOUTON D'INSTALLATION PWA (ISOLÉ)
+    // ==========================================================================
+    let deferredPrompt;
+    const installBtn = document.getElementById('btn-install-pwa');
 
-// RÈGLE 2 : Le navigateur indique que l'app PEUT être installée
-window.addEventListener('beforeinstallprompt', (e) => {
-    // On bloque le bandeau automatique de Chrome pour le remplacer par notre bouton
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    // On affiche notre bouton
-    if (installBtn && !isStandalone) {
-        installBtn.style.display = 'block'; // ou 'flex' selon ton design
-    }
-});
-
-// RÈGLE 3 : Le clic sur le bouton
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            // Affiche la vraie pop-up d'installation du téléphone
-            deferredPrompt.prompt();
-            
-            // Attend la réponse de l'utilisateur (Accepté ou Refusé)
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                console.log('L\'utilisateur a accepté l\'installation');
-            }
-            // On réinitialise la variable
-            deferredPrompt = null;
-        }
-    });
-}
-
-// RÈGLE 4 : L'installation est terminée, on cache le bouton en direct
-window.addEventListener('appinstalled', () => {
     if (installBtn) {
-        installBtn.style.display = 'none';
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        
+        if (isStandalone) {
+            installBtn.style.display = 'none';
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            if (!isStandalone) {
+                installBtn.style.display = 'block'; 
+            }
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+        });
     }
-    console.log('Kaido a été installé avec succès !');
 });
