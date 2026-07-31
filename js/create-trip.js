@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (submitBtn) {
-                    submitBtn.textContent = "Calcul de l'itinéraire en cours...";
+                    submitBtn.textContent = "Calcul de l'itinéraire en cours avec l'IA...";
                     submitBtn.disabled = true;
                 }
 
@@ -109,34 +109,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // 4. RECHERCHE DES LIEUX À VISITER AVEC COORDONNÉES GPS
-                let spots = [];
-                try {
-                    spots = await fetchTopPlacesSafe(cleanDestination);
-                } catch (placesError) {
-                    console.warn("Google Places indisponible. Utilisation de la liste de secours.", placesError);
-                    spots = [
-                        { name: "Le centre historique et ses monuments incontournables", lat: null, lng: null },
-                        { name: "Le grand parc de la ville et ses espaces de détente", lat: null, lng: null },
-                        { name: "Le musée d'art et d'histoire locale", lat: null, lng: null },
-                        { name: "Le quartier animé et ses ruelles commerçantes", lat: null, lng: null },
-                        { name: "Le belvédère principal pour une vue panoramique", lat: null, lng: null },
-                        { name: "Le grand marché traditionnel local", lat: null, lng: null }
-                    ];
+                // 4. APPEL À L'IA NETLIFY (GEMINI)
+                console.log("🤖 Appel de l'IA Netlify en cours...");
+                const aiResponse = await fetch('/.netlify/functions/generate-trip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        destination: cleanDestination,
+                        departure: departure,
+                        totalDays: totalDays,
+                        descText: desc
+                    })
+                });
+
+                if (!aiResponse.ok) {
+                    throw new Error(`Erreur du serveur IA (${aiResponse.status}). Vérifiez vos logs Netlify.`);
                 }
 
-                const itinerary = generateItinerary(start, totalDays, spots);
+                // Récupération du JSON généré par Gemini
+                const aiData = await aiResponse.json();
+                console.log("✅ Réponse IA reçue :", aiData);
 
-                // Coordonnées de la destination principale pour le centrage de la carte
-                const mainLat = (spots.length > 0 && spots[0].lat) ? spots[0].lat : null;
-                const mainLng = (spots.length > 0 && spots[0].lng) ? spots[0].lng : null;
+                // Extraction des données de l'IA
+                const itinerary = aiData.itinerary || [];
+                const checklist = aiData.checklist || [];
+                const budgetDetails = aiData.budgetDetails || null;
+
+                // 4.bis RECHERCHE DES COORDONNÉES PRINCIPALES (Pour centrer la carte)
+                let mainLat = null;
+                let mainLng = null;
+                try {
+                    const spots = await fetchTopPlacesSafe(cleanDestination);
+                    if (spots.length > 0) {
+                        mainLat = spots[0].lat;
+                        mainLng = spots[0].lng;
+                    }
+                } catch (e) {
+                    console.warn("Impossible de récupérer les coordonnées centrales avec Google Places :", e);
+                }
                 
                 // 5. RÉCUPÉRATION DE L'IMAGE PEXELS
                 console.log("🖼️ Appel Pexels pour :", cleanDestination);
                 const finalImage = await fetchPexelsImage(cleanDestination);
                 console.log("✅ Image retenue :", finalImage);
 
-                // 6. ENREGISTREMENT DU VOYAGE (AVEC LAT ET LNG)
+                // 6. ENREGISTREMENT DU VOYAGE (AVEC LES DONNÉES IA)
                 const newTrip = {
                     id: Date.now(),
                     title: cleanDestination,
@@ -150,7 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     budget: budget,
                     desc: desc,
                     image: finalImage,
-                    itinerary: itinerary
+                    itinerary: itinerary,
+                    checklist: checklist,
+                    budgetDetails: budgetDetails
                 };
 
                 const currentTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
@@ -245,47 +264,6 @@ function fetchTopPlacesSafe(destinationName) {
             reject(e);
         }
     });
-}
-
-// GÉNÉRATION D'ITINÉRAIRE INTÉGRANT LAT ET LNG À CHAQUE ÉTAPE
-function generateItinerary(startDate, totalDays, spots) {
-    const itinerary = [];
-    let spotIndex = 0;
-
-    for (let i = 0; i < totalDays; i++) {
-        const currentDate = new Date(startDate);
-        currentDate.setDate(startDate.getDate() + i);
-
-        const daySteps = [];
-        
-        const spotMatin = spots[spotIndex % spots.length];
-        daySteps.push({
-            time: "10:00",
-            activity: `Visite et exploration : ${spotMatin.name}`,
-            location: spotMatin.name,
-            lat: spotMatin.lat,
-            lng: spotMatin.lng
-        });
-        spotIndex++;
-
-        const spotAprem = spots[spotIndex % spots.length];
-        daySteps.push({
-            time: "15:00",
-            activity: `Découverte incontournable : ${spotAprem.name}`,
-            location: spotAprem.name,
-            lat: spotAprem.lat,
-            lng: spotArem?.lng || spotAprem.lng
-        });
-        spotIndex++;
-
-        itinerary.push({
-            day: `Jour ${i + 1}`,
-            dateText: formatDate(currentDate),
-            steps: daySteps
-        });
-    }
-
-    return itinerary;
 }
 
 function formatDate(date) {
