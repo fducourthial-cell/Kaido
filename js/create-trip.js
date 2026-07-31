@@ -207,20 +207,12 @@ async function fetchPexelsImage(cityName) {
     return 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 }
 
-// EXTRACTION DES LIEUX SÉCURISÉE (Ne bloque plus jamais la création)
+// EXTRACTION DES LIEUX AVEC NOMS + COORDONNÉES GPS (LAT / LNG)
 function fetchTopPlacesSafe(destinationName) {
-    return new Promise((resolve) => {
-        // Si Google Maps / Places n'est pas disponible, on bascule direct sur le secours
+    return new Promise((resolve, reject) => {
         if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
-            console.warn("API Google Places absente, utilisation des lieux par défaut.");
-            return resolve([
-                { name: `Centre historique de ${destinationName}`, lat: null, lng: null },
-                { name: "Le grand parc principal et ses environs", lat: null, lng: null },
-                { name: "Le musée d'art et d'histoire locale", lat: null, lng: null },
-                { name: "Le quartier animé et commerçant", lat: null, lng: null },
-                { name: "Le belvédère et point de vue panoramique", lat: null, lng: null },
-                { name: "Le marché traditionnel local", lat: null, lng: null }
-            ]);
+            reject("API Google Maps absente.");
+            return;
         }
 
         try {
@@ -233,7 +225,7 @@ function fetchTopPlacesSafe(destinationName) {
             };
 
             service.textSearch(request, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                     const topSpots = results
                         .filter(place => place.name && place.geometry && place.geometry.location)
                         .slice(0, 10)
@@ -242,22 +234,15 @@ function fetchTopPlacesSafe(destinationName) {
                             lat: place.geometry.location.lat(),
                             lng: place.geometry.location.lng()
                         }));
-                    resolve(topSpots);
+
+                    if (topSpots.length > 0) resolve(topSpots);
+                    else reject("Aucun lieu trouvé.");
                 } else {
-                    // En cas d'erreur API, on renvoie une liste propre au lieu de rejeter
-                    resolve([
-                        { name: `Incontournables de ${destinationName}`, lat: null, lng: null },
-                        { name: "Centre-ville et rues piétonnes", lat: null, lng: null },
-                        { name: "Quartier culturel et monuments", lat: null, lng: null },
-                        { name: "Parc et espaces naturels", lat: null, lng: null }
-                    ]);
+                    reject(`Statut API invalide : ${status}`);
                 }
             });
         } catch (e) {
-            resolve([
-                { name: `Visite de ${destinationName}`, lat: null, lng: null },
-                { name: "Points d'intérêts principaux", lat: null, lng: null }
-            ]);
+            reject(e);
         }
     });
 }
@@ -289,7 +274,7 @@ function generateItinerary(startDate, totalDays, spots) {
             activity: `Découverte incontournable : ${spotAprem.name}`,
             location: spotAprem.name,
             lat: spotAprem.lat,
-            lng: spotAprem.lng
+            lng: spotArem?.lng || spotAprem.lng
         });
         spotIndex++;
 
