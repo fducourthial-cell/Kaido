@@ -1,7 +1,9 @@
-// Dictionnaire des traductions statiques
+// ==========================================
+// 1. BANQUE DES TRADUCTIONS MULTILINGUES
+// ==========================================
 const translations = {
     fr: {
-        // Le français sert de base, pas besoin de tout redéfinir si on ne trouve pas
+        // Le français sert de base
     },
     en: {
         "Projet Kiroku": "Kiroku Project",
@@ -137,7 +139,7 @@ const translations = {
         "Rang Actuel du Voyageur": "Grado Attuale del Viaggiatore",
         "Voyages planifiés": "Viaggi pianificati",
         "Aventures bouclées": "Avventure completate",
-        "Taux de complétion": "Tasso di completamento",
+        "Taux de completamento": "Tasso di completamento",
         "Volume Financier": "Volume Finanziario",
         "📜 Registre des Rangs par Voyage": "📜 Registro dei Gradi",
         "🏅 Titres & Succès du Voyageur": "🏅 Titoli e Obiettivi",
@@ -240,29 +242,27 @@ const translations = {
     }
 };
 
-// Fonction principale pour appliquer la traduction
+// ==========================================
+// 2. FONCTIONS DE GESTION DE LA LANGUE
+// ==========================================
 function applyGlobalLanguage(lang) {
     const dict = translations[lang] || translations['fr'];
     
     document.querySelectorAll('[data-i18n]').forEach(el => {
-        // Sauvegarde la clé en français lors du premier passage
         let key = el.getAttribute('data-i18n-key');
         if (!key) {
-            // Si c'est un input/textarea on prend le placeholder, sinon le texte
             key = el.placeholder ? el.placeholder.trim() : el.textContent.trim();
             el.setAttribute('data-i18n-key', key);
         }
 
-        // Si la traduction existe dans le dictionnaire pour cette langue
-        if (dict[key]) {
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'GMP-PLACE-AUTOCOMPLETE') {
+        if (dict && dict[key]) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = dict[key];
             } else {
                 el.textContent = dict[key];
             }
         } else if (lang === 'fr') {
-            // Restaure le français original si on repasse en FR
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'GMP-PLACE-AUTOCOMPLETE') {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = key;
             } else {
                 el.textContent = key;
@@ -271,14 +271,51 @@ function applyGlobalLanguage(lang) {
     });
 }
 
-// Fonction appelée par les boutons du menu HTML
-window.changeLanguage = function(lang) {
+window.selectLanguage = function(lang) {
     localStorage.setItem('kaido_global_lang', lang);
     applyGlobalLanguage(lang);
 };
 
-// Application automatique au chargement de la page
+// ==========================================
+// 3. FONCTIONS DE GESTION DU THÈME
+// ==========================================
+function applyGlobalTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('kaido_theme', theme);
+
+    const themeBtn = document.getElementById('global-theme-toggle');
+    if (themeBtn) {
+        if (theme === 'papyrus') {
+            themeBtn.innerHTML = '<span>🌙</span> <span data-i18n>Changer de thème</span>';
+            themeBtn.title = "Passer au thème sombre";
+        } else {
+            themeBtn.innerHTML = '<span>🌓</span> <span data-i18n>Changer de thème</span>';
+            themeBtn.title = "Passer au thème papyrus";
+        }
+    }
+}
+
+// ==========================================
+// 4. INITIALISATION AU CHARGEMENT DE LA PAGE
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialisation de la langue
     const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
     applyGlobalLanguage(savedLang);
+
+    // 2. Initialisation du thème
+    const savedTheme = localStorage.getItem('kaido_theme') || 'dark';
+    applyGlobalTheme(savedTheme);
+
+    // 3. Écouteur sur le bouton de bascule du thème (#global-theme-toggle)
+    const themeToggleBtn = document.getElementById('global-theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'papyrus' : 'dark';
+            applyGlobalTheme(newTheme);
+            // Réapplique la langue pour s'assurer que le texte "Changer de thème" reste traduit
+            applyGlobalLanguage(localStorage.getItem('kaido_global_lang') || 'fr');
+        });
+    }
 });
