@@ -86,7 +86,7 @@ Structure stricte à respecter :
     "food": 250,
     "activities": 150
   }
-}``;
+}`;
 
     const response = await fetch(endpoint, {
       method: 'POST',
