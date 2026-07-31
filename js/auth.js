@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const { error } = await client.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'https://kaido-translate.netlify.app'
+                        redirectTo: 'https://quiet-hamster-f904c2.netlify.app/'
                     }
                 });
                 if (error) throw error;
