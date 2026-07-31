@@ -293,4 +293,69 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (title && amount && title.value.trim() && amount.value) { window.activeTrip.expenses.push({ id: Date.now(), title: title.value.trim(), amount: parseFloat(amount.value) }); await window.saveTrip(); renderExpenses(); title.value = ''; amount.value = ''; }
         });
     }
+    // 10. Rendu des Notes de Réservation Personnelles
+    const renderBookingNotes = () => {
+        const listEl = document.getElementById('booking-notes-list');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        
+        if (!window.activeTrip.bookingNotes || window.activeTrip.bookingNotes.length === 0) {
+            listEl.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Aucune note de réservation.</span>`;
+            return;
+        }
+
+        window.activeTrip.bookingNotes.forEach(note => {
+            const row = document.createElement('div');
+            row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.6rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;`;
+            
+            // S'il y a un lien, on crée le bouton cliquable
+            let linkHTML = note.link ? `<a href="${note.link}" target="_blank" style="color: var(--color-gold); text-decoration: none; margin-right: 10px; font-weight: bold;">🔗 Lien</a>` : '';
+            
+            row.innerHTML = `
+                <span style="color: var(--text-main); font-weight: 500; flex: 1;">${note.title}</span>
+                <div style="display: flex; align-items: center;">
+                    ${linkHTML}
+                    <button class="btn-delete-booking" data-id="${note.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.8rem; font-weight: bold;">✖</button>
+                </div>
+            `;
+            
+            // Fonction de suppression
+            row.querySelector('.btn-delete-booking').addEventListener('click', async () => { 
+                window.activeTrip.bookingNotes = window.activeTrip.bookingNotes.filter(n => String(n.id) !== String(note.id)); 
+                await window.saveTrip(); 
+                renderBookingNotes(); 
+            });
+            
+            listEl.appendChild(row);
+        });
+    };
+
+    // On lance l'affichage au chargement
+    renderBookingNotes();
+
+    // Gestion de l'ajout d'une nouvelle réservation
+    const bookingForm = document.getElementById('add-booking-note-form');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            const titleInput = document.getElementById('booking-title-input'); 
+            const linkInput = document.getElementById('booking-link-input');
+            
+            if (titleInput && titleInput.value.trim()) { 
+                if (!window.activeTrip.bookingNotes) window.activeTrip.bookingNotes = [];
+                
+                window.activeTrip.bookingNotes.push({ 
+                    id: Date.now(), 
+                    title: titleInput.value.trim(), 
+                    link: linkInput ? linkInput.value.trim() : '' 
+                }); 
+                
+                await window.saveTrip(); 
+                renderBookingNotes(); 
+                
+                titleInput.value = ''; 
+                if (linkInput) linkInput.value = ''; 
+            }
+        });
+    }
 });
