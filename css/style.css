@@ -1028,9 +1028,4 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     font-size: 2rem;
     margin: 1rem 0;
 }
-/* Cache le bouton d'installation sur les écrans d'ordinateur */
-@media (min-width: 769px) {
-    #btn-install-pwa {
-        display: none !important;
-    }
-}
+
