@@ -327,7 +327,7 @@
                                 documents: ct.documents || [],
                                 gallery: ct.gallery || [],
                                 expenses: ct.expenses || [],
-                                bookingNotes: ct.booking_notes || [],
+                                bookingNotes: typeof ct.booking_notes === 'string' ? JSON.parse(ct.booking_notes) : (ct.booking_notes || []),
                                 status: ct.status || 'ongoing',
                                 final_rank: ct.final_rank || null,
                                 completion_rate: ct.completion_rate || 0
