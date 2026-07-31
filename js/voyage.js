@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Parsing sécurisé des données
-    ['itinerary', 'checklist', 'expenses', 'budgetDetails', 'documents', 'gallery', 'bookingNotes'].forEach(key => {
+    ['itinerary', 'checklist', 'expenses', 'budgetDetails', 'documents', 'gallery'].forEach(key => {
         if (typeof window.activeTrip[key] === 'string') {
             try { window.activeTrip[key] = JSON.parse(window.activeTrip[key]); } catch (e) { window.activeTrip[key] = key === 'budgetDetails' ? null : []; }
         }
@@ -177,8 +177,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span style="color:var(--text-muted);">⠿</span>
                                 <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;">
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
-                                    <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};" data-i18n>${actName}</div>
-                                    <div style="color:var(--text-muted); font-size:0.8rem;" data-i18n>📍 ${loc}</div>
+                                    <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
+                                    <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
                                 <a href="${googleSearchUrl}" target="_blank" class="step-google-link" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); text-decoration: none; display: flex; align-items: center; justify-content: center;">🌐</a>
                             </div>`;
@@ -291,55 +291,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         expenseForm.addEventListener('submit', async (e) => {
             e.preventDefault(); const title = document.getElementById('expense-title-input'); const amount = document.getElementById('expense-amount-input');
             if (title && amount && title.value.trim() && amount.value) { window.activeTrip.expenses.push({ id: Date.now(), title: title.value.trim(), amount: parseFloat(amount.value) }); await window.saveTrip(); renderExpenses(); title.value = ''; amount.value = ''; }
-        });
-    }
-
-    // 10. Rendu Notes de Réservation
-    const renderBookingNotes = () => {
-        const container = document.getElementById('booking-notes-list');
-        if (!container) return;
-        container.innerHTML = '';
-
-        if (!window.activeTrip.bookingNotes || window.activeTrip.bookingNotes.length === 0) {
-            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem;">Aucune note de réservation.</span>`;
-            return;
-        }
-
-        window.activeTrip.bookingNotes.forEach(note => {
-            const row = document.createElement('div');
-            row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.5rem 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;`;
-            row.innerHTML = `
-                <div>
-                    <strong style="color: var(--text-main);">${note.title}</strong>
-                    ${note.link ? `<a href="${note.link}" target="_blank" style="color: var(--color-gold); margin-left: 8px; font-size: 0.78rem;">🔗 Ouvrir</a>` : ''}
-                </div>
-                <button class="btn-delete-booking-note" data-id="${note.id}" style="background: none; border: none; color: var(--color-torii); cursor: pointer; font-size: 0.85rem;">🗑️</button>`;
-            row.querySelector('.btn-delete-booking-note').addEventListener('click', async () => {
-                window.activeTrip.bookingNotes = window.activeTrip.bookingNotes.filter(n => String(n.id) !== String(note.id));
-                await window.saveTrip();
-                renderBookingNotes();
-            });
-            container.appendChild(row);
-        });
-    };
-    renderBookingNotes();
-
-    const bookingNoteForm = document.getElementById('add-booking-note-form');
-    if (bookingNoteForm) {
-        bookingNoteForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const titleInput = document.getElementById('booking-title-input');
-            const linkInput = document.getElementById('booking-link-input');
-            const title = titleInput ? titleInput.value.trim() : '';
-            const link = linkInput ? linkInput.value.trim() : '';
-            if (!title) return;
-
-            if (!window.activeTrip.bookingNotes) window.activeTrip.bookingNotes = [];
-            window.activeTrip.bookingNotes.push({ id: Date.now(), title, link });
-            await window.saveTrip();
-            renderBookingNotes();
-            titleInput.value = '';
-            if (linkInput) linkInput.value = '';
         });
     }
 });
