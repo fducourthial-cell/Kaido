@@ -156,7 +156,7 @@
         </section>
     </div>
 
-    <!-- LOGIQUE DE RENDU -->
+    <!-- LOGIQUE DE RENDU & PWA -->
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
         if (typeof supabase !== 'undefined') {
@@ -374,6 +374,41 @@
             };
 
             await renderTrips();
+        }
+
+        // ==========================================================================
+        // GESTION DU BOUTON PWA (SÉCURISÉ DANS LE DOMContentLoaded)
+        // ==========================================================================
+        let deferredPrompt;
+        const installBtn = document.getElementById('btn-install-pwa');
+
+        if (installBtn) {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            
+            if (isStandalone) {
+                installBtn.style.display = 'none';
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                if (!isStandalone) {
+                    installBtn.style.display = 'block'; 
+                }
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                }
+            });
+
+            window.addEventListener('appinstalled', () => {
+                installBtn.style.display = 'none';
+            });
         }
     });
     </script>
