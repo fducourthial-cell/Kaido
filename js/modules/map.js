@@ -3,7 +3,36 @@ let activeMarkers = [];
 let routePolyline = null; 
 let placesService = null;
 
-// --- DÉFINITION DE TON PIN DORÉ SVG PERSONNALISÉ ---
+// --- FONCTION POUR GÉNÉRER UN PIN DORÉ AVEC LE NUMÉRO INTÉGRÉ ---
+function getNumberedGoldPin(numberText) {
+    const svgString = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 256 256">
+            <g transform="translate(1.40659 1.40659) scale(2.81)">
+                <!-- Gradient Doré -->
+                <linearGradient id="SVGID_4" x1="45" y1="80.71" x2="45" y2="2.88" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#b07908"/>
+                    <stop offset="22%" stop-color="#ddbd53"/>
+                    <stop offset="40%" stop-color="#f4e07a"/>
+                    <stop offset="68%" stop-color="#d5b354"/>
+                    <stop offset="100%" stop-color="#c0943a"/>
+                </linearGradient>
+                <!-- Corps du Pin -->
+                <path d="M 45 1.5 c -15.92 0 -28.83 12.9 -28.83 28.83 C 16.16 46.25 30.58 70.86 45 88.5 c 14.41 -17.63 28.83 -42.24 28.83 -58.16 C 73.83 14.4 60.92 1.5 45 1.5 z" fill="url(#SVGID_4)"/>
+                <!-- Cercle blanc à l'intérieur -->
+                <circle cx="45" cy="30.33" r="14" fill="#FFFFFF" stroke="#c0943a" stroke-width="2"/>
+                <!-- Texte du numéro centré -->
+                <text x="45" y="35.5" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#0D0B09" text-anchor="middle">${numberText}</text>
+            </g>
+        </svg>
+    `;
+    return {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgString),
+        scaledSize: new google.maps.Size(40, 40),
+        anchor: new google.maps.Point(20, 40) // Ancrage parfait sur la pointe du pin
+    };
+}
+
+// Pin simple sans numéro (pour l'étape unique ou sélectionnée)
 const goldPinIcon = {
     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 256 256">
@@ -140,20 +169,14 @@ async function displayDayOnMap(steps, mainDestination) {
     const bounds = new google.maps.LatLngBounds();
     resolvedWaypoints.forEach(wp => bounds.extend(wp.location));
 
-    // Si une seule étape, marqueur avec ton Pin Doré SVG
+    // Si une seule étape, marqueur "1" avec le Pin Doré numéroté
     if (resolvedWaypoints.length === 1) {
         const singleLoc = resolvedWaypoints[0].location;
         const marker = new google.maps.Marker({
             position: singleLoc,
             map: map,
             title: `1. ${resolvedWaypoints[0].stepInfo.activity || resolvedWaypoints[0].stepInfo.title}`,
-            label: {
-                text: "1",
-                color: "#0D0B09",
-                fontWeight: "bold",
-                fontSize: "12px"
-            },
-            icon: goldPinIcon
+            icon: getNumberedGoldPin("1")
         });
         activeMarkers.push(marker);
         map.setCenter(singleLoc);
@@ -198,13 +221,7 @@ async function displayDayOnMap(steps, mainDestination) {
                     position: wp.location,
                     map: map,
                     title: `${wp.index + 1}. ${wp.stepInfo.activity || wp.stepInfo.title}`,
-                    label: {
-                        text: `${wp.index + 1}`,
-                        color: "#0D0B09", 
-                        fontWeight: "bold",
-                        fontSize: "12px"
-                    },
-                    icon: goldPinIcon
+                    icon: getNumberedGoldPin(wp.index + 1)
                 });
                 activeMarkers.push(marker);
             });
@@ -216,8 +233,7 @@ async function displayDayOnMap(steps, mainDestination) {
                     position: wp.location,
                     map: map,
                     title: `${wp.index + 1}. ${wp.stepInfo.activity || wp.stepInfo.title}`,
-                    label: { text: `${wp.index + 1}`, color: "#0D0B09", fontWeight: "bold", fontSize: "12px" },
-                    icon: goldPinIcon
+                    icon: getNumberedGoldPin(wp.index + 1)
                 });
                 activeMarkers.push(marker);
             });
@@ -250,7 +266,7 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
             map: map,
             title: actName,
             animation: google.maps.Animation.DROP,
-            icon: goldPinIcon // Utilisation du pin doré SVG ici aussi
+            icon: goldPinIcon
         });
         activeMarkers.push(marker);
         map.panTo(location);
@@ -291,7 +307,7 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
                     const place = results[0];
                     if (previewImg && place.photos && place.photos.length > 0) {
                         previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
-                        previewImg.style.display = 'block';
+                        previewImg.style.display = 'none'; // garde tes réglages
                     }
                 }
             }
