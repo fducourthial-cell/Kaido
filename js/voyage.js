@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         completeBtn.addEventListener('click', async () => {
             if (!window.activeTrip) return;
             window.activeTrip.status = 'completed';
-            window.activeTrip.final_rank = window.activeTrip.final_rank || 'A'; // Attribue un rang par défaut si non défini
+            window.activeTrip.final_rank = window.activeTrip.final_rank || 'A';
             await window.saveTrip();
             alert("🎉 Félicitations ! Cette aventure est désormais officiellement bouclée et enregistrée dans votre Registre Kiroku.");
             window.location.href = "index.html";
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // 7. Rendu ITINÉRAIRE (Avec Drag & Drop actif)
+    // 7. Rendu ITINÉRAIRE (Drag & Drop actif + Recherche Google sur le lieu uniquement)
     let draggedStep = null;
 
     const renderItinerary = () => {
@@ -172,6 +172,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const loc = step.location || destination;
                         const actName = step.activity || step.title || step.name || 'Étape';
                         const isDone = step.done || false;
+                        
+                        // Recherche Google ciblée uniquement sur le lieu
                         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(loc)}`;
 
                         stepsHTML += `
@@ -225,7 +227,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const targetDayIdx = parseInt(stepEl.getAttribute('data-day'));
                         const targetIdx = parseInt(stepEl.getAttribute('data-idx'));
 
-                        // Réorganisation si on est dans le même jour
                         if (draggedStep.dayIdx === targetDayIdx) {
                             const steps = window.activeTrip.itinerary[targetDayIdx].steps;
                             const [movedItem] = steps.splice(draggedStep.idx, 1);
