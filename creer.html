@@ -170,15 +170,66 @@
                             <input type="date" id="trip-date-end" class="kaido-input" required>
                         </div>
                     </div>
+                </div>
+
+                <!-- NOUVELLE CARTE : MODES DE TRANSPORT -->
+                <div class="day-block-card" style="padding: 2rem;">
+                    <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">🚆 <span data-i18n>Modes de Transport</span></h3>
                     
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Transport pour s'y rendre -->
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.8rem; color: var(--text-main);">✈️ Moyen de transport pour aller à la destination :</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.2rem;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="radio" name="transport-get-there" value="avion" checked style="accent-color: var(--color-gold);"> Avion
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="radio" name="transport-get-there" value="train" style="accent-color: var(--color-gold);"> Train
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="radio" name="transport-get-there" value="voiture" style="accent-color: var(--color-gold);"> Voiture
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="radio" name="transport-get-there" value="bus" style="accent-color: var(--color-gold);"> Bus / Car
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Transport sur place -->
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.8rem; color: var(--text-main);">🚲 Mode de transport sur place :</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.2rem;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="checkbox" name="transport-onsite" value="à pied" style="accent-color: var(--color-gold);"> À pied
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="checkbox" name="transport-onsite" value="vélo" style="accent-color: var(--color-gold);"> Vélo
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="checkbox" name="transport-onsite" value="transports en commun" style="accent-color: var(--color-gold);"> Transports en commun
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="checkbox" name="transport-onsite" value="voiture" style="accent-color: var(--color-gold);"> Voiture / Location
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                                    <input type="checkbox" id="transport-onsite-other-checkbox" name="transport-onsite" value="autre" style="accent-color: var(--color-gold);"> Autre
+                                </label>
+                            </div>
+                            <!-- Champ de précision pour "Autre" -->
+                            <div id="transport-other-container" style="display: none; margin-top: 0.8rem;">
+                                <input type="text" id="transport-other-input" class="kaido-input" placeholder="Précisez le mode de transport (ex: Scooter, Van aménagé...)">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="day-block-card" style="padding: 2rem;">
                     <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">🎨 <span data-i18n>Vos Envies</span></h3>
                     
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label data-i18n>📝 Notes, mode de transport & activités souhaitées</label>
-                        <textarea id="trip-notes" class="kaido-input" rows="4" data-i18n placeholder="Ex: Road-trip en van, beaucoup de randonnées, visite de musées... Plus vous détaillez, plus l'IA sera précise."></textarea>
+                        <label data-i18n>📝 Notes & activités souhaitées</label>
+                        <textarea id="trip-notes" class="kaido-input" rows="4" data-i18n placeholder="Ex: Beaucoup de randonnées, visite de musées... Plus vous détaillez, plus l'IA sera précise."></textarea>
                     </div>
                 </div>
 
@@ -205,6 +256,15 @@
         const modernField = document.getElementById('trip-destination-modern');
         const departureModernField = document.getElementById('trip-departure-modern');
         const NETLIFY_ENDPOINT = '/.netlify/functions/generate-trip';
+
+        // Gestion affichage input "Autre" pour le transport sur place
+        const otherCheckbox = document.getElementById('transport-onsite-other-checkbox');
+        const otherContainer = document.getElementById('transport-other-container');
+        if (otherCheckbox && otherContainer) {
+            otherCheckbox.addEventListener('change', () => {
+                otherContainer.style.display = otherCheckbox.checked ? 'block' : 'none';
+            });
+        }
 
         let selectedDestinationName = "";
         let selectedDepartureName = "";
@@ -333,7 +393,17 @@
                     const userBudget = budgetInput ? parseFloat(budgetInput.value) : 0;
                     const notesInput = document.getElementById('trip-notes');
                     const desc = notesInput ? notesInput.value : '';
-                    
+
+                    // Récupération des modes de transport sélectionnés
+                    const transportGetThereEl = document.querySelector('input[name="transport-get-there"]:checked');
+                    const transportGetThere = transportGetThereEl ? transportGetThereEl.value : 'avion';
+
+                    const transportOnSiteChecked = Array.from(document.querySelectorAll('input[name="transport-onsite"]:checked'))
+                        .map(cb => cb.value);
+                    const transportOnSite = transportOnSiteChecked.join(', ');
+                    const transportOnSiteOtherInput = document.getElementById('transport-other-input');
+                    const transportOnSiteOther = transportOnSiteOtherInput ? transportOnSiteOtherInput.value.trim() : '';
+
                     const selectedLang = localStorage.getItem('kaido_global_lang') || 'fr';
 
                     if (!dateStart || !dateEnd) {
@@ -366,7 +436,10 @@
                             destination: cleanDestination,
                             departure: departure,
                             totalDays: totalDays,
-                            descText: desc
+                            descText: desc,
+                            transportGetThere: transportGetThere,
+                            transportOnSite: transportOnSite,
+                            transportOnSiteOther: transportOnSiteOther
                         })
                     });
 
