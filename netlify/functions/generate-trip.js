@@ -22,7 +22,7 @@ exports.handler = async (event, context) => {
       totalDays, 
       descText, 
       transportGetThere, // ex: "avion", "train", "voiture", "bus"
-      transportOnSite,   // ex: "à pied", "vélo", "transports commun", "voiture", ou autre
+      transportOnSite,   // ex: "à pied, vélo, autre" (peut contenir plusieurs choix)
       transportOnSiteOther // Précision si "autre"
     } = JSON.parse(event.body || "{}");
 
@@ -36,10 +36,15 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Formatage textuel propre pour l'IA
+    // --- CORRECTION : Gestion propre des textes pour l'IA ---
+    let finalTransportOnSite = transportOnSite || 'voiture';
+    // Si l'utilisateur a coché "autre" parmi ses choix, on remplace le mot "autre" par sa précision
+    if (finalTransportOnSite.includes('autre') && transportOnSiteOther) {
+        finalTransportOnSite = finalTransportOnSite.replace('autre', `autre (${transportOnSiteOther})`);
+    }
+
     const travelMainStr = transportGetThere ? `Mode de transport principal pour s'y rendre : ${transportGetThere}` : '';
-    const travelOnSiteDetail = transportOnSite === 'autre' && transportOnSiteOther ? `Autre (${transportOnSiteOther})` : transportOnSite;
-    const travelOnSiteStr = transportOnSiteDetail ? `Mode de déplacement sur place : ${travelOnSiteDetail}` : '';
+    const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
@@ -54,7 +59,7 @@ RÈGLES IMPÉRATIVES DE LOGISTIQUE ET DE GÉOGRAPHIE :
 
 1. PROGRESSION GÉOGRAPHIQUE GLOBALE (Le Circuit) : L'itinéraire doit suivre une boucle ou une ligne continue logique. Le lieu du matin du Jour N+1 DOIT être géographiquement proche du lieu de la veille au soir (Jour N). Zéro aller-retour absurde d'un bout à l'autre de la région.
 
-2. FAISABILITÉ QUOTIDIENNE (Microgéographie) : Les étapes d'une même journée doivent être regroupées dans le même secteur. Le temps de trajet entre chaque étape doit être court, réaliste et calibré en fonction du mode de déplacement sur place choisi ("${travelOnSiteDetail || 'voiture'}" : adapter les distances si c'est à pied, en transports en commun ou en voiture).
+2. FAISABILITÉ QUOTIDIENNE (Microgéographie) : Les étapes d'une même journée doivent être regroupées dans le même secteur. Le temps de trajet entre chaque étape doit être court, réaliste et calibré en fonction des modes de déplacement sur place choisis ("${finalTransportOnSite}").
 
 3. LOGISTIQUE D'ARRIVÉE/DÉPART : Le Jour 1 doit intégrer le trajet initial (${transportGetThere || 'standard'}) depuis ${departure} (arrivée, installation, première activité légère). Le dernier jour doit anticiper le retour vers le point de départ.
 
