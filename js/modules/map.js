@@ -3,6 +3,26 @@ let activeMarkers = [];
 let routePolyline = null; 
 let placesService = null;
 
+// --- DÉFINITION DE TON PIN DORÉ SVG PERSONNALISÉ ---
+const goldPinIcon = {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 256 256">
+            <g transform="translate(1.40659 1.40659) scale(2.81)">
+                <linearGradient id="SVGID_4" x1="45" y1="80.71" x2="45" y2="2.88" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#b07908"/>
+                    <stop offset="22%" stop-color="#ddbd53"/>
+                    <stop offset="40%" stop-color="#f4e07a"/>
+                    <stop offset="68%" stop-color="#d5b354"/>
+                    <stop offset="100%" stop-color="#c0943a"/>
+                </linearGradient>
+                <path d="M 45 1.5 c -15.92 0 -28.83 12.9 -28.83 28.83 C 16.16 46.25 30.58 70.86 45 88.5 c 14.41 -17.63 28.83 -42.24 28.83 -58.16 C 73.83 14.4 60.92 1.5 45 1.5 z M 45 47.6 c -9.78 0 -17.71 -7.93 -17.71 -17.71 S 35.21 12.18 45 12.18 s 17.71 7.93 17.71 17.71 S 54.78 47.6 45 47.6 z" fill="url(#SVGID_4)"/>
+            </g>
+        </svg>
+    `),
+    scaledSize: new google.maps.Size(36, 36),
+    anchor: new google.maps.Point(18, 36)
+};
+
 // Styles personnalisés pour la carte Google Maps selon le thème actif
 const mapStyles = {
     dark: [
@@ -14,7 +34,7 @@ const mapStyles = {
         { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
     ],
     papyrus: [
-        { elementType: "geometry", stylers: [{ color: "#F2EBD9" }] }, // Ton blanc cassé / parchemin des cartes
+        { elementType: "geometry", stylers: [{ color: "#F2EBD9" }] },
         { elementType: "labels.text.stroke", stylers: [{ color: "#FCF8F2" }] },
         { elementType: "labels.text.fill", stylers: [{ color: "#6B5E52" }] },
         { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#8C6D23" }] },
@@ -27,13 +47,12 @@ function initGoogleMap(destinationName, lat, lng) {
     const mapContainer = document.getElementById('map');
     if (!mapContainer || typeof google === 'undefined' || !google.maps) return;
 
-    let initialPos = { lat: 48.8566, lng: 2.3522 }; // Fallback Paris
+    let initialPos = { lat: 48.8566, lng: 2.3522 };
 
     if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
         initialPos = { lat: parseFloat(lat), lng: parseFloat(lng) };
     }
 
-    // 1. CORRECTION : Sécurité au chargement (vérifie le localStorage si le body n'est pas encore prêt)
     const currentTheme = document.body.getAttribute('data-theme') || localStorage.getItem('kaido_theme') || 'dark';
     const activeStyle = mapStyles[currentTheme] || mapStyles.dark;
 
@@ -47,7 +66,6 @@ function initGoogleMap(destinationName, lat, lng) {
 
     placesService = new google.maps.places.PlacesService(map);
 
-    // Fallback géocodage unique
     if (!lat || !lng) {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address: destinationName }, (results, status) => {
@@ -57,22 +75,19 @@ function initGoogleMap(destinationName, lat, lng) {
         });
     }
 
-    // 2. CORRECTION : Réintégration de l'écouteur du bouton Thème
     const themeToggleBtn = document.getElementById('global-theme-toggle');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
             setTimeout(() => {
-                // On récupère le nouveau thème après le clic
                 const newTheme = document.body.getAttribute('data-theme') || localStorage.getItem('kaido_theme') || 'dark';
                 if (map && mapStyles[newTheme]) {
                     map.setOptions({ styles: mapStyles[newTheme] });
                 }
-            }, 50); // Léger délai pour laisser le script global changer l'attribut du body
+            }, 50);
         });
     }
 }
 
-// Nettoyer les marqueurs et lignes de la carte
 function clearMapOverlays() {
     activeMarkers.forEach(m => m.setMap(null));
     activeMarkers = [];
@@ -86,7 +101,6 @@ function clearMapOverlays() {
     }
 }
 
-// Affichage du tracé routier Rouge Torii et des marqueurs numérotés Or personnalisés
 async function displayDayOnMap(steps, mainDestination) {
     clearMapOverlays();
     if (!steps || steps.length === 0 || !map) return;
@@ -94,7 +108,6 @@ async function displayDayOnMap(steps, mainDestination) {
     const geocoder = new google.maps.Geocoder();
     const resolvedWaypoints = [];
 
-    // 1. Résolution de toutes les coordonnées des étapes
     for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
         let loc = null;
@@ -127,7 +140,7 @@ async function displayDayOnMap(steps, mainDestination) {
     const bounds = new google.maps.LatLngBounds();
     resolvedWaypoints.forEach(wp => bounds.extend(wp.location));
 
-    // Si une seule étape, simple marqueur numéroté "1" en Or
+    // Si une seule étape, marqueur avec ton Pin Doré SVG
     if (resolvedWaypoints.length === 1) {
         const singleLoc = resolvedWaypoints[0].location;
         const marker = new google.maps.Marker({
@@ -140,14 +153,7 @@ async function displayDayOnMap(steps, mainDestination) {
                 fontWeight: "bold",
                 fontSize: "12px"
             },
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 14,
-                fillColor: "#D4AF37",
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#FFFFFF"
-            }
+            icon: goldPinIcon
         });
         activeMarkers.push(marker);
         map.setCenter(singleLoc);
@@ -155,7 +161,6 @@ async function displayDayOnMap(steps, mainDestination) {
         return;
     }
 
-    // 2. Tracé de la route (Rouge Torii) sans les marqueurs par défaut
     const origin = resolvedWaypoints[0].location;
     const destination = resolvedWaypoints[resolvedWaypoints.length - 1].location;
     
@@ -170,7 +175,7 @@ async function displayDayOnMap(steps, mainDestination) {
         suppressMarkers: true, 
         preserveViewport: false,
         polylineOptions: {
-            strokeColor: "#A63A2B", // Rouge Torii
+            strokeColor: "#A63A2B",
             strokeWeight: 5,
             strokeOpacity: 0.9
         }
@@ -188,7 +193,6 @@ async function displayDayOnMap(steps, mainDestination) {
         if (status === 'OK') {
             directionsRenderer.setDirections(response);
 
-            // 3. Ajout manuel de nos beaux marqueurs numérotés en Or
             resolvedWaypoints.forEach((wp) => {
                 const marker = new google.maps.Marker({
                     position: wp.location,
@@ -200,14 +204,7 @@ async function displayDayOnMap(steps, mainDestination) {
                         fontWeight: "bold",
                         fontSize: "12px"
                     },
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 14,
-                        fillColor: "#D4AF37",
-                        fillOpacity: 1,
-                        strokeWeight: 2,
-                        strokeColor: "#FFFFFF"
-                    }
+                    icon: goldPinIcon
                 });
                 activeMarkers.push(marker);
             });
@@ -220,14 +217,7 @@ async function displayDayOnMap(steps, mainDestination) {
                     map: map,
                     title: `${wp.index + 1}. ${wp.stepInfo.activity || wp.stepInfo.title}`,
                     label: { text: `${wp.index + 1}`, color: "#0D0B09", fontWeight: "bold", fontSize: "12px" },
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 14,
-                        fillColor: "#D4AF37",
-                        fillOpacity: 1,
-                        strokeWeight: 2,
-                        strokeColor: "#FFFFFF"
-                    }
+                    icon: goldPinIcon
                 });
                 activeMarkers.push(marker);
             });
@@ -239,7 +229,6 @@ async function displayDayOnMap(steps, mainDestination) {
     }
 }
 
-// Sélectionner une seule activité au clic individuel
 function selectActivityOnMap(step, addressQuery, mainDestination) {
     const actName = step ? (step.activity || step.title || 'Activité') : 'Activité';
     const locationName = step ? (step.location || addressQuery || mainDestination) : (addressQuery || mainDestination);
@@ -261,15 +250,7 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
             map: map,
             title: actName,
             animation: google.maps.Animation.DROP,
-            icon: {
-                path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-                fillColor: "#D4AF37",
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#FFFFFF",
-                scale: 1.8,
-                anchor: new google.maps.Point(12, 22)
-            }
+            icon: goldPinIcon // Utilisation du pin doré SVG ici aussi
         });
         activeMarkers.push(marker);
         map.panTo(location);
