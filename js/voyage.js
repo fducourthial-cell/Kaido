@@ -180,7 +180,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
                                     <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
-                                <a href="${googleSearchUrl}" target="_blank" class="step-google-link" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); text-decoration: none; display: flex; align-items: center; justify-content: center;">🌐</a>
+                                <a href="${googleSearchUrl}" target="_blank" class="step-google-link" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); text-decoration: none; display: flex; align-items: center; justify-content: center;">
+    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 16px; height: 16px;">
+</a>
                             </div>`;
                     });
                 }
