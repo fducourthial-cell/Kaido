@@ -19,9 +19,9 @@ function getNumberedGoldPin(numberText) {
                 <!-- Corps du Pin -->
                 <path d="M 45 1.5 c -15.92 0 -28.83 12.9 -28.83 28.83 C 16.16 46.25 30.58 70.86 45 88.5 c 14.41 -17.63 28.83 -42.24 28.83 -58.16 C 73.83 14.4 60.92 1.5 45 1.5 z" fill="url(#SVGID_4)"/>
                 <!-- Cercle blanc à l'intérieur -->
-                <circle cx="45" cy="30.33" r="14" fill="#FFFFFF" stroke="#c0943a" stroke-width="2"/>
+                <circle cx="45" cy="30.33" r="18" fill="#FFFFFF" stroke="#c0943a" stroke-width="2"/>
                 <!-- Texte du numéro centré -->
-                <text x="45" y="35.5" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#0D0B09" text-anchor="middle">${numberText}</text>
+                <text x="45" y="35.5" font-family="Arial, sans-serif" font-weight="bold" font-size="20" fill="#0D0B09" text-anchor="middle">${numberText}</text>
             </g>
         </svg>
     `;
