@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom: 0.5rem;">
                         <span style="background:var(--color-torii); color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem;" class="day-map-trigger">${day.day}</span>
                         <span style="color:var(--text-main); font-weight:500;" class="day-map-trigger">${day.dateText || ''}</span>
-                        <span style="color:var(--color-gold); font-size:0.8rem; margin-left: auto; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
+                        <span style="color:var(--color-gold); font-size:0.8rem; margin-left: auto; cursor:pointer;" class="day-map-trigger">🗺️ Parcours du jour</span>
                     </div>
                     <div style="margin-top: 0.5rem;" class="day-steps-container">${stepsHTML}</div>`;
 
