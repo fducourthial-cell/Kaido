@@ -15,7 +15,17 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { destination, departure, totalDays, descText } = JSON.parse(event.body || "{}");
+    // 1. Récupération des nouveaux champs de transport dans le body
+    const { 
+      destination, 
+      departure, 
+      totalDays, 
+      descText, 
+      transportGetThere, // ex: "avion", "train", "voiture", "bus"
+      transportOnSite,   // ex: "à pied", "vélo", "transports commun", "voiture", ou autre
+      transportOnSiteOther // Précision si "autre"
+    } = JSON.parse(event.body || "{}");
+
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -26,33 +36,39 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Endpoint v1beta avec le modèle exact attribué à ton compte
+    // Formatage textuel propre pour l'IA
+    const travelMainStr = transportGetThere ? `Mode de transport principal pour s'y rendre : ${transportGetThere}` : '';
+    const travelOnSiteDetail = transportOnSite === 'autre' && transportOnSiteOther ? `Autre (${transportOnSiteOther})` : transportOnSite;
+    const travelOnSiteStr = transportOnSiteDetail ? `Mode de déplacement sur place : ${travelOnSiteDetail}` : '';
+
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido, doublé d'un ingénieur senior en logistique géographique.
 
 Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
 Préférences / Notes de l'utilisateur : "${descText}"
+${travelMainStr}
+${travelOnSiteStr}
 
 RÈGLES IMPÉRATIVES DE LOGISTIQUE ET DE GÉOGRAPHIE :
 
 1. PROGRESSION GÉOGRAPHIQUE GLOBALE (Le Circuit) : L'itinéraire doit suivre une boucle ou une ligne continue logique. Le lieu du matin du Jour N+1 DOIT être géographiquement proche du lieu de la veille au soir (Jour N). Zéro aller-retour absurde d'un bout à l'autre de la région.
 
-2. FAISABILITÉ QUOTIDIENNE (Microgéographie) : Les étapes d'une même journée doivent être regroupées dans le même secteur. Le temps de trajet entre chaque étape doit être court, réaliste et optimisé pour un déplacement en voiture (sauf si "${descText}" précise un autre mode : train, vélo, à pied).
+2. FAISABILITÉ QUOTIDIENNE (Microgéographie) : Les étapes d'une même journée doivent être regroupées dans le même secteur. Le temps de trajet entre chaque étape doit être court, réaliste et calibré en fonction du mode de déplacement sur place choisi ("${travelOnSiteDetail || 'voiture'}" : adapter les distances si c'est à pied, en transports en commun ou en voiture).
 
-3. LOGISTIQUE D'ARRIVÉE/DÉPART : Le Jour 1 doit refléter l'arrivée depuis ${departure} (atterrissage/gare, trajet, première activité d'introduction, légère). Le dernier jour doit anticiper le rapprochement vers le point de départ pour le trajet retour.
+3. LOGISTIQUE D'ARRIVÉE/DÉPART : Le Jour 1 doit intégrer le trajet initial (${transportGetThere || 'standard'}) depuis ${departure} (arrivée, installation, première activité légère). Le dernier jour doit anticiper le retour vers le point de départ.
 
 4. JOURS DE TRANSFERT : Si une journée implique un long trajet entre deux secteurs éloignés, réduis le nombre d'étapes ce jour-là plutôt que de forcer 3 étapes irréalistes, et indique "travelDay": true sur ce jour.
 
-5. VÉRACITÉ : Propose uniquement des lieux RÉELS, EXACTS et PRÉCIS (ex: "Eilean Donan Castle", jamais "Un château écossais"). Reste prudent sur les horaires d'ouverture connus (évite par exemple de placer un musée un jour de fermeture habituelle si tu sais qu'il est fermé ce jour-là).
+5. VÉRACITÉ : Propose uniquement des lieux RÉELS, EXACTS et PRÉCIS (ex: "Eilean Donan Castle", jamais "Un château écossais"). Reste prudent sur les horaires d'ouverture connus.
 
 6. PRÉCISION DE LOCALISATION : Remplis "location" avec le nom exact du lieu + Ville + Pays pour un géocodage parfait côté application. Ne renseigne JAMAIS lat/lng : laisse-les strictement à null, ils sont calculés par l'application après coup.
 
 7. HÉBERGEMENT : Pour chaque jour, indique dans "accommodation" une zone ou ville où il est logique de dormir compte tenu du secteur du soir, sans inventer de nom d'hôtel précis.
 
-8. CHECK-LIST : Fournis 4 à 6 éléments de préparation indispensables, spécifiques à ce type de voyage et cette destination.
+8. CHECK-LIST : Fournis 4 à 6 éléments de préparation indispensables, spécifiques à ce type de voyage, à la destination et aux modes de transport choisis.
 
-9. BUDGET : Estime en euros (EUR) de manière réaliste selon la destination et la durée, avec un détail par poste (transport, hébergement, nourriture, activités).
+9. BUDGET : Estime en euros (EUR) de manière réaliste selon la destination, la durée et le mode de transport principal (${transportGetThere || 'standard'}), avec un détail par poste (transport, hébergement, nourriture, activités).
 
 10. LANGUE : Toutes les valeurs textuelles ("activity", "location", "checklist", etc.) doivent être rédigées en français, même si "${descText}" est dans une autre langue.
 
