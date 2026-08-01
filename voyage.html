@@ -139,7 +139,7 @@
         <!-- EN-TÊTE ÉPURÉ DU VOYAGE -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem;">
             <div>
-                <h1 id="trip-main-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0; color: var(--text-main);">Chargement...</h1>
+                <h1 id="trip-main-title" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0; color: var(--text-main); display: flex; align-items: center;">Chargement...</h1>
                 <p id="trip-main-dates" style="color: var(--color-gold); font-weight: 600; margin: 0.3rem 0 0 0; font-size: 0.95rem;">📅 --/--/---- au --/--/----</p>
             </div>
 
@@ -479,8 +479,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const activeTrip = JSON.parse(localStorage.getItem('kaido_active_trip')) || JSON.parse(localStorage.getItem('currentTrip'));
-            if (activeTrip && typeof calculateTripKiroku === 'function') {
-                await calculateTripKiroku(activeTrip);
+            
+            if (activeTrip) {
+                // ✨ Intégration dynamique du drapeau à gauche du titre
+                const countryCode = activeTrip.countryCode || 'fr';
+                const titleElement = document.getElementById('trip-main-title');
+                
+                if (titleElement) {
+                    titleElement.innerHTML = `
+                        <img src="https://flagcdn.com/32x24/${countryCode}.png" alt="Drapeau" style="vertical-align: middle; margin-right: 12px; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        ${activeTrip.title || activeTrip.destination}
+                    `;
+                }
+
+                if (typeof calculateTripKiroku === 'function') {
+                    await calculateTripKiroku(activeTrip);
+                }
             }
         });
     </script>
