@@ -45,6 +45,7 @@ body[data-theme="papyrus"] .step-item div,
 body[data-theme="papyrus"] .day-header span {
     color: var(--text-main) !important;
 }
+
 /* ==========================================================================
    CORRECTION DE L'ICÔNE ET DU TEXTE DU SÉLECTEUR DE DATE (DARK / PAPYRUS)
    ========================================================================== */
@@ -70,6 +71,7 @@ input[type="date"] {
 body[data-theme="papyrus"] input[type="date"] {
     color-scheme: light;
 }
+
 /* ==========================================================================
    CORRECTION DE L'AUTO-COMPLÉTION ET DU REMPLISSAGE AUTO (MODE CLAIR / PAPYRUS)
    ========================================================================== */
@@ -293,7 +295,6 @@ body:has(.create-hero) header {
     justify-content: space-between;
     align-items: center;
 }
-
 
 /* ==========================================================================
    4. DASHBOARD (INDEX.HTML)
@@ -572,6 +573,27 @@ gmp-place-autocomplete::part(input):focus {
     outline: none !important;
     border-color: var(--color-gold) !important;
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15) !important;
+}
+
+/* ==========================================================================
+   CORRECTION DU MENU DÉROULANT GOOGLE PLACES (AUTOCOMPLÉTION)
+   ========================================================================== */
+
+/* 1. Forcer le thème Clair (Papyrus) sur le menu Google Maps */
+body[data-theme="papyrus"] gmp-place-autocomplete {
+    color-scheme: light !important;
+    --gmp-color-surface: var(--bg-card) !important; /* Fond du menu clair */
+    --gmp-color-on-surface: var(--text-main) !important; /* Texte sombre */
+    --gmp-color-on-surface-variant: var(--text-muted) !important; /* Sous-titre gris */
+}
+
+/* 2. Forcer le thème Sombre (Dark) sur le menu Google Maps */
+body[data-theme="dark"] gmp-place-autocomplete,
+body:not([data-theme="papyrus"]) gmp-place-autocomplete {
+    color-scheme: dark !important;
+    --gmp-color-surface: var(--bg-card) !important; /* Fond du menu sombre */
+    --gmp-color-on-surface: var(--text-main) !important; /* Texte clair */
+    --gmp-color-on-surface-variant: var(--text-muted) !important;
 }
 
 /* Bouton de soumission stylisé */
@@ -1096,5 +1118,3 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     font-size: 2rem;
     margin: 1rem 0;
 }
-}
-
