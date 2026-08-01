@@ -717,7 +717,7 @@ body:not([data-theme="papyrus"]) gmp-place-autocomplete {
     list-style: none;
     padding: 0;
     margin: 1rem 0;
-    max-height: 250px;
+    max-height: 400px;
     overflow-y: auto;
 }
 .checklist-item {
