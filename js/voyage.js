@@ -152,7 +152,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // 7. Rendu ITINÉRAIRE
+    // 7. Rendu ITINÉRAIRE (Avec Drag & Drop actif)
+    let draggedStep = null;
+
     const renderItinerary = () => {
         const daysContainer = document.getElementById('itinerary-days-container');
         if (!daysContainer) return;
@@ -174,15 +176,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         stepsHTML += `
                             <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab; opacity: ${isDone ? '0.5' : '1'};">
-                                <span style="color:var(--text-muted);">⠿</span>
+                                <span style="color:var(--text-muted); cursor:grab;">⠿</span>
                                 <input type="checkbox" class="step-done-checkbox" data-day="${dayIdx}" data-idx="${idx}" ${isDone ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--color-gold); cursor:pointer;">
                                 <div style="flex: 1; cursor:pointer;" class="step-click-target">
                                     <div style="color:var(--text-main); font-weight:600; text-decoration: ${isDone ? 'line-through' : 'none'};">${actName}</div>
                                     <div style="color:var(--text-muted); font-size:0.8rem;">📍 ${loc}</div>
                                 </div>
                                 <a href="${googleSearchUrl}" target="_blank" class="step-google-link" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); width: 32px; height: 32px; border-radius: 50%; color: var(--color-gold); text-decoration: none; display: flex; align-items: center; justify-content: center;">
-    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 16px; height: 16px;">
-</a>
+                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 16px; height: 16px;">
+                                </a>
                             </div>`;
                     });
                 }
@@ -193,7 +195,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span style="color:var(--text-main); font-weight:500;" class="day-map-trigger">${day.dateText || ''}</span>
                         <span style="color:var(--color-gold); font-size:0.8rem; margin-left: auto; cursor:pointer;" class="day-map-trigger">📍 Carte</span>
                     </div>
-                    <div style="margin-top: 0.5rem;">${stepsHTML}</div>`;
+                    <div style="margin-top: 0.5rem;" class="day-steps-container">${stepsHTML}</div>`;
+
+                // --- ÉCOUTEURS DRAG & DROP ---
+                block.querySelectorAll('.step-item').forEach(stepEl => {
+                    stepEl.addEventListener('dragstart', (e) => {
+                        draggedStep = {
+                            dayIdx: parseInt(stepEl.getAttribute('data-day')),
+                            idx: parseInt(stepEl.getAttribute('data-idx'))
+                        };
+                        e.dataTransfer.effectAllowed = 'move';
+                        setTimeout(() => stepEl.style.opacity = '0.4', 0);
+                    });
+
+                    stepEl.addEventListener('dragend', () => {
+                        stepEl.style.opacity = '1';
+                        draggedStep = null;
+                    });
+
+                    stepEl.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                    });
+
+                    stepEl.addEventListener('drop', async (e) => {
+                        e.preventDefault();
+                        if (!draggedStep) return;
+
+                        const targetDayIdx = parseInt(stepEl.getAttribute('data-day'));
+                        const targetIdx = parseInt(stepEl.getAttribute('data-idx'));
+
+                        // Réorganisation si on est dans le même jour
+                        if (draggedStep.dayIdx === targetDayIdx) {
+                            const steps = window.activeTrip.itinerary[targetDayIdx].steps;
+                            const [movedItem] = steps.splice(draggedStep.idx, 1);
+                            steps.splice(targetIdx, 0, movedItem);
+
+                            await window.saveTrip();
+                            renderItinerary();
+                        }
+                    });
+                });
 
                 // Events Itinéraire (Checkbox & Map Select)
                 block.querySelectorAll('.step-done-checkbox').forEach(cb => {
@@ -295,6 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (title && amount && title.value.trim() && amount.value) { window.activeTrip.expenses.push({ id: Date.now(), title: title.value.trim(), amount: parseFloat(amount.value) }); await window.saveTrip(); renderExpenses(); title.value = ''; amount.value = ''; }
         });
     }
+
     // 10. Rendu des Notes de Réservation Personnelles
     const renderBookingNotes = () => {
         const listEl = document.getElementById('booking-notes-list');
@@ -310,7 +353,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const row = document.createElement('div');
             row.style.cssText = `display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 0.6rem; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;`;
             
-            // S'il y a un lien, on crée le bouton cliquable
             let linkHTML = note.link ? `<a href="${note.link}" target="_blank" style="color: var(--color-gold); text-decoration: none; margin-right: 10px; font-weight: bold;">🔗 Lien</a>` : '';
             
             row.innerHTML = `
@@ -321,7 +363,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
             
-            // Fonction de suppression
             row.querySelector('.btn-delete-booking').addEventListener('click', async () => { 
                 window.activeTrip.bookingNotes = window.activeTrip.bookingNotes.filter(n => String(n.id) !== String(note.id)); 
                 await window.saveTrip(); 
@@ -332,10 +373,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    // On lance l'affichage au chargement
     renderBookingNotes();
 
-    // Gestion de l'ajout d'une nouvelle réservation
     const bookingForm = document.getElementById('add-booking-note-form');
     if (bookingForm) {
         bookingForm.addEventListener('submit', async (e) => {
