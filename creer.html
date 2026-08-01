@@ -267,6 +267,7 @@
         }
 
         let selectedDestinationName = "";
+        let selectedCountryCode = "fr"; // Code pays par défaut
         let selectedDepartureName = "";
         let placesService = null;
 
@@ -320,11 +321,20 @@
             });
         }
 
+        // Récupération intelligente de la destination et du code pays via Google Places
         if (modernField) {
             modernField.addEventListener('gmp-placeselect', (event) => {
                 const place = event.detail.place;
                 if (place) {
                     selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
+                    
+                    // Extraction automatique du code pays fourni par Google Places
+                    if (place.addressComponents) {
+                        const countryComponent = place.addressComponents.find(comp => comp.types.includes('country'));
+                        if (countryComponent && countryComponent.shortText) {
+                            selectedCountryCode = countryComponent.shortText.toLowerCase();
+                        }
+                    }
                 }
             });
         }
@@ -480,6 +490,7 @@
                         id: Date.now(),
                         title: cleanDestination,
                         destination: cleanDestination,
+                        countryCode: selectedCountryCode, // ✨ Enregistrement direct du code pays Google Places
                         destinationLat: destInfo.lat,
                         destinationLng: destInfo.lng,
                         departure: departure,
