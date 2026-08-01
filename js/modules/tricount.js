@@ -105,7 +105,10 @@ window.initTricountModule = async function(tripId) {
                         .from('trip_expenses').insert([{ trip_id: tripId, title, amount, paid_by }]).select().single();
 
                     if (!expenseError && expenseData) {
+                        // Mise à jour de l'ID de la dépense ET des expense_id des splits associés
                         newExpense.id = expenseData.id;
+                        newExpense.trip_expense_splits.forEach(s => s.expense_id = expenseData.id);
+
                         const cloudSplits = selectedParticipantIds.map(participantId => ({
                             expense_id: expenseData.id, participant_id: participantId
                         }));
