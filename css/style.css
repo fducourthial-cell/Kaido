@@ -45,6 +45,31 @@ body[data-theme="papyrus"] .step-item div,
 body[data-theme="papyrus"] .day-header span {
     color: var(--text-main) !important;
 }
+/* ==========================================================================
+   CORRECTION DE L'ICÔNE ET DU TEXTE DU SÉLECTEUR DE DATE (DARK / PAPYRUS)
+   ========================================================================== */
+
+/* Mode Sombre (Dark) : Inverser l'icône du calendrier pour qu'elle devienne blanche/claire */
+body[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+body:not([data-theme="papyrus"]) input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) hue-rotate(180deg) brightness(1.2);
+    cursor: pointer;
+}
+
+/* Mode Papyrus : Garder l'icône sombre pour qu'elle contraste avec le fond clair */
+body[data-theme="papyrus"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: none;
+    cursor: pointer;
+}
+
+/* Assurer une police et une couleur de texte parfaitement lisibles sur les inputs date */
+input[type="date"] {
+    color-scheme: dark; /* Force le navigateur à adapter les menus déroulants natifs en mode sombre */
+}
+
+body[data-theme="papyrus"] input[type="date"] {
+    color-scheme: light;
+}
 
 /* ==========================================================================
    2. STYLE GLOBAL & HALO CHALEUREUX + TEXTURE WASHI
