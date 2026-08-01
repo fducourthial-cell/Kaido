@@ -85,14 +85,14 @@
                         <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
                     </button>
                     <button type="button" onclick="selectLanguage('it')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
-</button>
+                        <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
+                    </button>
                     <button type="button" onclick="selectLanguage('de')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
-</button>
+                        <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
+                    </button>
                     <button type="button" onclick="selectLanguage('ja')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
-</button>
+                        <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
+                    </button>
                 </div>
             </div>
 
@@ -172,12 +172,11 @@
                     </div>
                 </div>
 
-                <!-- NOUVELLE CARTE : MODES DE TRANSPORT -->
+                <!-- CARTE : MODES DE TRANSPORT -->
                 <div class="day-block-card" style="padding: 2rem;">
                     <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">🚆 <span data-i18n>Modes de Transport</span></h3>
                     
                     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                        <!-- Transport pour s'y rendre -->
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 0.8rem; color: var(--text-main);">✈️ Moyen de transport pour aller à la destination :</label>
                             <div style="display: flex; flex-wrap: wrap; gap: 1.2rem;">
@@ -196,7 +195,6 @@
                             </div>
                         </div>
 
-                        <!-- Transport sur place -->
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 0.8rem; color: var(--text-main);">🚲 Mode de transport sur place :</label>
                             <div style="display: flex; flex-wrap: wrap; gap: 1.2rem;">
@@ -216,7 +214,6 @@
                                     <input type="checkbox" id="transport-onsite-other-checkbox" name="transport-onsite" value="autre" style="accent-color: var(--color-gold);"> Autre
                                 </label>
                             </div>
-                            <!-- Champ de précision pour "Autre" -->
                             <div id="transport-other-container" style="display: none; margin-top: 0.8rem;">
                                 <input type="text" id="transport-other-input" class="kaido-input" placeholder="Précisez le mode de transport (ex: Scooter, Van aménagé...)">
                             </div>
@@ -225,7 +222,15 @@
                 </div>
 
                 <div class="day-block-card" style="padding: 2rem;">
-                    <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">🎨 <span data-i18n>Vos Envies</span></h3>
+                    <!-- TITRE ET BOUTON DICTÉE VOCALE -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin: 0; font-size: 1.3rem;">🎨 <span data-i18n>Vos Envies</span></h3>
+                        
+                        <!-- Bouton Dictée -->
+                        <button type="button" id="btn-dictate" style="background: rgba(212, 175, 55, 0.15); color: var(--color-gold); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                            <span id="dictate-icon">🎤</span> <span id="dictate-text" data-i18n>Dicter mes envies</span>
+                        </button>
+                    </div>
                     
                     <div class="form-group" style="margin-bottom: 0;">
                         <label data-i18n>📝 Notes & activités souhaitées</label>
@@ -257,6 +262,80 @@
         const departureModernField = document.getElementById('trip-departure-modern');
         const NETLIFY_ENDPOINT = '/.netlify/functions/generate-trip';
 
+        // ==========================================
+        // GESTION DE LA DICTÉE VOCALE (SPEECH RECOGNITION)
+        // ==========================================
+        const btnDictate = document.getElementById('btn-dictate');
+        const dictateIcon = document.getElementById('dictate-icon');
+        const dictateText = document.getElementById('dictate-text');
+        const tripNotes = document.getElementById('trip-notes');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            if (btnDictate) btnDictate.style.display = 'none'; // Masquer si non supporté par le navigateur
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'fr-FR'; // Langue de dictée par défaut
+
+            let isRecording = false;
+
+            btnDictate.addEventListener('click', () => {
+                if (!isRecording) {
+                    recognition.start();
+                } else {
+                    recognition.stop();
+                }
+            });
+
+            recognition.onstart = () => {
+                isRecording = true;
+                btnDictate.style.background = 'rgba(166, 58, 43, 0.2)';
+                btnDictate.style.borderColor = 'var(--color-torii)';
+                btnDictate.style.color = 'var(--color-torii)';
+                dictateIcon.textContent = '⏹️';
+                dictateText.textContent = 'Arrêter la dictée...';
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    const existingText = tripNotes.value;
+                    tripNotes.value = existingText ? existingText + ' ' + finalTranscript.trim() : finalTranscript.trim();
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Erreur de reconnaissance vocale:", event.error);
+                stopDictationUI();
+            };
+
+            recognition.onend = () => {
+                stopDictationUI();
+            };
+
+            function stopDictationUI() {
+                isRecording = false;
+                btnDictate.style.background = 'rgba(212, 175, 55, 0.15)';
+                btnDictate.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                btnDictate.style.color = 'var(--color-gold)';
+                dictateIcon.textContent = '🎤';
+                dictateText.textContent = 'Dicter mes envies';
+            }
+        }
+
         // Gestion affichage input "Autre" pour le transport sur place
         const otherCheckbox = document.getElementById('transport-onsite-other-checkbox');
         const otherContainer = document.getElementById('transport-other-container');
@@ -267,7 +346,7 @@
         }
 
         let selectedDestinationName = "";
-        let selectedCountryCode = "fr"; // Code pays par défaut
+        let selectedCountryCode = "fr";
         let selectedDepartureName = "";
         let placesService = null;
 
@@ -321,14 +400,11 @@
             });
         }
 
-        // Récupération intelligente de la destination et du code pays via Google Places
         if (modernField) {
             modernField.addEventListener('gmp-placeselect', (event) => {
                 const place = event.detail.place;
                 if (place) {
                     selectedDestinationName = place.displayName || place.formattedAddress || place.name || "";
-                    
-                    // Extraction automatique du code pays fourni par Google Places
                     if (place.addressComponents) {
                         const countryComponent = place.addressComponents.find(comp => comp.types.includes('country'));
                         if (countryComponent && countryComponent.shortText) {
@@ -404,7 +480,6 @@
                     const notesInput = document.getElementById('trip-notes');
                     const desc = notesInput ? notesInput.value : '';
 
-                    // Récupération des modes de transport sélectionnés
                     const transportGetThereEl = document.querySelector('input[name="transport-get-there"]:checked');
                     const transportGetThere = transportGetThereEl ? transportGetThereEl.value : 'avion';
 
@@ -490,7 +565,7 @@
                         id: Date.now(),
                         title: cleanDestination,
                         destination: cleanDestination,
-                        countryCode: selectedCountryCode, // ✨ Enregistrement direct du code pays Google Places
+                        countryCode: selectedCountryCode,
                         destinationLat: destInfo.lat,
                         destinationLng: destInfo.lng,
                         departure: departure,
