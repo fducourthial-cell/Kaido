@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const loc = step.location || destination;
                         const actName = step.activity || step.title || step.name || 'Étape';
                         const isDone = step.done || false;
-                        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${actName} ${loc}`)}`;
+                        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(loc)}`;
 
                         stepsHTML += `
                             <div class="step-item" draggable="true" data-day="${dayIdx}" data-idx="${idx}" style="display:flex; align-items:center; gap:1rem; margin-top:0.8rem; background:rgba(255,255,255,0.02); padding:0.8rem; border-radius:6px; border:1px solid var(--border-color); cursor:grab; opacity: ${isDone ? '0.5' : '1'};">
