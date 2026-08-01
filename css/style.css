@@ -478,6 +478,21 @@ body:has(.create-hero) header {
     font-weight: 500;
     font-size: 1.1rem;
 }
+/* Effet visuel au survol de la photo de la carte voyage */
+.trip-banner {
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.trip-banner-link:hover .trip-banner {
+    filter: brightness(1.1);
+    transform: scale(1.02); /* Léger zoom élégant */
+}
+.trip-banner-link {
+    overflow: hidden; /* Empêche le zoom de dépasser des bords de la carte */
+    display: block;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
 
 /* ==========================================================================
    5. FORMULAIRES & CRÉATION (CREER.HTML)
