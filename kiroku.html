@@ -105,6 +105,93 @@
                     }
                     if (dropdown) dropdown.style.display = 'none';
                 }
+                document.addEventListener('DOMContentLoaded', () => {
+    // 1. Récupération des voyages enregistrés
+    const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
+
+    if (trips.length === 0) return;
+
+    // 2. Extraction des données pour chaque voyage
+    const labels = trips.map(t => t.destination || t.title || 'Voyage');
+    const estimatedBudgets = trips.map(t => parseFloat(t.budget) || 0);
+    
+    // Calcul des dépenses réelles par voyage (somme du tableau expenses si présent)
+    const realExpenses = trips.map(t => {
+        if (t.expenses && Array.isArray(t.expenses)) {
+            return t.expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+        }
+        return 0; // 0 si aucune dépense réelle saisie pour ce voyage
+    });
+
+    // 3. Configuration et création du graphique avec Chart.js
+    const ctx = document.getElementById('tripsBudgetChart').getContext('2d');
+
+    // Détection du thème actuel (pour adapter les couleurs du texte du graphe)
+    const isPapyrus = document.body.getAttribute('data-theme') === 'papyrus';
+    const textColor = isPapyrus ? '#2C241D' : '#F4EFEA';
+    const gridColor = isPapyrus ? 'rgba(140, 109, 35, 0.15)' : 'rgba(212, 175, 55, 0.15)';
+
+    new Chart(ctx, {
+        type: 'bar', // Histogramme en barres
+        data: {
+            labels: labels, // Noms des destinations sur l'axe X
+            datasets: [
+                {
+                    label: 'Budget Estimé (€)',
+                    data: estimatedBudgets,
+                    backgroundColor: 'rgba(212, 175, 55, 0.7)', // Or Kaido
+                    borderColor: '#D4AF37',
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Dépenses Réelles (€)',
+                    data: realExpenses,
+                    backgroundColor: 'rgba(166, 58, 43, 0.7)', // Rouge Torii
+                    borderColor: '#A63A2B',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: textColor,
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + ' €';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: textColor },
+                    grid: { color: gridColor }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { 
+                        color: textColor,
+                        callback: function(value) { return value + ' €'; }
+                    },
+                    grid: { color: gridColor }
+                }
+            }
+        }
+    });
+});
                 
                 // --- LOGIQUE DES SUCCÈS & ACHIEVEMENTS ---
                 const achievementsContainer = document.getElementById('kiroku-achievements-list');
