@@ -164,11 +164,19 @@
                     <div id="stat-total-budget" style="font-size: 2rem; font-weight: bold; color: var(--color-gold); font-family: 'Playfair Display', serif;">0 €</div>
                 </div>
 
+                <!-- Distance parcourue -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem;">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🌍</div>
+                    <h3 style="font-family: 'Playfair Display', serif; color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0;" data-i18n>Distance Parcourue</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;" data-i18n>Trajets & itinéraires cumulés</p>
+                    <div id="stat-total-km" style="font-size: 2rem; font-weight: bold; color: var(--color-gold); font-family: 'Playfair Display', serif;">0 km</div>
+                </div>
+
             </div>
 
             <!-- BLOC 2.5 : GRAPHIQUE BUDGET -->
-            <div class="map-card" style="margin-top: 0; padding: 1.5rem;">
-                <h3 style="font-family: var(--font-serif); color: var(--color-gold); margin-bottom: 1rem;" data-i18n>
+            <div class="map-card" style="margin-top: 0; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                <h3 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-top: 0; margin-bottom: 1rem;" data-i18n>
                     📊 Comparatif Budget Estimé vs Dépenses Réelles
                 </h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;" data-i18n>
@@ -229,8 +237,8 @@
         document.getElementById('stat-completed-trips').textContent = completedTrips;
         
         document.getElementById('stat-total-budget').innerHTML = `
-            <span style="font-size: 1.8rem; color: var(--color-gold);">${totalRealSpent.toLocaleString()} €</span>
-            <span style="font-size: 0.85rem; color: var(--text-muted); display: block; font-weight: normal; margin-top: 4px;">Estimé global : ${totalBudget.toLocaleString()} €</span>
+            <span style="font-size: 1.8rem; color: var(--color-gold);">${totalRealSpent.toLocaleString('fr-FR')} €</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); display: block; font-weight: normal; margin-top: 4px;">Estimé global : ${totalBudget.toLocaleString('fr-FR')} €</span>
         `;
 
         const rankTitleEl = document.getElementById('profile-rank-title');
@@ -246,6 +254,62 @@
             rankTitleEl.textContent = "Tabibito (Voyageur Novice)";
             badgeIconEl.textContent = "🌱";
         }
+
+        // ----------------------------------------------------
+        // 1.5 CALCUL DE LA DISTANCE PARCOURUE (KILOMÈTRES)
+        // ----------------------------------------------------
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = 
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+            return R * c;
+        }
+
+        let totalKilometers = 0;
+        const defaultDepartureLat = 48.8566; // Paris par défaut
+        const defaultDepartureLng = 2.3522;
+
+        localTrips.forEach(trip => {
+            let tripDistance = 0;
+
+            const depLat = trip.departureLat || defaultDepartureLat;
+            const depLng = trip.departureLng || defaultDepartureLng;
+            const destLat = trip.destinationLat;
+            const destLng = trip.destinationLng;
+
+            if (destLat && destLng) {
+                // Aller-retour
+                tripDistance += getDistanceFromLatLonInKm(depLat, depLng, destLat, destLng) * 2;
+            }
+
+            if (trip.itinerary && Array.isArray(trip.itinerary)) {
+                trip.itinerary.forEach(day => {
+                    if (day.steps && Array.isArray(day.steps)) {
+                        for (let i = 1; i < day.steps.length; i++) {
+                            const prevStep = day.steps[i - 1];
+                            const currStep = day.steps[i];
+                            
+                            if (prevStep.lat && prevStep.lng && currStep.lat && currStep.lng) {
+                                tripDistance += getDistanceFromLatLonInKm(
+                                    prevStep.lat, prevStep.lng, 
+                                    currStep.lat, currStep.lng
+                                );
+                            }
+                        }
+                    }
+                });
+            }
+
+            totalKilometers += tripDistance;
+        });
+
+        document.getElementById('stat-total-km').textContent = Math.round(totalKilometers).toLocaleString('fr-FR') + " km";
 
         // ----------------------------------------------------
         // 2. GENERATION DU GRAPHIQUE CHART.JS
