@@ -44,8 +44,8 @@
                 </a>
             </div>
 
-            <!-- DROITE : Menu Options -->
-            <div class="header-right" style="display: flex; align-items: center; position: relative;">
+            <!-- DROITE : Menu Options (Avec le gap: 12px pour l'espacement) -->
+            <div class="header-right" style="display: flex; align-items: center; position: relative; gap: 12px;">
                 <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
                     ⚙️
                 </button>
@@ -59,7 +59,7 @@
 
                     <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Langue</div>
                     
-                   <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <img src="https://flagcdn.com/20x15/fr.png" width="16" alt="FR"> Français
                     </button>
                     <button type="button" onclick="selectLanguage('en')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
@@ -69,17 +69,22 @@
                         <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
                     </button>
                     <button type="button" onclick="selectLanguage('it')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
-</button>
+                        <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
+                    </button>
                     <button type="button" onclick="selectLanguage('de')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
-</button>
+                        <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
+                    </button>
                     <button type="button" onclick="selectLanguage('ja')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
-</button>
+                        <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
+                    </button>
                 </div>
+
+                <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                    <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+                </button>
             </div>
 
+            <!-- LOGIQUE DU HEADER UNIQUEMENT -->
             <script>
                 const menuBtn = document.getElementById('options-menu-btn');
                 const dropdown = document.getElementById('options-dropdown');
@@ -105,169 +110,15 @@
                     }
                     if (dropdown) dropdown.style.display = 'none';
                 }
-                document.addEventListener('DOMContentLoaded', () => {
-    // 1. Récupération des voyages enregistrés
-    const trips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-
-    if (trips.length === 0) return;
-
-    // 2. Extraction des données pour chaque voyage
-    const labels = trips.map(t => t.destination || t.title || 'Voyage');
-    const estimatedBudgets = trips.map(t => parseFloat(t.budget) || 0);
-    
-    // Calcul des dépenses réelles par voyage (somme du tableau expenses si présent)
-    const realExpenses = trips.map(t => {
-        if (t.expenses && Array.isArray(t.expenses)) {
-            return t.expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-        }
-        return 0; // 0 si aucune dépense réelle saisie pour ce voyage
-    });
-
-    // 3. Configuration et création du graphique avec Chart.js
-    const ctx = document.getElementById('tripsBudgetChart').getContext('2d');
-
-    // Détection du thème actuel (pour adapter les couleurs du texte du graphe)
-    const isPapyrus = document.body.getAttribute('data-theme') === 'papyrus';
-    const textColor = isPapyrus ? '#2C241D' : '#F4EFEA';
-    const gridColor = isPapyrus ? 'rgba(140, 109, 35, 0.15)' : 'rgba(212, 175, 55, 0.15)';
-
-    new Chart(ctx, {
-        type: 'bar', // Histogramme en barres
-        data: {
-            labels: labels, // Noms des destinations sur l'axe X
-            datasets: [
-                {
-                    label: 'Budget Estimé (€)',
-                    data: estimatedBudgets,
-                    backgroundColor: 'rgba(212, 175, 55, 0.7)', // Or Kaido
-                    borderColor: '#D4AF37',
-                    borderWidth: 1,
-                    borderRadius: 4
-                },
-                {
-                    label: 'Dépenses Réelles (€)',
-                    data: realExpenses,
-                    backgroundColor: 'rgba(166, 58, 43, 0.7)', // Rouge Torii
-                    borderColor: '#A63A2B',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: {
-                        color: textColor,
-                        font: {
-                            family: 'Plus Jakarta Sans',
-                            size: 12
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + context.raw + ' €';
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { color: textColor },
-                    grid: { color: gridColor }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: { 
-                        color: textColor,
-                        callback: function(value) { return value + ' €'; }
-                    },
-                    grid: { color: gridColor }
-                }
-            }
-        }
-    });
-});
-                
-                // --- LOGIQUE DES SUCCÈS & ACHIEVEMENTS ---
-                const achievementsContainer = document.getElementById('kiroku-achievements-list');
-                if (achievementsContainer) {
-                    const localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
-                    let achievements = [
-                        {
-                            id: 'first_step',
-                            title: 'Premier Pas',
-                            desc: 'Tracer et enregistrer votre tout premier voyage.',
-                            icon: '🧭',
-                            unlocked: localTrips.length > 0
-                        },
-                        {
-                            id: 'completionist',
-                            title: 'Explorateur Méthodique',
-                            desc: 'Atteindre un taux de complétion global de 100% sur un carnet.',
-                            icon: '🎯',
-                            unlocked: localTrips.some(t => {
-                                let total = 0, done = 0;
-                                t.itinerary?.forEach(d => d.steps?.forEach(s => { total++; if(s.done) done++; }));
-                                return total > 0 && done === total;
-                            })
-                        },
-                        {
-                            id: 'budget_master',
-                            title: 'Maître des Cordons',
-                            desc: 'Enregistrer des dépenses réelles sans dépasser le budget estimé.',
-                            icon: '⚖️',
-                            unlocked: localTrips.some(t => {
-                                if (!t.expenses || t.expenses.length === 0) return false;
-                                const spent = t.expenses.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
-                                return spent <= (parseFloat(t.budget) || 0);
-                            })
-                        },
-                        {
-                            id: 'nomad_veteran',
-                            title: 'Grand Nomade',
-                            desc: 'Planifier 5 voyages ou plus dans votre registre.',
-                            icon: '⛩️',
-                            unlocked: localTrips.length >= 5
-                        }
-                    ];
-
-                    achievementsContainer.innerHTML = '';
-                    achievements.forEach(ach => {
-                        const opacity = ach.unlocked ? '1' : '0.4';
-                        const borderColor = ach.unlocked ? 'var(--color-gold)' : 'var(--border-color)';
-                        const bgStyle = ach.unlocked ? 'background: rgba(212,175,55,0.05);' : 'background: var(--bg-dark);';
-
-                        achievementsContainer.innerHTML += `
-                            <div style="${bgStyle} border: 1px solid ${borderColor}; border-radius: 6px; padding: 1rem; opacity: ${opacity}; display: flex; gap: 12px; align-items: center;">
-                                <div style="font-size: 2rem; background: var(--bg-card); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid ${borderColor}; flex-shrink: 0;">
-                                    ${ach.icon}
-                                </div>
-                                <div>
-                                    <h4 style="margin: 0 0 0.2rem 0; color: var(--text-main); font-family: 'Playfair Display', serif; font-size: 1rem;">${ach.title} ${ach.unlocked ? '✅' : '🔒'}</h4>
-                                    <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted);">${ach.desc}</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
             </script>
-
-            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
-                <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
-            </button>
         </header>
 
         <!-- TITRE DE LA PAGE KIROKU -->
         <div class="dashboard-title-wrapper" style="text-align: center; margin-top: 2rem;">
-            <h1 class="dashboard-title">
+            <h1 class="dashboard-title" style="justify-content: center;">
                 🏆 <span data-i18n>Statistiques & Rang</span> 
-                <span class="dashboard-subtitle-jp">記録 — Le Registre du Voyageur</span>
             </h1>
+            <span class="dashboard-subtitle-jp" style="display: block; margin-top: 0.5rem;">記録 — Le Registre du Voyageur</span>
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;" data-i18n>Votre palmarès, vos rangs et l'historique de vos aventures.</p>
         </div>
 
@@ -314,19 +165,19 @@
                 </div>
 
             </div>
-            <div class="map-card" style="margin-top: 2rem; padding: 1.5rem;">
-    <h3 style="font-family: var(--font-serif); color: var(--color-gold); margin-bottom: 1rem;" data-i18n>
-        📊 Comparatif Budget Estimé vs Dépenses Réelles
-    </h3>
-    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;" data-i18n>
-        Analyse globale et par voyage de tes finances de voyage.
-    </p>
 
-    <!-- Conteneur du graphique -->
-    <div style="position: relative; height: 300px; width: 100%;">
-        <canvas id="tripsBudgetChart"></canvas>
-    </div>
-</div>
+            <!-- BLOC 2.5 : GRAPHIQUE BUDGET -->
+            <div class="map-card" style="margin-top: 0; padding: 1.5rem;">
+                <h3 style="font-family: var(--font-serif); color: var(--color-gold); margin-bottom: 1rem;" data-i18n>
+                    📊 Comparatif Budget Estimé vs Dépenses Réelles
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;" data-i18n>
+                    Analyse globale et par voyage de tes finances de voyage.
+                </p>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="tripsBudgetChart"></canvas>
+                </div>
+            </div>
 
             <!-- BLOC 3 : HISTORIQUE DES RANGS S / A / B -->
             <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem;">
@@ -348,11 +199,14 @@
         </main>
     </div>
 
-    <!-- LOGIQUE DE CALCUL DU PROJET KIROKU -->
+    <!-- TOUTE LA LOGIQUE DE CALCUL DU PROJET KIROKU EST REGROUPÉE ICI -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const localTrips = JSON.parse(localStorage.getItem('kaido_trips')) || [];
 
+        // ----------------------------------------------------
+        // 1. CALCUL DES STATS GLOBALES (RANG, BUDGET, VOYAGES)
+        // ----------------------------------------------------
         const totalTrips = localTrips.length;
         const completedTrips = localTrips.filter(t => 
             t.status === 'completed' || (t.dateEnd && new Date(t.dateEnd) < new Date())
@@ -393,6 +247,66 @@
             badgeIconEl.textContent = "🌱";
         }
 
+        // ----------------------------------------------------
+        // 2. GENERATION DU GRAPHIQUE CHART.JS
+        // ----------------------------------------------------
+        if (localTrips.length > 0) {
+            const labels = localTrips.map(t => t.destination || t.title || 'Voyage');
+            const estimatedBudgets = localTrips.map(t => parseFloat(t.budget) || 0);
+            
+            const realExpenses = localTrips.map(t => {
+                if (t.expenses && Array.isArray(t.expenses)) {
+                    return t.expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+                }
+                return 0;
+            });
+
+            const ctx = document.getElementById('tripsBudgetChart').getContext('2d');
+            const isPapyrus = document.body.getAttribute('data-theme') === 'papyrus';
+            const textColor = isPapyrus ? '#2C241D' : '#F4EFEA';
+            const gridColor = isPapyrus ? 'rgba(140, 109, 35, 0.15)' : 'rgba(212, 175, 55, 0.15)';
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Budget Estimé (€)',
+                            data: estimatedBudgets,
+                            backgroundColor: 'rgba(212, 175, 55, 0.7)',
+                            borderColor: '#D4AF37',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Dépenses Réelles (€)',
+                            data: realExpenses,
+                            backgroundColor: 'rgba(166, 58, 43, 0.7)',
+                            borderColor: '#A63A2B',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 12 } } },
+                        tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.raw + ' €'; } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { beginAtZero: true, ticks: { color: textColor, callback: function(value) { return value + ' €'; } }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        }
+
+        // ----------------------------------------------------
+        // 3. GENERATION DE L'HISTORIQUE
+        // ----------------------------------------------------
         const historyContainer = document.getElementById('kiroku-history-list');
         if (localTrips.length === 0) {
             historyContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem; text-align: center; display: block;">Aucun voyage enregistré pour le moment. Tracez votre première route !</span>`;
@@ -447,6 +361,70 @@
 
         const avgCompletion = Math.round(totalCompletionSum / localTrips.length);
         document.getElementById('stat-completion-avg').textContent = `${avgCompletion}%`;
+
+        // ----------------------------------------------------
+        // 4. GENERATION DES SUCCÈS (ACHIEVEMENTS)
+        // ----------------------------------------------------
+        const achievementsContainer = document.getElementById('kiroku-achievements-list');
+        if (achievementsContainer) {
+            let achievements = [
+                {
+                    id: 'first_step',
+                    title: 'Premier Pas',
+                    desc: 'Tracer et enregistrer votre tout premier voyage.',
+                    icon: '🧭',
+                    unlocked: localTrips.length > 0
+                },
+                {
+                    id: 'completionist',
+                    title: 'Explorateur Méthodique',
+                    desc: 'Atteindre un taux de complétion global de 100% sur un carnet.',
+                    icon: '🎯',
+                    unlocked: localTrips.some(t => {
+                        let total = 0, done = 0;
+                        t.itinerary?.forEach(d => d.steps?.forEach(s => { total++; if(s.done) done++; }));
+                        return total > 0 && done === total;
+                    })
+                },
+                {
+                    id: 'budget_master',
+                    title: 'Maître des Cordons',
+                    desc: 'Enregistrer des dépenses réelles sans dépasser le budget estimé.',
+                    icon: '⚖️',
+                    unlocked: localTrips.some(t => {
+                        if (!t.expenses || t.expenses.length === 0) return false;
+                        const spent = t.expenses.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
+                        return spent <= (parseFloat(t.budget) || 0);
+                    })
+                },
+                {
+                    id: 'nomad_veteran',
+                    title: 'Grand Nomade',
+                    desc: 'Planifier 5 voyages ou plus dans votre registre.',
+                    icon: '⛩️',
+                    unlocked: localTrips.length >= 5
+                }
+            ];
+
+            achievementsContainer.innerHTML = '';
+            achievements.forEach(ach => {
+                const opacity = ach.unlocked ? '1' : '0.4';
+                const borderColor = ach.unlocked ? 'var(--color-gold)' : 'var(--border-color)';
+                const bgStyle = ach.unlocked ? 'background: rgba(212,175,55,0.05);' : 'background: var(--bg-dark);';
+
+                achievementsContainer.innerHTML += `
+                    <div style="${bgStyle} border: 1px solid ${borderColor}; border-radius: 6px; padding: 1rem; opacity: ${opacity}; display: flex; gap: 12px; align-items: center;">
+                        <div style="font-size: 2rem; background: var(--bg-card); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid ${borderColor}; flex-shrink: 0;">
+                            ${ach.icon}
+                        </div>
+                        <div>
+                            <h4 style="margin: 0 0 0.2rem 0; color: var(--text-main); font-family: 'Playfair Display', serif; font-size: 1rem;">${ach.title} ${ach.unlocked ? '✅' : '🔒'}</h4>
+                            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted);">${ach.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     });
     </script>
 </body>
