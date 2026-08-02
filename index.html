@@ -204,8 +204,9 @@
                         displayBudget = (daysCount * 150) + 200;
                     }
 
+                    // ✨ CORRECTION ICI : On retire le onclick du lien de l'image
                     card.innerHTML = `
-                       <a href="voyage.html" class="trip-banner-link" onclick="localStorage.setItem('kaido_active_trip', JSON.stringify(trip))" style="text-decoration: none; display: block;">
+                       <a href="voyage.html" class="trip-banner-link" style="text-decoration: none; display: block;">
                         <div class="trip-banner" style="background-image: url('${finalImage}');">
                             <div style="position: absolute; top: 12px; right: 12px; z-index: 2;">
                                 ${statusBadge}
@@ -229,13 +230,17 @@
                         </div>
                     `;
 
+                    // ✨ CORRECTION ICI : On gère le clic sur l'image ET sur le bouton de la même façon
                     const viewLink = card.querySelector('.btn-view');
-                    if (viewLink) {
-                        viewLink.addEventListener('click', () => {
-                            localStorage.setItem('currentTrip', JSON.stringify(trip));
-                            localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
-                        });
-                    }
+                    const bannerLink = card.querySelector('.trip-banner-link');
+                    
+                    const saveActiveTrip = () => {
+                        localStorage.setItem('currentTrip', JSON.stringify(trip));
+                        localStorage.setItem('kaido_active_trip', JSON.stringify(trip));
+                    };
+
+                    if (viewLink) viewLink.addEventListener('click', saveActiveTrip);
+                    if (bannerLink) bannerLink.addEventListener('click', saveActiveTrip);
                     
                     if (createZone) {
                         grid.insertBefore(card, createZone);
