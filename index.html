@@ -40,7 +40,7 @@
 
     <div class="container">
         <!-- HEADER UNIFIÉ KAIDO -->
-        <header class="kaido-header">
+       <header class="kaido-header">
             <!-- GAUCHE : Navigation -->
             <div class="header-left">
                 <a href="index.html" class="header-brand-text">KAIDO</a>
@@ -53,8 +53,8 @@
                 </a>
             </div>
 
-            <!-- DROITE : Menu Options (Langues + Thème) -->
-            <div class="header-right" style="display: flex; align-items: center; position: relative;">
+            <!-- DROITE : Menu Options & Profil (Aéré avec gap: 12px) -->
+            <div class="header-right" style="display: flex; align-items: center; position: relative; gap: 12px;">
                 
                 <!-- Bouton Principal du Menu (Burger / Options) -->
                 <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
@@ -66,10 +66,6 @@
                    <button id="btn-install-pwa" class="btn-primary" style="display: none;">
     📱 Installer l'App
 </button>
-                    <!-- NOUVEAU : Lien vers le Projet Kiroku -->
-                    <a href="kiroku.html" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%; text-decoration: none;">
-                        <span>🏆</span> <span data-i18n>Statistiques & Rang</span>
-                    </a>
                     <!-- Option : Thème -->
                     <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <span>🌓</span> <span data-i18n>Changer de thème</span>
@@ -99,6 +95,10 @@
     <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
 </button>
                 </div>
+
+                <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
+                    <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+                </button>
             </div>
 
             <script>
@@ -133,10 +133,6 @@
                     if (dropdown) dropdown.style.display = 'none';
                 }
             </script>
-
-            <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
-                <img src="image/logo kaido v7.2.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
-            </button>
         </header>
 
         <!-- TITRE PRINCIPAL ÉPURÉ -->
