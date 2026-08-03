@@ -15,15 +15,14 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // 1. Récupération des nouveaux champs de transport dans le body
     const { 
       destination, 
       departure, 
       totalDays, 
       descText, 
-      transportGetThere, // ex: "avion", "train", "voiture", "bus"
-      transportOnSite,   // ex: "à pied, vélo, autre" (peut contenir plusieurs choix)
-      transportOnSiteOther // Précision si "autre"
+      transportGetThere, 
+      transportOnSite,   
+      transportOnSiteOther 
     } = JSON.parse(event.body || "{}");
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -36,9 +35,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // --- CORRECTION : Gestion propre des textes pour l'IA ---
     let finalTransportOnSite = transportOnSite || 'voiture';
-    // Si l'utilisateur a coché "autre" parmi ses choix, on remplace le mot "autre" par sa précision
     if (finalTransportOnSite.includes('autre') && transportOnSiteOther) {
         finalTransportOnSite = finalTransportOnSite.replace('autre', `autre (${transportOnSiteOther})`);
     }
@@ -46,50 +43,37 @@ exports.handler = async (event, context) => {
     const travelMainStr = transportGetThere ? `Mode de transport principal pour s'y rendre : ${transportGetThere}` : '';
     const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+    // ✨ CORRECTION 1 : Utilisation du modèle de production ultra-rapide (gemini-1.5-flash)
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido, doublé d'un ingénieur senior en logistique géographique.
+    const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 
 Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
 Préférences / Notes de l'utilisateur : "${descText}"
 ${travelMainStr}
 ${travelOnSiteStr}
 
-RÈGLES IMPÉRATIVES DE LOGISTIQUE ET DE GÉOGRAPHIE :
-
-1. PROGRESSION GÉOGRAPHIQUE GLOBALE (Le Circuit) : L'itinéraire doit suivre une boucle ou une ligne continue logique. Le lieu du matin du Jour N+1 DOIT être géographiquement proche du lieu de la veille au soir (Jour N). Zéro aller-retour absurde d'un bout à l'autre de la région.
-
-2. FAISABILITÉ QUOTIDIENNE (Microgéographie) : Les étapes d'une même journée doivent être regroupées dans le même secteur. Le temps de trajet entre chaque étape doit être court, réaliste et calibré en fonction des modes de déplacement sur place choisis ("${finalTransportOnSite}").
-
-3. LOGISTIQUE D'ARRIVÉE/DÉPART : Le Jour 1 doit intégrer le trajet initial (${transportGetThere || 'standard'}) depuis ${departure} (arrivée, installation, première activité légère). Le dernier jour doit anticiper le retour vers le point de départ.
-
-4. JOURS DE TRANSFERT : Si une journée implique un long trajet entre deux secteurs éloignés, réduis le nombre d'étapes ce jour-là plutôt que de forcer 3 étapes irréalistes, et indique "travelDay": true sur ce jour.
-
-5. VÉRACITÉ : Propose uniquement des lieux RÉELS, EXACTS et PRÉCIS (ex: "Eilean Donan Castle", jamais "Un château écossais"). Reste prudent sur les horaires d'ouverture connus.
-
-6. PRÉCISION DE LOCALISATION : Remplis "location" avec le nom exact du lieu + Ville + Pays pour un géocodage parfait côté application. Ne renseigne JAMAIS lat/lng : laisse-les strictement à null, ils sont calculés par l'application après coup.
-
-7. HÉBERGEMENT : Pour chaque jour, indique dans "accommodation" une zone ou ville où il est logique de dormir compte tenu du secteur du soir, sans inventer de nom d'hôtel précis.
-
-8. CHECK-LIST : Fournis 4 à 6 éléments de préparation indispensables, spécifiques à ce type de voyage, à la destination et aux modes de transport choisis.
-
-9. BUDGET : Estime en euros (EUR) de manière réaliste selon la destination, la durée et le mode de transport principal (${transportGetThere || 'standard'}), avec un détail par poste (transport, hébergement, nourriture, activités).
-
-10. LANGUE : Toutes les valeurs textuelles ("activity", "location", "checklist", etc.) doivent être rédigées en français, même si "${descText}" est dans une autre langue.
-
-11. NOMBRE DE JOURS : Le tableau "itinerary" DOIT contenir exactement ${totalDays} éléments, ni plus ni moins — un par jour du voyage.
-
-EXIGENCE ABSOLUE : Retourne UNIQUEMENT un objet JSON valide, sans aucune balise markdown, sans texte avant ni après.
+RÈGLES IMPÉRATIVES :
+1. PROGRESSION GÉOGRAPHIQUE : Zéro aller-retour absurde. Les étapes du jour N+1 doivent être logiquement proches de la nuit du jour N.
+2. FAISABILITÉ : Les étapes d'une même journée doivent être regroupées dans le même secteur.
+3. CONCISION : Sois extrêmement concis dans les descriptions ("activity"). Maximum 2 phrases. Va à l'essentiel pour générer la réponse rapidement.
+4. LIEUX EXACTS : Remplis "location" avec "Nom du lieu, Ville, Pays". Ne renseigne JAMAIS lat/lng (laisse null).
+5. VOYAGE ET TRANSFERT : Le Jour 1 intègre le trajet initial depuis ${departure}. Si un jour implique un très long trajet interne, mets "travelDay": true.
+6. HÉBERGEMENT : Indique dans "accommodation" une zone logique où dormir le soir.
+7. CHECK-LIST : Fournis 4 à 6 éléments indispensables.
+8. BUDGET : Estime en euros (EUR) de manière réaliste.
+9. EXACTEMENT ${totalDays} JOURS : Le tableau "itinerary" DOIT contenir exactement ${totalDays} éléments.
+10. LANGUE : Tout le contenu doit être en français.
 
 Structure stricte à respecter :
 {
-  "checklist": ["String", "String", "String"],
+  "checklist": ["String"],
   "itinerary": [
     {
       "day": "Jour 1",
       "dateText": "JJ/MM/AAAA",
       "travelDay": false,
-      "accommodation": "Ville/secteur pour la nuit",
+      "accommodation": "Ville/secteur",
       "steps": [
         {
           "time": "09:30",
@@ -113,7 +97,12 @@ Structure stricte à respecter :
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [{ parts: [{ text: prompt }] }],
+        // ✨ CORRECTION 2 : Activation du mode JSON natif de Gemini (Vitesse et stabilité)
+        generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7
+        }
       })
     });
 
@@ -128,8 +117,8 @@ Structure stricte à respecter :
       };
     }
 
-    let rawText = data.candidates[0].content.parts[0].text;
-    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Plus besoin de nettoyer avec des regex (replace /```json/g), Gemini renvoie directement un string JSON pur !
+    const rawText = data.candidates[0].content.parts[0].text;
 
     return {
       statusCode: 200,
