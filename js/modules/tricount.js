@@ -5,8 +5,46 @@ window.initTricountModule = async function(tripId) {
     if (!window.activeTrip.participants) window.activeTrip.participants = [];
     if (!window.activeTrip.sharedExpenses) window.activeTrip.sharedExpenses = [];
 
+    // --- NOUVEAU : Fonction de mise à jour du budget réel global ---
+    function updateGlobalRealBudget() {
+        const personalExpenses = window.activeTrip.expenses || [];
+        const personalTotal = personalExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+
+        const sharedExpenses = window.activeTrip.sharedExpenses || [];
+        const sharedTotal = sharedExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+
+        const totalSpent = personalTotal + sharedTotal;
+
+        const spentElement = document.getElementById('expenses-total-spent');
+        if (spentElement) {
+            spentElement.textContent = totalSpent.toLocaleString('fr-FR') + ' €';
+        }
+
+        // Si tu as une barre de progression de budget, on la met à jour aussi
+        const estimatedBudget = parseFloat(window.activeTrip.budget) || 1;
+        const progressBar = document.getElementById('expenses-progress-bar');
+        const statusText = document.getElementById('budget-status-text');
+        
+        if (progressBar && statusText) {
+            const percentage = Math.min((totalSpent / estimatedBudget) * 100, 100);
+            progressBar.style.width = percentage + '%';
+
+            if (totalSpent > estimatedBudget) {
+                progressBar.style.backgroundColor = 'var(--color-torii)';
+                statusText.textContent = 'Dépassement du budget ⚠️';
+                statusText.style.color = 'var(--color-torii)';
+            } else {
+                progressBar.style.backgroundColor = 'var(--color-gold)';
+                statusText.textContent = 'Dans les clous';
+                statusText.style.color = 'var(--text-muted)';
+            }
+        }
+    }
+    // ---------------------------------------------------------------
+
     // 1. Chargement initial (Priorité au stockage local de l'objet voyage)
     await loadDataLocallyOrCloud();
+    updateGlobalRealBudget(); // Mise à jour du budget au lancement
 
     const addPartForm = document.getElementById('add-participant-form');
     if (addPartForm) {
@@ -94,6 +132,7 @@ window.initTricountModule = async function(tripId) {
             
             renderSharedExpensesUI(); 
             calculateSettlements();
+            updateGlobalRealBudget(); // ✨ Maj budget global !
 
             if (typeof window.saveTrip === 'function') await window.saveTrip();
 
@@ -145,6 +184,7 @@ window.initTricountModule = async function(tripId) {
                 updatePaidByDropdown();
                 renderSharedExpensesUI();
                 calculateSettlements();
+                updateGlobalRealBudget(); // ✨ Maj budget global !
             } catch (err) { console.warn("Utilisation des données locales (pas de réseau)."); }
         }
     }
@@ -275,6 +315,7 @@ window.initTricountModule = async function(tripId) {
         window.activeTrip.sharedExpenses = (window.activeTrip.sharedExpenses || []).filter(e => e.id !== id);
         if (typeof window.saveTrip === 'function') await window.saveTrip();
         renderSharedExpensesUI(); calculateSettlements();
+        updateGlobalRealBudget(); // ✨ Maj budget global !
 
         const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
         if (client && navigator.onLine && !id.startsWith('local_')) {
@@ -296,5 +337,6 @@ window.initTricountModule = async function(tripId) {
         window.activeTrip.sharedExpenses.push(newExpense);
         if (typeof window.saveTrip === 'function') await window.saveTrip();
         renderSharedExpensesUI(); calculateSettlements();
+        updateGlobalRealBudget(); // ✨ Maj budget global !
     };
 };
