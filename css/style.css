@@ -707,7 +707,7 @@ body:not([data-theme="papyrus"]) gmp-place-autocomplete {
 .itinerary-map-col { width: 100%; }
 
 .checklist-card, .map-card {
-    margin-top: 1.5rem;
+    margin-top: 0rem;
     padding: 1.2rem;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
