@@ -128,11 +128,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('budget-hotel')) document.getElementById('budget-hotel').textContent = `${hotel} €`;
     if (document.getElementById('budget-rest')) document.getElementById('budget-rest').textContent = `${rest} €`;
 
-    // Liens de Réservation dynamiques
+   // 1. Nettoyage de la destination (ne garde que la ville)
     const destClean = encodeURIComponent(destination.split(',')[0].trim());
-    if (document.getElementById('res-btn-booking')) document.getElementById('res-btn-booking').href = `https://www.booking.com/searchresults.fr.html?ss=${destClean}`;
-    if (document.getElementById('res-btn-airbnb')) document.getElementById('res-btn-airbnb').href = `https://www.airbnb.fr/s/${destClean}/homes`;
-    if (document.getElementById('res-btn-car')) document.getElementById('res-btn-car').href = `https://www.kayak.fr/cars/${destClean}`;
+
+            // 2. Construction des URLs de base
+    let bookingUrl = `https://www.booking.com/searchresults.fr.html?ss=${destClean}`;
+    let airbnbUrl = `https://www.airbnb.fr/s/${destClean}/homes`;
+    let kayakCarUrl = `https://www.kayak.fr/cars/${destClean}`;
+    let flightsUrl = `https://www.google.com/travel/flights?q=Vols+vers+${destClean}`;
+
+            // 3. Ajout dynamique des dates si elles existent (Format: YYYY-MM-DD)
+    if (window.activeTrip && window.activeTrip.dateStart && window.activeTrip.dateEnd) {
+        bookingUrl += `&checkin=${window.activeTrip.dateStart}&checkout=${window.activeTrip.dateEnd}`;
+        airbnbUrl += `?checkin=${window.activeTrip.dateStart}&checkout=${window.activeTrip.dateEnd}`;
+    }
+
+            // 4. Ciblage optimisé (une seule requête DOM par bouton)
+    const btnBooking = document.getElementById('res-btn-booking');
+    const btnAirbnb = document.getElementById('res-btn-airbnb');
+    const btnCar = document.getElementById('res-btn-car');
+    const btnFlights = document.getElementById('res-btn-flights');
+
+            // 5. Attribution des liens
+    if (btnBooking) btnBooking.href = bookingUrl;
+    if (btnAirbnb) btnAirbnb.href = airbnbUrl;
+    if (btnCar) btnCar.href = kayakCarUrl;
+    if (btnFlights) btnFlights.href = flightsUrl;
 
     // 5. Appels APIs externes (Cartes et Météo)
     if (typeof initGoogleMap === 'function') initGoogleMap(destination, window.activeTrip.destinationLat, window.activeTrip.destinationLng);
