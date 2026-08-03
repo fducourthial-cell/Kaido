@@ -184,6 +184,26 @@ body::before {
     display: flex;
     justify-content: center;
 }
+/* --- ANIMATION LOGO KAIDO (HEADER) --- */
+.header-center img {
+    /* Transition très fluide avec un effet de rebond (cubic-bezier) */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease;
+    will-change: transform; /* Optimisation des performances */
+}
+
+/* L'effet "Boussole" au survol */
+.header-center img:hover {
+    transform: scale(1.1) rotate(8deg); /* Zoom de 10% et légère inclinaison */
+    filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.5)); /* Halo or (Kaido Gold) */
+    cursor: pointer;
+}
+
+/* L'effet au clic (pressé) */
+.header-center img:active {
+    transform: scale(0.95) rotate(-5deg); /* S'enfonce légèrement dans l'autre sens */
+    filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
+    transition: transform 0.1s ease; /* Très rapide au clic */
+}
 
 /* Typographie "KAIDO" */
 .header-brand-text {
