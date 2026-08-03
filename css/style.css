@@ -619,6 +619,38 @@ body:not([data-theme="papyrus"]) gmp-place-autocomplete {
 /* ==========================================================================
    6. VUE DÉTAIL VOYAGE & ITINÉRAIRE (VOYAGE.HTML)
    ========================================================================== */
+/* --- Boutons d'action (Style Pilule Unifiée) --- */
+.action-pill-btn {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px; /* Forme de pilule */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Effet au survol (PC) */
+.action-pill-btn:hover {
+    border-color: var(--color-gold);
+    background: rgba(212, 175, 55, 0.08); /* Léger fond doré */
+    transform: translateY(-2px); /* Remonte très légèrement */
+}
+
+/* Effet quand on CLIQUE sur la pilule (État Actif) */
+.action-pill-btn:active {
+    background: var(--color-gold); /* La pilule se remplit d'or */
+    color: var(--bg-dark); /* Le texte devient foncé pour le contraste */
+    border-color: var(--color-gold);
+    transform: scale(0.95); /* Effet d'enfoncement physique */
+}
+
 /* Navigation de base (Par défaut horizontale) */
 .trip-nav-tabs {
     display: flex;
