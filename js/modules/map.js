@@ -128,6 +128,10 @@ function clearMapOverlays() {
         }
         routePolyline = null;
     }
+    
+    // ✨ NOUVEAU : Réinitialiser le texte de la distance quand on efface la carte
+    const distanceSpan = document.getElementById('map-daily-distance');
+    if (distanceSpan) distanceSpan.textContent = '';
 }
 
 async function displayDayOnMap(steps, mainDestination) {
@@ -216,6 +220,21 @@ async function displayDayOnMap(steps, mainDestination) {
         if (status === 'OK') {
             directionsRenderer.setDirections(response);
 
+            // ✨ NOUVEAU : Calcul et affichage de la distance
+            let totalDistanceMeters = 0;
+            const route = response.routes[0];
+            
+            for (let i = 0; i < route.legs.length; i++) {
+                totalDistanceMeters += route.legs[i].distance.value; 
+            }
+            
+            const totalKm = (totalDistanceMeters / 1000).toFixed(1);
+            const distanceSpan = document.getElementById('map-daily-distance');
+            if (distanceSpan) {
+                distanceSpan.textContent = `— ${totalKm} km`; 
+            }
+            // ----------------------------------------------------
+
             resolvedWaypoints.forEach((wp) => {
                 const marker = new google.maps.Marker({
                     position: wp.location,
@@ -228,6 +247,11 @@ async function displayDayOnMap(steps, mainDestination) {
 
         } else {
             console.warn("Impossible de tracer l'itinéraire routier :", status);
+            
+            // Sécurité si le trajet échoue
+            const distanceSpan = document.getElementById('map-daily-distance');
+            if (distanceSpan) distanceSpan.textContent = '';
+            
             resolvedWaypoints.forEach((wp) => {
                 const marker = new google.maps.Marker({
                     position: wp.location,
@@ -307,7 +331,7 @@ function selectActivityOnMap(step, addressQuery, mainDestination) {
                     const place = results[0];
                     if (previewImg && place.photos && place.photos.length > 0) {
                         previewImg.src = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
-                        previewImg.style.display = 'none'; // garde tes réglages
+                        previewImg.style.display = 'block'; 
                     }
                 }
             }
