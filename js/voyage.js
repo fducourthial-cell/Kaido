@@ -428,4 +428,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // 11. ✨ NOUVEAU : Rendu du Transfert Aéroport
+    if (window.activeTrip.airportTransfer) {
+        const transferBox = document.getElementById('airport-transfer-container');
+        const t = window.activeTrip.airportTransfer;
+        
+        if (transferBox && t.lineNumber) {
+            transferBox.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">${(t.transportType || '').toLowerCase().includes('train') ? '🚆' : '🚌'}</span>
+                    <div>
+                        <div style="color: var(--color-gold); font-weight: bold; font-size: 1rem;">${t.lineNumber}</div>
+                        <div style="color: var(--text-main); font-size: 0.85rem;">${t.transportType}</div>
+                    </div>
+                </div>
+                <div style="border-top: 1px dashed var(--border-color); margin-top: 0.5rem; padding-top: 0.5rem; color: var(--text-muted); font-size: 0.85rem;">
+                    💵 Coût estimé : <strong style="color: var(--text-main);">${t.priceEst || 'Non précisé'}</strong>
+                </div>
+            `;
+        }
+    }
+
+    // Option Bonus : Configurer le bouton Google Maps pour le mode "Transport en commun"
+    const btnTransit = document.getElementById('btn-google-transit');
+    if (btnTransit && window.activeTrip.destination) {
+        // Crée une recherche Google Maps avec "Aéroport" comme point de départ vers la ville, en forçant le mode transport en commun (dirflg=r)
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=Aéroport+${encodeURIComponent(window.activeTrip.destination)}&destination=Centre+ville+${encodeURIComponent(window.activeTrip.destination)}&travelmode=transit`;
+        btnTransit.href = mapsUrl;
+    }
 });
