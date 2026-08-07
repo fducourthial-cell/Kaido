@@ -111,6 +111,65 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- GESTION DE LA MODALE "MODIFIER LE VOYAGE" ---
+    const btnOpenEdit = document.getElementById('btn-open-edit');
+    const btnCloseEdit = document.getElementById('btn-close-edit');
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('edit-trip-form');
+
+    if (btnOpenEdit && editModal) {
+        // 1. Ouvrir la modale et pré-remplir les champs avec les données actuelles
+        btnOpenEdit.addEventListener('click', () => {
+            document.getElementById('edit-date-start').value = window.activeTrip.dateStart || '';
+            document.getElementById('edit-date-end').value = window.activeTrip.dateEnd || '';
+            document.getElementById('edit-budget').value = window.activeTrip.budget || '';
+            document.getElementById('edit-desc').value = window.activeTrip.desc || '';
+            
+            editModal.style.display = 'block'; 
+        });
+
+        // 2. Fermer la modale au clic sur "Annuler"
+        if (btnCloseEdit) {
+            btnCloseEdit.addEventListener('click', () => {
+                editModal.style.display = 'none';
+            });
+        }
+
+        // Optionnel : Fermer la modale en cliquant à l'extérieur du bloc blanc
+        window.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+
+        // 3. Sauvegarder les nouvelles informations
+        if (editForm) {
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Empêche le rechargement de la page
+                
+                // On met à jour l'objet global avec les nouvelles valeurs
+                window.activeTrip.dateStart = document.getElementById('edit-date-start').value;
+                window.activeTrip.dateEnd = document.getElementById('edit-date-end').value;
+                window.activeTrip.budget = document.getElementById('edit-budget').value;
+                window.activeTrip.desc = document.getElementById('edit-desc').value;
+
+                // On sauvegarde (Supabase + LocalStorage) via ta fonction globale
+                await window.saveTrip();
+
+                // On met à jour l'affichage en direct sur la page
+                if (typeof formatTripDuration === 'function') {
+                    const datesElement = document.getElementById('trip-main-dates');
+                    if (datesElement) {
+                        datesElement.textContent = `📅 ${formatTripDuration(window.activeTrip.dateStart, window.activeTrip.dateEnd)}`;
+                    }
+                }
+                
+                // Fermeture de la modale
+                editModal.style.display = 'none';
+            });
+        }
+    }
+
     // 4. Remplissage des données d'en-tête et Budget
     const destination = window.activeTrip.destination || window.activeTrip.title || "Destination";
     if (document.getElementById('trip-main-title')) document.getElementById('trip-main-title').textContent = destination;
