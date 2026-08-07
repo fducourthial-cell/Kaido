@@ -358,6 +358,19 @@
                             <span style="color: var(--text-muted); font-size: 0.85rem;" data-i18n>Chargement de la météo...</span>
                         </div>
                     </div>
+
+                    <div class="card-box transfer-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🚌 Transfert Aéroport</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Recommandé pour rejoindre le centre</p>
+    
+                        <div id="airport-transfer-container" style="display: flex; flex-direction: column; gap: 0.8rem; background: rgba(255, 255, 255, 0.02); padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                           <span style="color: var(--text-muted); font-size: 0.85rem;">Aucune donnée de transfert disponible.</span>
+                        </div>
+                        <!-- Bouton de secours vers Google Maps Transit -->
+                        <a id="btn-google-transit" href="#" target="_blank" style="display: block; text-align: center; margin-top: 1rem; padding: 0.6rem; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--color-gold); color: var(--color-gold); text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">
+                            🗺️ Voir l'itinéraire en direct sur Maps
+                        </a>
+                    </div>
                 </div>
             </div>
 
