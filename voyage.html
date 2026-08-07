@@ -480,6 +480,43 @@
         </div>
     </div>
 
+<!-- ✨ NOUVEAU : UTILITAIRES DE DATES KAIDO -->
+    <script>
+        // Formate l'en-tête (ex: du 10 au 14 août 2026)
+        function formatTripDuration(startDateStr, endDateStr) {
+            if (!startDateStr || !endDateStr) return '--/--/---- au --/--/----';
+            const parseDate = (d) => d.includes('/') ? new Date(d.split('/').reverse().join('-')) : new Date(d);
+            const start = parseDate(startDateStr);
+            const end = parseDate(endDateStr);
+
+            const optionsMonthYear = { month: 'long', year: 'numeric' };
+            const optionsMonth = { month: 'long' };
+
+            if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                return `du ${start.getDate()} au ${end.getDate()} ${end.toLocaleDateString('fr-FR', optionsMonthYear)}`;
+            } else if (start.getFullYear() === end.getFullYear()) {
+                 return `du ${start.getDate()} ${start.toLocaleDateString('fr-FR', optionsMonth)} au ${end.getDate()} ${end.toLocaleDateString('fr-FR', optionsMonthYear)}`;
+            } else {
+                 return `du ${start.getDate()} ${start.toLocaleDateString('fr-FR', optionsMonthYear)} au ${end.getDate()} ${end.toLocaleDateString('fr-FR', optionsMonthYear)}`;
+            }
+        }
+
+        // Formate les cartes d'itinéraire (ex: Vendredi 14)
+        function formatCardDate(dateString) {
+            if (!dateString) return '';
+            let dateObj;
+            if (dateString.includes('/')) {
+                const parts = dateString.split('/');
+                dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            } else {
+                dateObj = new Date(dateString);
+            }
+            const formatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric' });
+            let formatted = formatter.format(dateObj);
+            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+    </script>
+    
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly"></script>
     
     <script src="js/modules/map.js"></script>
