@@ -44,7 +44,7 @@ exports.handler = async (event, context) => {
     const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
     // ✨ CORRECTION 1 : Utilisation du modèle de production ultra-rapide (gemini-1.5-flash)
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 
@@ -61,7 +61,7 @@ RÈGLES IMPÉRATIVES :
 5. VOYAGE ET TRANSFERT : Le Jour 1 intègre le trajet initial depuis ${departure}. Si un jour implique un très long trajet interne, mets "travelDay": true.
 6. HÉBERGEMENT : Indique dans "accommodation" une zone logique où dormir le soir.
 7. CHECK-LIST : Fournis 4 à 6 éléments indispensables.
-8. BUDGET : Estime en euros (EUR) de manière réaliste.
+8. BUDGET : Estime en euros (EUR) de manière réaliste et adapte selon le PIB du pays.
 9. EXACTEMENT ${totalDays} JOURS : Le tableau "itinerary" DOIT contenir exactement ${totalDays} éléments.
 10. LANGUE : Tout le contenu doit être en français.
 
