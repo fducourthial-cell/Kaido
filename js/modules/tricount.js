@@ -238,7 +238,7 @@ window.initTricountModule = async function(tripId) {
                 <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 0.5rem 0.8rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--border-color);">
                     <div>
                         <strong style="color: var(--text-main);">${exp.title}</strong>
-                        <div style="color: var(--text-muted); font-size: 0.75rem;">Payé par ${payer ? payer.name : 'Inconnu'}</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem;">Payé par ${payer ? payer.name : 'Ancien participant'}</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="color: var(--color-gold); font-weight: 600;">${Number(exp.amount).toFixed(2)} €</span>
@@ -248,18 +248,20 @@ window.initTricountModule = async function(tripId) {
         }).join('');
     }
 
+    // 🔧 L'ALGORITHME RÉPARÉ EST ICI
     function calculateSettlements() {
         const resultsContainer = document.getElementById('settlement-results');
         if (!resultsContainer) return;
         const parts = window.activeTrip.participants || [];
         const expenses = window.activeTrip.sharedExpenses || [];
 
-        if (parts.length === 0 || expenses.length === 0) {
+        if (expenses.length === 0) {
             resultsContainer.innerHTML = '<span style="color: var(--text-muted);">Ajoutez des participants et des dépenses.</span>';
             return;
         }
 
         const balances = {};
+        // On initialise le solde à 0 pour tous les participants actuels
         parts.forEach(p => balances[p.id] = { name: p.name, net: 0 });
 
         expenses.forEach(exp => {
@@ -268,20 +270,31 @@ window.initTricountModule = async function(tripId) {
             if (splits.length === 0) return;
             const sharePerPerson = amount / splits.length;
 
-            if (balances[exp.paid_by]) balances[exp.paid_by].net += amount;
+            // SÉCURITÉ : Si le payeur a été supprimé de la liste, on le recrée virtuellement
+            if (!balances[exp.paid_by]) {
+                balances[exp.paid_by] = { name: 'Ancien participant', net: 0 };
+            }
+            balances[exp.paid_by].net += amount;
+
             splits.forEach(split => {
-                if (balances[split.participant_id]) balances[split.participant_id].net -= sharePerPerson;
+                // SÉCURITÉ : Si la personne qui doit payer a été supprimée, on la recrée virtuellement
+                if (!balances[split.participant_id]) {
+                    balances[split.participant_id] = { name: 'Ancien participant', net: 0 };
+                }
+                balances[split.participant_id].net -= sharePerPerson;
             });
         });
 
         let debtors = [], creditors = [];
         Object.keys(balances).forEach(id => {
             const b = balances[id];
+            // On arrondit pour éviter les bugs de virgule flottante de Javascript (ex: 0.0000000000001)
             if (b.net < -0.01) debtors.push({ id, name: b.name, amount: -b.net, originalId: id });
             else if (b.net > 0.01) creditors.push({ id, name: b.name, amount: b.net, originalId: id });
         });
 
         let transactions = [], dIndex = 0, cIndex = 0;
+        
         while (dIndex < debtors.length && cIndex < creditors.length) {
             let debtor = debtors[dIndex], creditor = creditors[cIndex];
             let paidAmount = Math.min(debtor.amount, creditor.amount);
