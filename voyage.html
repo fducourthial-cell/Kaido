@@ -544,6 +544,21 @@
                     `;
                 }
 
+                // ✨ NOUVEAU : Calcul dynamique des dates pour l'en-tête (Modification 1)
+                const datesElement = document.getElementById('trip-main-dates');
+                if (datesElement) {
+                    // Si on a l'itinéraire avec les jours générés, on prend le premier et le dernier jour
+                    if (activeTrip.itinerary && activeTrip.itinerary.length > 0) {
+                        const start = activeTrip.itinerary[0].dateText;
+                        const end = activeTrip.itinerary[activeTrip.itinerary.length - 1].dateText;
+                        datesElement.textContent = `📅 ${formatTripDuration(start, end)}`;
+                    } 
+                    // Sinon, si on a juste les dates de début et fin classiques
+                    else if (activeTrip.startDate && activeTrip.endDate) {
+                        datesElement.textContent = `📅 ${formatTripDuration(activeTrip.startDate, activeTrip.endDate)}`;
+                    }
+                }
+
                 if (typeof calculateTripKiroku === 'function') {
                     await calculateTripKiroku(activeTrip);
                 }
