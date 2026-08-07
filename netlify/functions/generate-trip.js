@@ -64,6 +64,7 @@ RÈGLES IMPÉRATIVES :
 8. BUDGET : Estime en euros (EUR) de manière réaliste et adapte selon le PIB du pays.
 9. EXACTEMENT ${totalDays} JOURS : Le tableau "itinerary" DOIT contenir exactement ${totalDays} éléments.
 10. LANGUE : Tout le contenu doit être en français.
+11. TRANSFERT AÉROPORT : Identifie le meilleur moyen de transport en commun (navette, bus, train) pour relier l'aéroport principal de la destination au centre-ville. Précise impérativement le nom ou le numéro de la ligne (ex: "Bus X82", "RoissyBus", "Ligne de train RER B").
 
 Structure stricte à respecter :
 {
@@ -85,6 +86,12 @@ Structure stricte à respecter :
       ]
     }
   ],
+  "airportTransfer": {
+    "recommended": "Oui/Non",
+    "transportType": "Bus / Train / Navette",
+    "lineNumber": "Nom ou Numéro exact de la ligne (ex: Bus 100)",
+    "priceEst": "Prix estimé (ex: 5€)"
+  },
   "budgetDetails": {
     "flights": 300,
     "hotel": 500,
