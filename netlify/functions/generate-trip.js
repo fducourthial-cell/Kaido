@@ -1,4 +1,7 @@
 exports.handler = async (event, context) => {
+  // ⏱️ DÉMARRAGE DU CHRONOMÈTRE
+  const startTime = Date.now();
+
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
@@ -43,7 +46,8 @@ exports.handler = async (event, context) => {
     const travelMainStr = transportGetThere ? `Mode de transport principal pour s'y rendre : ${transportGetThere}` : '';
     const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-latest:generateContent?key=${apiKey}`;
+    // ✨ ICI TU PEUX CHANGER LE MODÈLE POUR TESTER (ex: gemini-3.6-flash ou gemini-3.5-flash-lite)
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 
@@ -123,6 +127,16 @@ Structure stricte à respecter :
     }
 
     const rawText = data.candidates[0].content.parts[0].text;
+
+    // ⏱️ ARRÊT DU CHRONOMÈTRE
+    const endTime = Date.now();
+    const executionTime = endTime - startTime;
+
+    // Affichage dans le tableau de bord Netlify (Functions Logs)
+    console.log(`🚀 Itinéraire généré en : ${executionTime} ms`);
+
+    // Ajout d'une ligne discrète dans les en-têtes HTTP de la réponse
+    headers["X-Kaido-Execution-Time-ms"] = executionTime.toString();
 
     return {
       statusCode: 200,
