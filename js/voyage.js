@@ -19,13 +19,14 @@ window.saveTrip = async function() {
                 expenses: window.activeTrip.expenses || [],
                 booking_notes: window.activeTrip.bookingNotes || [],
                 documents: window.activeTrip.documents || [],
-                gallery: window.activeTrip.gallery || []
+                gallery: window.activeTrip.gallery || [],
+                budget_details: window.activeTrip.budgetDetails // ✨ CORRECTION 1 : Sauvegarde du budget détaillé
             }).eq('id', window.activeTrip.id);
 
             if (updateError) {
                 console.error("❌ Erreur Supabase lors de la sauvegarde :", updateError.message);
             } else {
-                console.log("✅ Sauvegarde Supabase réussie pour la galerie !");
+                console.log("✅ Sauvegarde Supabase réussie pour la galerie et le budget !");
             }
         } catch (e) { 
             console.warn("⚠️ Exception attrapée pendant la sauvegarde Supabase:", e); 
@@ -170,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 4. Remplissage des données d'en-tête et Budget
+    // 4. Remplissage des données d'en-tête et Budget (✨ CORRECTION 2 : Calcul robuste)
     const destination = window.activeTrip.destination || window.activeTrip.title || "Destination";
     if (document.getElementById('trip-main-title')) document.getElementById('trip-main-title').textContent = destination;
     if (document.getElementById('trip-main-dates')) document.getElementById('trip-main-dates').textContent = `📅 ${window.activeTrip.dates || ''}`;
@@ -178,9 +179,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('trip-cover-img') && window.activeTrip.image) document.getElementById('trip-cover-img').src = window.activeTrip.image;
 
     let totalB = parseFloat(window.activeTrip.budget) || ((window.activeTrip.itinerary?.length || 3) * 150 + 200);
-    const flights = window.activeTrip.budgetDetails ? window.activeTrip.budgetDetails.flights : Math.round(totalB * 0.30);
-    const hotel = window.activeTrip.budgetDetails ? window.activeTrip.budgetDetails.hotel : Math.round(totalB * 0.40);
-    const rest = window.activeTrip.budgetDetails ? window.activeTrip.budgetDetails.rest : (totalB - (flights + hotel));
+    
+    // Valeurs par défaut (Le fameux 30/40/30)
+    let flights = Math.round(totalB * 0.30);
+    let hotel = Math.round(totalB * 0.40);
+    let rest = totalB - (flights + hotel);
+
+    // Si les détails de l'IA existent, on les utilise intelligemment
+    if (window.activeTrip.budgetDetails) {
+        flights = window.activeTrip.budgetDetails.flights || flights;
+        hotel = window.activeTrip.budgetDetails.hotel || hotel;
+        // L'IA génère "food" et "activities", on les additionne pour la catégorie "Repas & Activités"
+        const aiFood = window.activeTrip.budgetDetails.food || 0;
+        const aiActivities = window.activeTrip.budgetDetails.activities || 0;
+        
+        if (aiFood > 0 || aiActivities > 0) {
+             rest = aiFood + aiActivities;
+        }
+    }
 
     if (document.getElementById('trip-budget-total')) document.getElementById('trip-budget-total').textContent = `${totalB} €`;
     if (document.getElementById('budget-flights')) document.getElementById('budget-flights').textContent = `${flights} €`;
