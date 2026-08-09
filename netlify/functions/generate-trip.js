@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
     const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
     // ✨ ICI TU PEUX CHANGER LE MODÈLE POUR TESTER (ex: gemini-3.6-flash ou gemini-3.5-flash-lite)
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
 
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 
