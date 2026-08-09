@@ -25,14 +25,13 @@ exports.handler = async (event, context) => {
       transportOnSiteOther 
     } = JSON.parse(event.body || "{}");
 
-    // ✨ CHANGEMENT : On pointe désormais vers la variable de la clé Anthropic
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: "La variable ANTHROPIC_API_KEY n'est pas configurée dans Netlify." })
+        body: JSON.stringify({ error: "La variable GEMINI_API_KEY n'est pas configurée dans Netlify." })
       };
     }
 
@@ -44,7 +43,8 @@ exports.handler = async (event, context) => {
     const travelMainStr = transportGetThere ? `Mode de transport principal pour s'y rendre : ${transportGetThere}` : '';
     const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
-    // ✨ CHANGEMENT : Le prompt intègre la consigne stricte de formatage à la toute fin
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-latest:generateContent?key=${apiKey}`;
+
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 
 Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
@@ -97,38 +97,24 @@ Structure stricte à respecter :
     "food": 250,
     "activities": 150
   }
-}
+}`;
 
-Ne renvoie absolument aucun texte en dehors des accolades du JSON. Commence ta réponse directement par { et termine la par }.`;
-
-    // ✨ CHANGEMENT : URL de l'API Anthropic
-    const endpoint = 'https://api.anthropic.com/v1/messages';
-
-    // ✨ CHANGEMENT : Requête adaptée au format Claude
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01', // Version d'API obligatoire chez Anthropic
-        'content-type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', // Le modèle le plus rapide (équivalent Flash)
-        max_tokens: 4000,
-        system: "Tu es un expert mondial en logistique et création d'itinéraires de voyage. Tu dois répondre UNIQUEMENT par un objet JSON valide, sans aucune phrase d'introduction ni de conclusion.",
-        messages: [
-          { 
-              role: 'user', 
-              content: prompt 
-          }
-        ]
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7
+        }
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      const errorMsg = data.error ? data.error.message : "Erreur de réponse de l'API Anthropic";
+      const errorMsg = data.error ? data.error.message : "Erreur de réponse de l'API Google";
       return {
         statusCode: response.status,
         headers,
@@ -136,11 +122,7 @@ Ne renvoie absolument aucun texte en dehors des accolades du JSON. Commence ta r
       };
     }
 
-    // ✨ CHANGEMENT : On récupère le texte selon la structure JSON de Claude
-    let rawText = data.content[0].text;
-    
-    // Nettoyage au cas où Claude ajouterait des balises Markdown (sécurité supplémentaire)
-    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const rawText = data.candidates[0].content.parts[0].text;
 
     return {
       statusCode: 200,
