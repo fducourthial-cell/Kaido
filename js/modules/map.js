@@ -129,7 +129,7 @@ function clearMapOverlays() {
         routePolyline = null;
     }
     
-    // ✨ NOUVEAU : Réinitialiser le texte de la distance quand on efface la carte
+    // Réinitialiser le texte de la distance quand on efface la carte
     const distanceSpan = document.getElementById('map-daily-distance');
     if (distanceSpan) distanceSpan.textContent = '';
 }
@@ -220,18 +220,27 @@ async function displayDayOnMap(steps, mainDestination) {
         if (status === 'OK') {
             directionsRenderer.setDirections(response);
 
-            // ✨ NOUVEAU : Calcul et affichage de la distance
+            // ✨ NOUVEAU : Calcul et affichage de la distance ET du temps
             let totalDistanceMeters = 0;
+            let totalDurationSeconds = 0;
             const route = response.routes[0];
             
             for (let i = 0; i < route.legs.length; i++) {
                 totalDistanceMeters += route.legs[i].distance.value; 
+                totalDurationSeconds += route.legs[i].duration.value;
             }
             
             const totalKm = (totalDistanceMeters / 1000).toFixed(1);
+            const hours = Math.floor(totalDurationSeconds / 3600);
+            const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
+            
+            let timeStr = "";
+            if (hours > 0) timeStr += `${hours}h `;
+            timeStr += `${minutes}min`;
+
             const distanceSpan = document.getElementById('map-daily-distance');
             if (distanceSpan) {
-                distanceSpan.textContent = `— ${totalKm} km`; 
+                distanceSpan.textContent = ` — 🚗 ${totalKm} km • ⏱️ ${timeStr}`; 
             }
             // ----------------------------------------------------
 
