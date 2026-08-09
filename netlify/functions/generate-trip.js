@@ -25,13 +25,14 @@ exports.handler = async (event, context) => {
       transportOnSiteOther 
     } = JSON.parse(event.body || "{}");
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    // ✨ CHANGEMENT : On pointe désormais vers la variable de la clé Anthropic
+    const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: "La variable GEMINI_API_KEY n'est pas configurée dans Netlify." })
+        body: JSON.stringify({ error: "La variable ANTHROPIC_API_KEY n'est pas configurée dans Netlify." })
       };
     }
 
@@ -43,9 +44,7 @@ exports.handler = async (event, context) => {
     const travelMainStr = transportGetThere ? `Mode de transport principal pour s'y rendre : ${transportGetThere}` : '';
     const travelOnSiteStr = finalTransportOnSite ? `Modes de déplacement sur place : ${finalTransportOnSite}` : '';
 
-    // ✨ CORRECTION 1 : Utilisation du modèle de production ultra-rapide (gemini-1.5-flash)
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
-
+    // ✨ CHANGEMENT : Le prompt intègre la consigne stricte de formatage à la toute fin
     const prompt = `Tu es un expert mondial en création d'itinéraires de voyage sur-mesure pour l'application Kaido.
 
 Génère un itinéraire de ${totalDays} jours pour ${destination} (Ville de départ : ${departure}).
@@ -98,25 +97,38 @@ Structure stricte à respecter :
     "food": 250,
     "activities": 150
   }
-}`;
+}
 
+Ne renvoie absolument aucun texte en dehors des accolades du JSON. Commence ta réponse directement par { et termine la par }.`;
+
+    // ✨ CHANGEMENT : URL de l'API Anthropic
+    const endpoint = 'https://api.anthropic.com/v1/messages';
+
+    // ✨ CHANGEMENT : Requête adaptée au format Claude
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01', // Version d'API obligatoire chez Anthropic
+        'content-type': 'application/json'
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        // ✨ CORRECTION 2 : Activation du mode JSON natif de Gemini (Vitesse et stabilité)
-        generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.7
-        }
+        model: 'claude-3-haiku-20240307', // Le modèle le plus rapide (équivalent Flash)
+        max_tokens: 4000,
+        system: "Tu es un expert mondial en logistique et création d'itinéraires de voyage. Tu dois répondre UNIQUEMENT par un objet JSON valide, sans aucune phrase d'introduction ni de conclusion.",
+        messages: [
+          { 
+              role: 'user', 
+              content: prompt 
+          }
+        ]
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      const errorMsg = data.error ? data.error.message : "Erreur de réponse de l'API Google";
+      const errorMsg = data.error ? data.error.message : "Erreur de réponse de l'API Anthropic";
       return {
         statusCode: response.status,
         headers,
@@ -124,8 +136,11 @@ Structure stricte à respecter :
       };
     }
 
-    // Plus besoin de nettoyer avec des regex (replace /```json/g), Gemini renvoie directement un string JSON pur !
-    const rawText = data.candidates[0].content.parts[0].text;
+    // ✨ CHANGEMENT : On récupère le texte selon la structure JSON de Claude
+    let rawText = data.content[0].text;
+    
+    // Nettoyage au cas où Claude ajouterait des balises Markdown (sécurité supplémentaire)
+    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
     return {
       statusCode: 200,
