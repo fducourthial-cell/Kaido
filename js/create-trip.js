@@ -70,9 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const departure = String(departureText || 'Paris').trim();
                 console.log("🛫 Ville de départ extraite :", departure);
 
-                // 3. LECTURE DES AUTRES CHAMPS
-                const dateStart = document.getElementById('trip-date-start').value;
-                const dateEnd = document.getElementById('trip-date-end').value;
+              // 3. LECTURE DES AUTRES CHAMPS
+                const dateStartInput = document.getElementById('trip-date-start');
+                const dateEndInput = document.getElementById('trip-date-end');
+                const dateStart = dateStartInput ? dateStartInput.value : '';
+                let dateEnd = dateEndInput ? dateEndInput.value : ''; // "let" car on va peut-être la modifier
                 
                 const budgetInput = document.getElementById('trip-budget-input');
                 const budget = budgetInput ? budgetInput.value : 0;
@@ -85,30 +87,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                const start = new Date(dateStart);
+                let end = new Date(dateEnd);
+
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    alert("Le format des dates sélectionnées n'est pas valide.");
+                    return;
+                }
+
+                // Calcul du nombre de jours
+                let timeDiff = end.getTime() - start.getTime();
+                let totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+                // Sécurité 1 : Date de fin avant date de début
+                if (totalDays <= 0) {
+                    alert("La date de retour doit être égale ou postérieure à la date de départ !");
+                    return; // On arrête tout
+                }
+
+                // Sécurité 2 : Plus de 10 jours
+                if (totalDays > 10) {
+                    alert("⚠️ Pour garantir des performances optimales de l'IA, la durée du voyage a été ramenée à 10 jours maximum.");
+                    
+                    // On recalcule la date de fin (Début + 9 jours)
+                    end = new Date(start);
+                    end.setDate(start.getDate() + 9);
+                    
+                    // On met à jour la variable et le champ visuel
+                    dateEnd = end.toISOString().split('T')[0];
+                    if (dateEndInput) dateEndInput.value = dateEnd;
+                    
+                    totalDays = 10;
+                }
+
+                // Seulement maintenant on bloque le bouton (car tout est valide)
                 if (submitBtn) {
                     submitBtn.textContent = "Calcul de l'itinéraire en cours avec l'IA...";
                     submitBtn.disabled = true;
                 }
-
-                const start = new Date(dateStart);
-                const end = new Date(dateEnd);
-
-                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                    throw new Error("Le format des dates sélectionnées n'est pas valide.");
-                }
-
-                const timeDiff = end.getTime() - start.getTime();
-                const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-                if (totalDays <= 0) {
-                    alert("La date de retour doit être égale ou postérieure à la date de départ !");
-                    if (submitBtn) {
-                        submitBtn.textContent = originalBtnText;
-                        submitBtn.disabled = false;
-                    }
-                    return;
-                }
-
                 // 4. APPEL À L'IA NETLIFY (GEMINI)
                 console.log("🤖 Appel de l'IA Netlify en cours...");
                 const aiResponse = await fetch('/.netlify/functions/generate-trip', {
