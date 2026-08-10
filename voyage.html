@@ -110,9 +110,32 @@
                     ⚙️
                 </button>
 
-                <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
-                   <button id="btn-install-pwa" class="btn-primary" style="display: none;">
-    📱 Installer l'App
+               <!-- Panneau déroulant -->
+                <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 200px; flex-direction: column; gap: 8px;">
+                    
+                    <!-- NOUVEAU : Section Gestion du voyage -->
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Gestion du voyage</div>
+                    
+                    <button id="btn-open-edit" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        ⚙️ <span data-i18n>Modifier</span>
+                    </button>
+                    <button id="btn-share-trip" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        🔗 <span data-i18n>Copier le lien</span>
+                    </button>
+                    <button id="btn-export-pdf" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        📄 <span data-i18n>Exporter PDF</span>
+                    </button>
+                    <button id="btn-complete-trip" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                        🏁 <span data-i18n>Clôturer</span>
+                    </button>
+
+                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 4px 0;">
+
+                    <!-- Section Préférences (Thème & App) -->
+                    <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Préférences</div>
+
+                    <button id="btn-install-pwa" class="btn-primary" style="display: none;">
+                        📱 Installer l'App
                     </button>
                     <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <span>🌓</span> <span data-i18n>Changer de thème</span>
@@ -120,6 +143,7 @@
 
                     <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
 
+                    <!-- Section Langues -->
                     <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Langue</div>
                     
                     <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
