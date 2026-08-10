@@ -137,8 +137,8 @@
 
     <script>
         // Petite base de données ultra-légère des pays
-        const countries = [
-            { code: "AF", name: "Afghanistan" },
+const countries = [
+  { code: "AF", name: "Afghanistan" },
   { code: "ZA", name: "Afrique du Sud" },
   { code: "AL", name: "Albanie" },
   { code: "DZ", name: "Algérie" },
@@ -152,6 +152,7 @@
   { code: "AU", name: "Australie" },
   { code: "AT", name: "Autriche" },
   { code: "AZ", name: "Azerbaïdjan" },
+
   { code: "BS", name: "Bahamas" },
   { code: "BH", name: "Bahreïn" },
   { code: "BD", name: "Bangladesh" },
@@ -160,7 +161,7 @@
   { code: "BZ", name: "Belize" },
   { code: "BJ", name: "Bénin" },
   { code: "BT", name: "Bhoutan" },
-  { code: "BY", name: "Biélorussie" },
+  { code: "BY", name: "Bélarus" },
   { code: "BO", name: "Bolivie" },
   { code: "BA", name: "Bosnie-Herzégovine" },
   { code: "BW", name: "Botswana" },
@@ -169,10 +170,11 @@
   { code: "BG", name: "Bulgarie" },
   { code: "BF", name: "Burkina Faso" },
   { code: "BI", name: "Burundi" },
+
+  { code: "CV", name: "Cabo Verde" },
   { code: "KH", name: "Cambodge" },
   { code: "CM", name: "Cameroun" },
   { code: "CA", name: "Canada" },
-  { code: "CV", name: "Cap-Vert" },
   { code: "CL", name: "Chili" },
   { code: "CN", name: "Chine" },
   { code: "CY", name: "Chypre" },
@@ -186,9 +188,12 @@
   { code: "CI", name: "Côte d'Ivoire" },
   { code: "HR", name: "Croatie" },
   { code: "CU", name: "Cuba" },
+
   { code: "DK", name: "Danemark" },
   { code: "DJ", name: "Djibouti" },
   { code: "DM", name: "Dominique" },
+  { code: "DO", name: "République dominicaine" },
+
   { code: "EG", name: "Égypte" },
   { code: "AE", name: "Émirats arabes unis" },
   { code: "EC", name: "Équateur" },
@@ -198,9 +203,11 @@
   { code: "SZ", name: "Eswatini" },
   { code: "US", name: "États-Unis" },
   { code: "ET", name: "Éthiopie" },
+
   { code: "FJ", name: "Fidji" },
   { code: "FI", name: "Finlande" },
   { code: "FR", name: "France" },
+
   { code: "GA", name: "Gabon" },
   { code: "GM", name: "Gambie" },
   { code: "GE", name: "Géorgie" },
@@ -212,51 +219,60 @@
   { code: "GW", name: "Guinée-Bissau" },
   { code: "GQ", name: "Guinée équatoriale" },
   { code: "GY", name: "Guyana" },
+
   { code: "HT", name: "Haïti" },
   { code: "HN", name: "Honduras" },
   { code: "HU", name: "Hongrie" },
+
+  { code: "IS", name: "Islande" },
   { code: "IN", name: "Inde" },
   { code: "ID", name: "Indonésie" },
-  { code: "IQ", name: "Irak" },
   { code: "IR", name: "Iran" },
+  { code: "IQ", name: "Irak" },
   { code: "IE", name: "Irlande" },
-  { code: "IS", name: "Islande" },
   { code: "IL", name: "Israël" },
   { code: "IT", name: "Italie" },
+
   { code: "JM", name: "Jamaïque" },
   { code: "JP", name: "Japon" },
   { code: "JO", name: "Jordanie" },
+
   { code: "KZ", name: "Kazakhstan" },
   { code: "KE", name: "Kenya" },
-  { code: "KG", name: "Kirghizistan" },
   { code: "KI", name: "Kiribati" },
   { code: "KW", name: "Koweït" },
+  { code: "KG", name: "Kirghizistan" },
+
   { code: "LA", name: "Laos" },
-  { code: "LS", name: "Lesotho" },
   { code: "LV", name: "Lettonie" },
   { code: "LB", name: "Liban" },
+  { code: "LS", name: "Lesotho" },
   { code: "LR", name: "Liberia" },
   { code: "LY", name: "Libye" },
   { code: "LI", name: "Liechtenstein" },
   { code: "LT", name: "Lituanie" },
   { code: "LU", name: "Luxembourg" },
+
   { code: "MK", name: "Macédoine du Nord" },
   { code: "MG", name: "Madagascar" },
-  { code: "MY", name: "Malaisie" },
   { code: "MW", name: "Malawi" },
+  { code: "MY", name: "Malaisie" },
   { code: "MV", name: "Maldives" },
   { code: "ML", name: "Mali" },
   { code: "MT", name: "Malte" },
   { code: "MA", name: "Maroc" },
-  { code: "MU", name: "Maurice" },
+  { code: "MH", name: "Îles Marshall" },
   { code: "MR", name: "Mauritanie" },
+  { code: "MU", name: "Maurice" },
   { code: "MX", name: "Mexique" },
   { code: "FM", name: "Micronésie" },
-  { code: "MD", name: "Moldavie" },
+  { code: "MD", name: "Moldova" },
   { code: "MC", name: "Monaco" },
   { code: "MN", name: "Mongolie" },
   { code: "ME", name: "Monténégro" },
   { code: "MZ", name: "Mozambique" },
+  { code: "MM", name: "Myanmar" },
+
   { code: "NA", name: "Namibie" },
   { code: "NR", name: "Nauru" },
   { code: "NP", name: "Népal" },
@@ -265,11 +281,14 @@
   { code: "NG", name: "Nigeria" },
   { code: "NO", name: "Norvège" },
   { code: "NZ", name: "Nouvelle-Zélande" },
+
   { code: "OM", name: "Oman" },
   { code: "UG", name: "Ouganda" },
   { code: "UZ", name: "Ouzbékistan" },
+
   { code: "PK", name: "Pakistan" },
   { code: "PW", name: "Palaos" },
+  { code: "PS", name: "Palestine" },
   { code: "PA", name: "Panama" },
   { code: "PG", name: "Papouasie-Nouvelle-Guinée" },
   { code: "PY", name: "Paraguay" },
@@ -278,102 +297,171 @@
   { code: "PH", name: "Philippines" },
   { code: "PL", name: "Pologne" },
   { code: "PT", name: "Portugal" },
+
   { code: "QA", name: "Qatar" },
+
   { code: "CF", name: "République centrafricaine" },
-  { code: "DO", name: "République dominicaine" },
   { code: "CZ", name: "République tchèque" },
   { code: "RO", name: "Roumanie" },
   { code: "GB", name: "Royaume-Uni" },
   { code: "RU", name: "Russie" },
   { code: "RW", name: "Rwanda" },
-  { code: "KN", name: "Saint-Kitts-et-Nevis" },
-  { code: "SM", name: "Saint-Marin" }
-        ];
 
-        let currentStreak = 0;
-        let bestScore = localStorage.getItem('kaido_quiz_best') || 0;
-        let correctCountry = null;
-        let hasAnswered = false;
+  { code: "KN", name: "Saint-Christophe-et-Niévès" },
+  { code: "LC", name: "Sainte-Lucie" },
+  { code: "SM", name: "Saint-Marin" },
+  { code: "VC", name: "Saint-Vincent-et-les-Grenadines" },
+  { code: "WS", name: "Samoa" },
+  { code: "ST", name: "Sao Tomé-et-Principe" },
+  { code: "SN", name: "Sénégal" },
+  { code: "RS", name: "Serbie" },
+  { code: "SC", name: "Seychelles" },
+  { code: "SL", name: "Sierra Leone" },
+  { code: "SG", name: "Singapour" },
+  { code: "SK", name: "Slovaquie" },
+  { code: "SI", name: "Slovénie" },
+  { code: "SB", name: "Îles Salomon" },
+  { code: "SO", name: "Somalie" },
+  { code: "SD", name: "Soudan" },
+  { code: "SS", name: "Soudan du Sud" },
+  { code: "LK", name: "Sri Lanka" },
+  { code: "SE", name: "Suède" },
+  { code: "CH", name: "Suisse" },
+  { code: "SY", name: "Syrie" },
 
-        const countryNameEl = document.getElementById('country-name');
-        const flagsContainer = document.getElementById('flags-container');
-        const nextBtn = document.getElementById('next-btn');
-        const streakEl = document.getElementById('current-streak');
-        const bestScoreEl = document.getElementById('best-score');
+  { code: "TJ", name: "Tadjikistan" },
+  { code: "TZ", name: "Tanzanie" },
+  { code: "TD", name: "Tchad" },
+  { code: "TH", name: "Thaïlande" },
+  { code: "TL", name: "Timor oriental" },
+  { code: "TG", name: "Togo" },
+  { code: "TO", name: "Tonga" },
+  { code: "TT", name: "Trinité-et-Tobago" },
+  { code: "TN", name: "Tunisie" },
+  { code: "TM", name: "Turkménistan" },
+  { code: "TV", name: "Tuvalu" },
 
-        bestScoreEl.textContent = bestScore;
+  { code: "UA", name: "Ukraine" },
+  { code: "UY", name: "Uruguay" },
 
-        // Fonction pour mélanger un tableau
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+  { code: "VU", name: "Vanuatu" },
+  { code: "VA", name: "Vatican" },
+  { code: "VE", name: "Venezuela" },
+  { code: "VN", name: "Viêt Nam" },
+
+  { code: "YE", name: "Yémen" },
+
+  { code: "ZM", name: "Zambie" },
+  { code: "ZW", name: "Zimbabwe" }
+];
+
+let currentStreak = 0;
+    let bestScore = localStorage.getItem('kaido_quiz_best') || 0;
+    let correctCountry = null;
+    let hasAnswered = false;
+    let playlistPays = []; // La fameuse playlist
+
+    const countryNameEl = document.getElementById('country-name');
+    const flagsContainer = document.getElementById('flags-container');
+    const nextBtn = document.getElementById('next-btn');
+    const streakEl = document.getElementById('current-streak');
+    const bestScoreEl = document.getElementById('best-score');
+
+    bestScoreEl.textContent = bestScore;
+
+    // Fonction pour mélanger un tableau
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function refillPlaylist() {
+        // On copie le tableau de base et on le mélange pour faire une nouvelle playlist
+        playlistPays = shuffleArray([...countries]);
+    }
+
+    function loadNewQuestion() {
+        hasAnswered = false;
+        nextBtn.style.display = 'none';
+        flagsContainer.innerHTML = '';
+
+        // Si la playlist est vide, on la recharge
+        if (playlistPays.length === 0) {
+            refillPlaylist();
         }
 
-        function loadNewQuestion() {
-            hasAnswered = false;
-            nextBtn.style.display = 'none';
-            flagsContainer.innerHTML = '';
+        // 1. On retire le dernier pays de la playlist : c'est notre bonne réponse
+        correctCountry = playlistPays.pop();
+        countryNameEl.textContent = correctCountry.name;
 
-            // Sélectionner 4 pays uniques au hasard
-            const shuffledCountries = shuffleArray([...countries]);
-            const options = shuffledCountries.slice(0, 4);
+        // 2. On choisit 3 autres pays au hasard pour faire les mauvaises réponses
+        const wrongOptions = [];
+        const fullListShuffled = shuffleArray([...countries]);
+        
+        for (let i = 0; i < fullListShuffled.length; i++) {
+            // On s'assure de ne pas piocher la bonne réponse comme mauvaise option
+            if (fullListShuffled[i].code !== correctCountry.code) {
+                wrongOptions.push(fullListShuffled[i]);
+            }
+            if (wrongOptions.length === 3) break;
+        }
+
+        // 3. On rassemble la bonne et les mauvaises réponses, et on les mélange
+        const options = shuffleArray([correctCountry, ...wrongOptions]);
+
+        // 4. On crée les 4 boutons
+        options.forEach(country => {
+            const btn = document.createElement('button');
+            btn.className = 'flag-option';
+            btn.innerHTML = `<img src="https://flagcdn.com/w160/${country.code.toLowerCase()}.png" alt="Drapeau caché">`;
             
-            // Choisir la bonne réponse parmi les 4
-            correctCountry = options[Math.floor(Math.random() * options.length)];
-            countryNameEl.textContent = correctCountry.name;
+            btn.addEventListener('click', () => handleAnswer(btn, country));
+            flagsContainer.appendChild(btn);
+        });
+    }
 
-            // Générer les 4 boutons
-            options.forEach(country => {
-                const btn = document.createElement('button');
-                btn.className = 'flag-option';
-                btn.innerHTML = `<img src="https://flagcdn.com/w160/${country.code}.png" alt="Drapeau caché">`;
-                
-                btn.addEventListener('click', () => handleAnswer(btn, country));
-                flagsContainer.appendChild(btn);
+    function handleAnswer(selectedBtn, selectedCountry) {
+        if (hasAnswered) return; // Empêche de cliquer plusieurs fois
+        hasAnswered = true;
+
+        const allButtons = document.querySelectorAll('.flag-option');
+
+        if (selectedCountry.code === correctCountry.code) {
+            // Bonne réponse
+            selectedBtn.classList.add('correct');
+            currentStreak++;
+            
+            if (currentStreak > bestScore) {
+                bestScore = currentStreak;
+                bestScoreEl.textContent = bestScore;
+                localStorage.setItem('kaido_quiz_best', bestScore);
+            }
+        } else {
+            // Mauvaise réponse
+            selectedBtn.classList.add('wrong');
+            currentStreak = 0;
+            
+            // Mettre en surbrillance la bonne réponse pour montrer l'erreur
+            allButtons.forEach(btn => {
+                const imgUrl = btn.querySelector('img').src;
+                if (imgUrl.includes(`/${correctCountry.code.toLowerCase()}.png`)) {
+                    btn.classList.add('correct');
+                }
             });
         }
 
-        function handleAnswer(selectedBtn, selectedCountry) {
-            if (hasAnswered) return; // Empêche de cliquer plusieurs fois
-            hasAnswered = true;
+        streakEl.textContent = currentStreak;
+        nextBtn.style.display = 'block';
+    }
 
-            const allButtons = document.querySelectorAll('.flag-option');
+    nextBtn.addEventListener('click', loadNewQuestion);
 
-            if (selectedCountry.code === correctCountry.code) {
-                // Bonne réponse
-                selectedBtn.classList.add('correct');
-                currentStreak++;
-                
-                if (currentStreak > bestScore) {
-                    bestScore = currentStreak;
-                    bestScoreEl.textContent = bestScore;
-                    localStorage.setItem('kaido_quiz_best', bestScore);
-                }
-            } else {
-                // Mauvaise réponse
-                selectedBtn.classList.add('wrong');
-                currentStreak = 0;
-                
-                // Mettre en surbrillance la bonne réponse
-                allButtons.forEach(btn => {
-                    const imgUrl = btn.querySelector('img').src;
-                    if (imgUrl.includes(`/${correctCountry.code}.png`)) {
-                        btn.classList.add('correct');
-                    }
-                });
-            }
+    // Lancer la première question
+    loadNewQuestion();
+</script>
 
-            streakEl.textContent = currentStreak;
-            nextBtn.style.display = 'block';
-        }
-
-        nextBtn.addEventListener('click', loadNewQuestion);
-
-        // Lancer la première question
-        loadNewQuestion();
-    </script>
 </body>
 </html>
