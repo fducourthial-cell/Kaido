@@ -20,7 +20,7 @@ window.saveTrip = async function() {
                 booking_notes: window.activeTrip.bookingNotes || [],
                 documents: window.activeTrip.documents || [],
                 gallery: window.activeTrip.gallery || [],
-                budget_details: window.activeTrip.budgetDetails // ✨ CORRECTION 1 : Sauvegarde du budget détaillé
+                budget_details: window.activeTrip.budgetDetails
             }).eq('id', window.activeTrip.id);
 
             if (updateError) {
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Bouton Exporter PDF (Mode Rouleau Ancien)
+    // Bouton Exporter PDF
     const exportPdfBtn = document.getElementById('btn-export-pdf');
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', () => {
@@ -129,6 +129,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             editModal.style.display = 'block'; 
         });
 
+        // ✨ NOUVEAU : Contrôle strict des 10 jours dans la modale
+        const checkEditDates = () => {
+            const startInput = document.getElementById('edit-date-start');
+            const endInput = document.getElementById('edit-date-end');
+            if (!startInput.value || !endInput.value) return;
+
+            const start = new Date(startInput.value);
+            const end = new Date(endInput.value);
+            const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+            if (diffDays > 10) {
+                alert("⚠️ La durée est limitée à 10 jours maximum pour ne pas corrompre le calendrier.");
+                const maxEnd = new Date(start);
+                maxEnd.setDate(start.getDate() + 9);
+                endInput.value = maxEnd.toISOString().split('T')[0];
+            } else if (diffDays < 1) {
+                endInput.value = startInput.value;
+            }
+        };
+
+        document.getElementById('edit-date-start').addEventListener('change', checkEditDates);
+        document.getElementById('edit-date-end').addEventListener('change', checkEditDates);
+
         // 2. Fermer la modale au clic sur "Annuler"
         if (btnCloseEdit) {
             btnCloseEdit.addEventListener('click', () => {
@@ -146,18 +169,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 3. Sauvegarder les nouvelles informations
         if (editForm) {
             editForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); // Empêche le rechargement de la page
+                e.preventDefault(); 
                 
-                // On met à jour l'objet global avec les nouvelles valeurs
                 window.activeTrip.dateStart = document.getElementById('edit-date-start').value;
                 window.activeTrip.dateEnd = document.getElementById('edit-date-end').value;
                 window.activeTrip.budget = document.getElementById('edit-budget').value;
                 window.activeTrip.desc = document.getElementById('edit-desc').value;
 
-                // On sauvegarde (Supabase + LocalStorage) via ta fonction globale
                 await window.saveTrip();
 
-                // On met à jour l'affichage en direct sur la page
                 if (typeof formatTripDuration === 'function') {
                     const datesElement = document.getElementById('trip-main-dates');
                     if (datesElement) {
@@ -165,13 +185,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
                 
-                // Fermeture de la modale
                 editModal.style.display = 'none';
             });
         }
     }
 
-    // 4. Remplissage des données d'en-tête et Budget (✨ CORRECTION 2 : Calcul robuste)
+    // 4. Remplissage des données d'en-tête et Budget 
     const destination = window.activeTrip.destination || window.activeTrip.title || "Destination";
     if (document.getElementById('trip-main-title')) document.getElementById('trip-main-title').textContent = destination;
     if (document.getElementById('trip-main-dates')) document.getElementById('trip-main-dates').textContent = `📅 ${window.activeTrip.dates || ''}`;
@@ -180,16 +199,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let totalB = parseFloat(window.activeTrip.budget) || ((window.activeTrip.itinerary?.length || 3) * 150 + 200);
     
-    // Valeurs par défaut (Le fameux 30/40/30)
+    // Valeurs par défaut
     let flights = Math.round(totalB * 0.30);
     let hotel = Math.round(totalB * 0.40);
     let rest = totalB - (flights + hotel);
 
-    // Si les détails de l'IA existent, on les utilise intelligemment
     if (window.activeTrip.budgetDetails) {
         flights = window.activeTrip.budgetDetails.flights || flights;
         hotel = window.activeTrip.budgetDetails.hotel || hotel;
-        // L'IA génère "food" et "activities", on les additionne pour la catégorie "Repas & Activités"
         const aiFood = window.activeTrip.budgetDetails.food || 0;
         const aiActivities = window.activeTrip.budgetDetails.activities || 0;
         
@@ -203,31 +220,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('budget-hotel')) document.getElementById('budget-hotel').textContent = `${hotel} €`;
     if (document.getElementById('budget-rest')) document.getElementById('budget-rest').textContent = `${rest} €`;
 
-   // 1. Nettoyage de la destination (ne garde que la ville)
+    // Nettoyage de la destination
     const destClean = encodeURIComponent(destination.split(',')[0].trim());
 
-            // 2. Construction des URLs de base
+    // Construction des URLs de base
     let bookingUrl = `https://www.booking.com/searchresults.fr.html?ss=${destClean}`;
     let airbnbUrl = `https://www.airbnb.fr/s/${destClean}/homes`;
     let kayakCarUrl = `https://www.kayak.fr/cars/${destClean}`;
     let flightsUrl = `https://www.google.com/travel/flights?q=Vols+vers+${destClean}`;
     let gygUrl = `https://www.getyourguide.fr/s?q=${destClean}`;
 
-            // 3. Ajout dynamique des dates si elles existent (Format: YYYY-MM-DD)
     if (window.activeTrip && window.activeTrip.dateStart && window.activeTrip.dateEnd) {
         bookingUrl += `&checkin=${window.activeTrip.dateStart}&checkout=${window.activeTrip.dateEnd}`;
         airbnbUrl += `?checkin=${window.activeTrip.dateStart}&checkout=${window.activeTrip.dateEnd}`;
         gygUrl += `&date_from=${window.activeTrip.dateStart}&date_to=${window.activeTrip.dateEnd}`;
     }
 
-            // 4. Ciblage optimisé (une seule requête DOM par bouton)
     const btnBooking = document.getElementById('res-btn-booking');
     const btnAirbnb = document.getElementById('res-btn-airbnb');
     const btnCar = document.getElementById('res-btn-car');
     const btnFlights = document.getElementById('res-btn-flights');
     const btnGyg = document.getElementById('res-btn-gyg');
 
-            // 5. Attribution des liens
     if (btnBooking) btnBooking.href = bookingUrl;
     if (btnAirbnb) btnAirbnb.href = airbnbUrl;
     if (btnCar) btnCar.href = kayakCarUrl;
@@ -252,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // 7. Rendu ITINÉRAIRE (Drag & Drop actif + Recherche Google sur le lieu uniquement)
+    // 7. Rendu ITINÉRAIRE (Drag & Drop actif + Recherche Google + Pub AdMob)
     let draggedStep = null;
 
     const renderItinerary = () => {
@@ -273,7 +287,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const actName = step.activity || step.title || step.name || 'Étape';
                         const isDone = step.done || false;
                         
-                        // Recherche Google ciblée uniquement sur le lieu
                         const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(loc)}`;
 
                         stepsHTML += `
@@ -293,7 +306,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                block.innerHTML = `
                     <div class="day-header" style="display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom: 0.5rem;">
-                        <!-- On remplace day.day par notre fonction de formatage -->
                         <span style="background:var(--color-torii); color:white; padding:0.2rem 0.6rem; border-radius:4px; font-weight:bold; font-size:0.85rem;" class="day-map-trigger">
                             ${day.dateText ? formatCardDate(day.dateText) : day.day}
                         </span>
@@ -341,7 +353,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 });
 
-                // Events Itinéraire (Checkbox & Map Select)
                 block.querySelectorAll('.step-done-checkbox').forEach(cb => {
                     cb.addEventListener('change', async (e) => {
                         window.activeTrip.itinerary[cb.getAttribute('data-day')].steps[cb.getAttribute('data-idx')].done = e.target.checked;
@@ -363,20 +374,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 daysContainer.appendChild(block);
                 
                 // 💰 INJECTION ADMOB : S'insère uniquement après le Jour 2 (index 1)
-        if (dayIdx === 1) {
-            const adBlock = document.createElement('div');
-            adBlock.className = 'kaido-ad-container';
-            adBlock.style.margin = '1.5rem 0';
-            adBlock.style.minHeight = '120px';
-            
-            adBlock.innerHTML = `
-                <span class="kaido-ad-badge">Sponsorisé</span>
-                <div class="kaido-ad-placeholder">
-                    [ AdMob : Annonce Native ]
-                </div>
-            `;
-            daysContainer.appendChild(adBlock);
-        }
+                if (dayIdx === 1) {
+                    const adBlock = document.createElement('div');
+                    adBlock.className = 'kaido-ad-container';
+                    adBlock.style.margin = '1.5rem 0';
+                    adBlock.style.minHeight = '120px';
+                    
+                    adBlock.innerHTML = `
+                        <span class="kaido-ad-badge">Sponsorisé</span>
+                        <div class="kaido-ad-placeholder">
+                            [ AdMob : Annonce Native ]
+                        </div>
+                    `;
+                    daysContainer.appendChild(adBlock);
+                }
             });
         }
     };
@@ -520,7 +531,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 11. ✨ NOUVEAU : Rendu du Transfert Aéroport
+    // 11. Rendu du Transfert Aéroport
     if (window.activeTrip.airportTransfer) {
         const transferBox = document.getElementById('airport-transfer-container');
         const t = window.activeTrip.airportTransfer;
@@ -541,10 +552,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Option Bonus : Configurer le bouton Google Maps pour le mode "Transport en commun"
     const btnTransit = document.getElementById('btn-google-transit');
     if (btnTransit && window.activeTrip.destination) {
-        // Crée une recherche Google Maps avec "Aéroport" comme point de départ vers la ville, en forçant le mode transport en commun (dirflg=r)
         const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=Aéroport+${encodeURIComponent(window.activeTrip.destination)}&destination=Centre+ville+${encodeURIComponent(window.activeTrip.destination)}&travelmode=transit`;
         btnTransit.href = mapsUrl;
     }
