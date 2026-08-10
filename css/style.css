@@ -1249,3 +1249,54 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     opacity: 0.85;
     max-width: 500px;
 }
+
+/* =========================================
+   KAIDO BOTTOM SHEETS (TIROIRS MOBILES)
+   ========================================= */
+.sheet-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); z-index: 2000;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+}
+.sheet-overlay.active { opacity: 1; visibility: visible; }
+
+.bottom-sheet {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: var(--bg-card, #1A1A1A); 
+    border-top: 1px solid var(--border-color);
+    border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box;
+    z-index: 2001; transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+}
+.bottom-sheet.active { transform: translateY(0); }
+
+.sheet-handle {
+    width: 40px; height: 5px; background: var(--text-muted);
+    border-radius: 10px; margin: 0 auto 15px auto; opacity: 0.5;
+}
+.sheet-title { 
+    color: var(--color-gold); font-family: 'Playfair Display', serif; 
+    font-size: 1.2rem; margin: 0 0 15px 0; 
+    display: flex; justify-content: space-between; align-items: center; 
+}
+.btn-close-sheet { 
+    background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); 
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center;
+}
+/* Le joli bouton déclencheur qui remplace tes formulaires sur la page */
+.sheet-trigger-btn {
+    width: 100%; padding: 0.8rem; background: rgba(212, 175, 55, 0.05);
+    color: var(--color-gold); border: 1px dashed var(--color-gold);
+    border-radius: 8px; font-weight: 600; cursor: pointer; 
+    margin-top: 10px; text-align: center; transition: all 0.2s;
+}
+.sheet-trigger-btn:active { background: rgba(212, 175, 55, 0.15); transform: scale(0.98); }
+
+/* Adaptation des formulaires pour le format vertical du tiroir */
+.bottom-sheet form { display: flex; flex-direction: column; gap: 12px; }
+.bottom-sheet input, .bottom-sheet select, .bottom-sheet button { 
+    width: 100%; box-sizing: border-box; padding: 0.8rem !important; 
+}
