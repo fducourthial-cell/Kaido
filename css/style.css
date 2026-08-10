@@ -1004,7 +1004,7 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     .form-row { grid-template-columns: 1fr; gap: 0; }
 }
 
-/* --- ORDINATEURS & GRANDS ÉCRANS : COLONNE MAP GÉANTE & FIXE --- */
+/* --- ORDINATEURS & GRANDS ÉCRANS : CARTE AGRANDIE ET IMAGE EN BAS --- */
 @media (min-width: 992px) {
     .header-link-red { display: inline-block; }
     .mobile-only-tab { display: none !important; }
@@ -1016,53 +1016,69 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
         gap: 2rem; 
     }
     
-    /* La colonne de gauche (les jours) scroll normalement */
     .itinerary-list-col { 
         flex: 1.2; 
     }
     
-    /* La colonne de droite (la carte + preview) devient un bloc fixe collé sous le header */
+    /* La colonne de droite fixe */
     .itinerary-map-col { 
         flex: 1; 
         position: sticky; 
-        top: 80px; /* Ajuste selon la hauteur de ton header */
-        height: calc(100vh - 100px); /* Prend toute la hauteur de l'écran moins les marges */
+        top: 70px; /* On remonte encore un peu plus le bloc pour gagner de la place en haut */
+        height: calc(100vh - 85px); /* Ajustement pour utiliser toute la hauteur sans déborder */
         z-index: 10;
         display: flex;
         flex-direction: column;
     }
 
-    /* La boîte de la carte s'étire pour remplir toute la hauteur disponible */
     .sticky-map-box {
         height: 100% !important;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start; /* On aligne tout vers le haut pour combler le vide des flèches */
+        padding: 1rem !important;
+        box-sizing: border-box;
     }
 
-    /* La carte Google Maps s'agrandit au maximum */
+    /* On réduit les marges internes du titre de la carte pour coller le haut */
+    .sticky-map-box h3 {
+        margin-bottom: 0.2rem !important;
+    }
+
+    .sticky-map-box p {
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* La carte Google Maps prend tout l'espace étiré vers le haut (là où il y avait tes flèches) */
     #map {
-        flex-grow: 1 !important;
-        height: auto !important; /* L'emprise prend toute la place libre */
-        min-height: 300px;
+        flex: 1 1 auto !important; /* Force la carte à s'étirer au maximum */
+        width: 100% !important;
+        min-height: 400px; /* Une belle hauteur confortable */
+        margin-bottom: 0.5rem !important;
     }
 
-    /* Le bloc de preview photo se cale proprement en bas du panneau fixe */
+    /* Le bloc image se positionne juste en dessous, bien visible et jamais coupé */
     .activity-preview-box {
-        max-height: 200px !important;
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         background: rgba(0, 0, 0, 0.03) !important;
         border-radius: 6px;
-        margin-top: 0.5rem;
-        padding: 0.5rem 1rem !important;
-        flex-shrink: 0; /* Empêche le bloc d'être écrasé */
+        padding: 0.4rem !important;
+        margin-top: 0 !important;
+        flex-shrink: 0; /* Empêche l'image de se faire écraser */
     }
 
     .activity-preview-img {
-        max-height: 130px !important; /* On réduit la hauteur maximale de l'image pour qu'elle loge toujours */
+        max-height: 140px !important; /* Taille idéale pour voir l'image en entier au-dessus de la barre Windows */
         width: auto !important;
         object-fit: contain !important;
         margin: 0 auto !important;
+    }
+    
+    .activity-preview-title {
+        padding: 0.2rem 0 0 0 !important;
+        font-size: 0.8rem;
     }
 }
 
