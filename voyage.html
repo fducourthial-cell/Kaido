@@ -38,8 +38,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- STYLES DES BOTTOM SHEETS (TIROIRS MOBILES) -->
+    <!-- STYLES DES BOTTOM SHEETS ET DE L'EN-TÊTE RÉTRACTABLE -->
     <style>
+        /* Bottom Sheets */
         .sheet-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); z-index: 2000;
@@ -85,9 +86,8 @@
         .bottom-sheet input, .bottom-sheet select, .bottom-sheet button { 
             width: 100%; box-sizing: border-box; padding: 0.8rem !important; 
         }
-        /* =========================================
-           ANIMATION EN-TÊTE RÉTRACTABLE (COLLAPSING)
-           ========================================= */
+
+        /* Animation En-tête Rétractable */
         .kaido-header { transition: background-color 0.3s ease; }
         
         #header-logo { 
@@ -110,7 +110,6 @@
             align-items: center;
         }
         
-        /* Classes ajoutées dynamiquement via JavaScript lors du scroll */
         .header-scrolled #header-logo { 
             opacity: 0; 
             transform: translateY(-20px); 
@@ -124,46 +123,6 @@
         }
     </style>
 </head>
-    <!-- SCRIPT DE L'EN-TÊTE RÉTRACTABLE -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sentinel = document.getElementById('scroll-sentinel');
-            const header = document.querySelector('.kaido-header');
-            const compactTitle = document.getElementById('header-compact-title');
-            const mainTitle = document.getElementById('trip-main-title');
-
-            if (sentinel && header && compactTitle && mainTitle) {
-                // On crée le détective qui surveille notre sentinelle
-                const observer = new IntersectionObserver((entries) => {
-                    // Si la sentinelle sort de l'écran par le haut (on scrolle vers le bas)
-                    if (!entries[0].isIntersecting) {
-                        header.classList.add('header-scrolled');
-                        
-                        // On clone magiquement le gros titre (avec son emoji) dans le petit titre
-                        compactTitle.innerHTML = mainTitle.innerHTML;
-                        
-                        // Petite astuce CSS pour réduire la taille de l'emoji drapeau dans l'en-tête
-                        const flagSpan = compactTitle.querySelector('span');
-                        if (flagSpan) {
-                            flagSpan.style.fontSize = '1.2rem';
-                            flagSpan.style.marginRight = '8px';
-                        }
-                    } 
-                    // Si on remonte tout en haut
-                    else {
-                        header.classList.remove('header-scrolled');
-                    }
-                }, { 
-                    threshold: 0, 
-                    // On déclenche l'animation 50px avant que le titre principal ne disparaisse totalement
-                    rootMargin: "-50px 0px 0px 0px" 
-                });
-
-                // On lance la surveillance
-                observer.observe(sentinel);
-            }
-        });
-    </script>
 <body>
 
     <!-- HEADER UNIFIÉ KAIDO -->
@@ -191,7 +150,6 @@
                <!-- Panneau déroulant -->
                 <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 200px; flex-direction: column; gap: 8px;">
                     
-                    <!-- NOUVEAU : Section Gestion du voyage -->
                     <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Gestion du voyage</div>
                     
                     <button id="btn-open-edit" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
@@ -209,7 +167,6 @@
 
                     <hr style="border: none; border-top: 1px solid var(--border-color); margin: 4px 0;">
 
-                    <!-- Section Préférences (Thème & App) -->
                     <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Préférences</div>
 
                     <button id="btn-install-pwa" class="btn-primary" style="display: none;">
@@ -221,7 +178,6 @@
 
                     <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
 
-                    <!-- Section Langues -->
                     <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Langue</div>
                     
                     <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
@@ -345,7 +301,6 @@
             <div id="tab-budget" class="tab-content" style="display: none;">
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
                     
-                    <!-- Estimation & Liens Partenaires Directs -->
                     <div class="card-box budget-card" style="flex: 1; min-width: 300px; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;" data-i18n>Budget & Estimation</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;" data-i18n>Estimation globale et réservations directes</p>
@@ -399,7 +354,6 @@
                         </div>
                     </div>
 
-                    <!-- Dépenses réelles individuelles -->
                     <div class="card-box expenses-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>💸 Dépenses Réelles</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>Suivi du budget consommé</p>
@@ -417,13 +371,10 @@
 
                         <div id="expenses-list" style="max-height: 180px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
 
-                        <!-- DÉCLENCHEUR BOTTOM SHEET -->
                         <button class="sheet-trigger-btn" onclick="openKaidoSheet('sheet-expense')">➕ Ajouter une dépense perso</button>
                     </div>
-
                 </div>
 
-                <!-- Tricount / Dépenses Partagées -->
                 <div class="card-box shared-expenses-card" style="margin-top: 1.5rem; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>⚖️ Dépenses partagées</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1.2rem 0;" data-i18n>Gérez les comptes du groupe et l'équilibre des remboursements</p>
@@ -431,14 +382,10 @@
                     <div style="margin-bottom: 1.2rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 6px;">
                         <label style="display: block; font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.4rem;" data-i18n>Participants du voyage :</label>
                         <div id="participants-tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem;"></div>
-                        
-                        <!-- DÉCLENCHEUR BOTTOM SHEET -->
                         <button class="sheet-trigger-btn" onclick="openKaidoSheet('sheet-participant')">👥 Ajouter un participant</button>
                     </div>
 
                     <div id="shared-expenses-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
-                    
-                    <!-- DÉCLENCHEUR BOTTOM SHEET -->
                     <button class="sheet-trigger-btn" onclick="openKaidoSheet('sheet-shared-expense')">💸 Nouvelle dépense de groupe</button>
 
                     <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-top: 1.2rem;">
@@ -467,20 +414,14 @@
             <!-- 4. GRAND ONGLET LOGISTIQUE -->
             <div id="tab-logistics" class="tab-content" style="display: none;">
                 
-                <!-- Ligne 1 : Checklist & Météo -->
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                    
-                    <!-- Checklist -->
                     <div class="checklist-card" style="flex: 1; min-width: 300px; margin-top: 0;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>🎒 Check-list de voyage</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>À ne pas oublier</p>
                         <ul class="checklist-items" id="checklist-container"></ul>
-                        
-                        <!-- DÉCLENCHEUR BOTTOM SHEET -->
                         <button class="sheet-trigger-btn" onclick="openKaidoSheet('sheet-task')">✅ Ajouter à la check-list</button>
                     </div>
 
-                    <!-- Météo -->
                     <div class="card-box weather-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>🌤️ Météo prévue</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" id="weather-subtitle" data-i18n>Prévisions sur place</p>
@@ -488,13 +429,9 @@
                             <span style="color: var(--text-muted); font-size: 0.85rem;" data-i18n>Chargement de la météo...</span>
                         </div>
                     </div>
-
                 </div>
 
-                <!-- Ligne 2 : Transfert Aéroport & Notes Personnelles -->
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                    
-                    <!-- Transfert Aéroport -->
                     <div class="card-box transfer-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🚌 Transfert Aéroport</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Recommandé pour rejoindre le centre</p>
@@ -507,72 +444,33 @@
                         </a>
                     </div>
 
-                    <!-- Notes de réservation personnelles & Liens -->
                     <div class="card-box" style="flex: 1.5; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>📋 Notes & Liens personnels</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>Numéros de vol, codes de confirmation d'hôtel ou liens vers vos billets.</p>
                         
                         <div id="booking-notes-list" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 180px; overflow-y: auto;"></div>
-
-                        <!-- DÉCLENCHEUR BOTTOM SHEET -->
                         <button class="sheet-trigger-btn" onclick="openKaidoSheet('sheet-booking')">📋 Ajouter une note ou un lien</button>
                     </div>
-
                 </div>
 
-                <!-- Ligne 3 : Portefeuille de Documents Locaux (PDF / Images) -->
                 <div class="card-box" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <h3 style="color: var(--color-gold); margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>🗂️ Documents & Pass Fichiers</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem;" data-i18n>Stockez vos PDF de réservation et pièces d'identité localement.</p>
 
                     <div id="documents-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;"></div>
-
-                    <!-- DÉCLENCHEUR BOTTOM SHEET -->
                     <button class="sheet-trigger-btn" onclick="openKaidoSheet('sheet-doc')">🗂️ Importer un document</button>
                 </div>
-
             </div>
 
             <div id="tab-map" class="tab-content" style="display: none;"></div>
-
         </div>
     </main>
-
-    <!-- MODALE DE MODIFICATION -->
-    <div id="editModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--color-gold); font-family: 'Playfair Display', serif;" data-i18n>Modifier le voyage</h3>
-            <form id="edit-trip-form">
-                <div style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);" data-i18n>📅 Date Aller</label>
-                    <input type="date" id="edit-date-start" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;" required>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);" data-i18n>📅 Date Retour</label>
-                    <input type="date" id="edit-date-end" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;" required>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);" data-i18n>💶 Budget (€)</label>
-                    <input type="number" id="edit-budget" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;">
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);" data-i18n>📝 Notes & Description</label>
-                    <textarea id="edit-desc" rows="3" style="width:100%; padding:0.5rem; background:var(--bg-dark); border:1px solid var(--border-color); color:var(--text-main); border-radius:4px;"></textarea>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" id="btn-close-edit" style="background: #333; color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;" data-i18n>Annuler</button>
-                    <button type="submit" style="background: var(--color-torii); color:white; border:none; padding:0.6rem 1rem; border-radius:4px; cursor:pointer;" data-i18n>Sauvegarder</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- =========================================
          CONTENEUR DES BOTTOM SHEETS KAIDO
          ========================================= -->
     <div id="kaido-sheet-overlay" class="sheet-overlay" onclick="closeAllKaidoSheets()"></div>
 
-    <!-- Tiroir : Dépense Perso -->
     <div id="sheet-expense" class="bottom-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" data-i18n>Ajouter une dépense <button class="btn-close-sheet" onclick="closeAllKaidoSheets()">✖</button></div>
@@ -583,7 +481,6 @@
         </form>
     </div>
 
-    <!-- Tiroir : Participant Tricount -->
     <div id="sheet-participant" class="bottom-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" data-i18n>Nouveau participant <button class="btn-close-sheet" onclick="closeAllKaidoSheets()">✖</button></div>
@@ -593,7 +490,6 @@
         </form>
     </div>
 
-    <!-- Tiroir : Dépense Partagée -->
     <div id="sheet-shared-expense" class="bottom-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" data-i18n>Dépense de groupe <button class="btn-close-sheet" onclick="closeAllKaidoSheets()">✖</button></div>
@@ -611,7 +507,6 @@
         </form>
     </div>
 
-    <!-- Tiroir : Checklist -->
     <div id="sheet-task" class="bottom-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" data-i18n>Check-list <button class="btn-close-sheet" onclick="closeAllKaidoSheets()">✖</button></div>
@@ -621,7 +516,6 @@
         </form>
     </div>
 
-    <!-- Tiroir : Notes & Liens -->
     <div id="sheet-booking" class="bottom-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" data-i18n>Note & Lien <button class="btn-close-sheet" onclick="closeAllKaidoSheets()">✖</button></div>
@@ -632,7 +526,6 @@
         </form>
     </div>
 
-    <!-- Tiroir : Documents -->
     <div id="sheet-doc" class="bottom-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" data-i18n>Document <button class="btn-close-sheet" onclick="closeAllKaidoSheets()">✖</button></div>
@@ -657,19 +550,17 @@
             });
         }
 
-        // Astuce UX : Fermer automatiquement le tiroir quand un formulaire est validé
         document.querySelectorAll('.bottom-sheet form').forEach(form => {
             form.addEventListener('submit', () => {
-                setTimeout(() => closeAllKaidoSheets(), 150); // Petit délai pour laisser JS faire le save
+                setTimeout(() => closeAllKaidoSheets(), 150); 
             });
         });
     </script>
 
     <!-- UTILITAIRES DE DATES KAIDO & EMOJI DRAPEAU -->
     <script>
-        // Fonction magique pour transformer un code pays ('fr', 'jp'...) en Emoji
         function getFlagEmoji(countryCode) {
-            if (!countryCode) return '🌍'; // Globe par défaut si pas de code
+            if (!countryCode) return '🌍';
             const codePoints = countryCode
                 .toUpperCase()
                 .split('')
@@ -719,7 +610,6 @@
     <script src="js/modules/kaidoDB.js"></script>
     <script src="js/modules/gallery.js"></script>
     
-    <!-- Module Kiroku et exécution en arrière-plan -->
     <script src="js/modules/kiroku.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -756,6 +646,40 @@
     </script>
     
     <script src="js/voyage.js"></script>
+
+    <!-- SCRIPT DE L'EN-TÊTE RÉTRACTABLE (COLLAPSING HEADER) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sentinel = document.getElementById('scroll-sentinel');
+            const header = document.querySelector('.kaido-header');
+            const compactTitle = document.getElementById('header-compact-title');
+            const mainTitle = document.getElementById('trip-main-title');
+
+            if (sentinel && header && compactTitle && mainTitle) {
+                const observer = new IntersectionObserver((entries) => {
+                    if (!entries[0].isIntersecting) {
+                        header.classList.add('header-scrolled');
+                        
+                        compactTitle.innerHTML = mainTitle.innerHTML;
+                        
+                        const flagSpan = compactTitle.querySelector('span');
+                        if (flagSpan) {
+                            flagSpan.style.fontSize = '1.2rem';
+                            flagSpan.style.marginRight = '8px';
+                        }
+                    } else {
+                        header.classList.remove('header-scrolled');
+                    }
+                }, { 
+                    threshold: 0, 
+                    rootMargin: "-50px 0px 0px 0px" 
+                });
+
+                observer.observe(sentinel);
+            }
+        });
+    </script>
+
     <footer class="kaido-footer">
         <div class="footer-quote">
             « Fixe ton cœur sur le voyage, pas sur la destination. »
