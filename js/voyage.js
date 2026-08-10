@@ -361,6 +361,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 daysContainer.appendChild(block);
+                
+                // 💰 INJECTION ADMOB : S'insère uniquement après le Jour 2 (index 1)
+        if (dayIdx === 1) {
+            const adBlock = document.createElement('div');
+            adBlock.className = 'kaido-ad-container';
+            adBlock.style.margin = '1.5rem 0';
+            adBlock.style.minHeight = '120px';
+            
+            adBlock.innerHTML = `
+                <span class="kaido-ad-badge">Sponsorisé</span>
+                <div class="kaido-ad-placeholder">
+                    [ AdMob : Annonce Native ]
+                </div>
+            `;
+            daysContainer.appendChild(adBlock);
+        }
             });
         }
     };
