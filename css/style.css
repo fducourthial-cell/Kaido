@@ -1300,3 +1300,41 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
 .bottom-sheet input, .bottom-sheet select, .bottom-sheet button { 
     width: 100%; box-sizing: border-box; padding: 0.8rem !important; 
 }
+
+/* =========================================
+   EMPLACEMENTS PUBLICITAIRES ADMOB
+   ========================================= */
+.kaido-ad-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+.kaido-ad-badge {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa; /* Bleu discret et moderne */
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    font-size: 0.6rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    z-index: 2;
+}
+
+.kaido-ad-placeholder {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 20px;
+}
