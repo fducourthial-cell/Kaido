@@ -59,7 +59,7 @@ ${travelOnSiteStr}
 RÈGLES IMPÉRATIVES :
 1. PROGRESSION GÉOGRAPHIQUE : Zéro aller-retour absurde. Les étapes du jour N+1 doivent être logiquement proches de la nuit du jour N.
 2. FAISABILITÉ : Les étapes d'une même journée doivent être regroupées dans le même secteur.
-3. CONCISION : Sois extrêmement concis dans les descriptions ("activity"). Maximum 2 phrases. Va à l'essentiel pour générer la réponse rapidement.
+3. CONCISION : Sois extrêmement concis pour les descriptions ("activity"). Utilise un format titre court de 3 à 6 mots maximum (ex: "Visite du Rijksmuseum", "Croisière sur les canaux"), sans aucune phrase descriptive superflue. Va droit à l'essentiel.
 4. LIEUX EXACTS : Remplis "location" avec "Nom du lieu, Ville, Pays". Ne renseigne JAMAIS lat/lng (laisse null).
 5. VOYAGE ET TRANSFERT : Le Jour 1 intègre le trajet initial depuis ${departure}. Si un jour implique un très long trajet interne, mets "travelDay": true.
 6. HÉBERGEMENT : Indique dans "accommodation" une zone logique où dormir le soir.
