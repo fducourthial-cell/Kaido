@@ -1004,14 +1004,61 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     .form-row { grid-template-columns: 1fr; gap: 0; }
 }
 
-/* --- ORDINATEURS & GRANDS ÉCRANS --- */
+/* --- ORDINATEURS & GRANDS ÉCRANS : COLONNE MAP GÉANTE & FIXE --- */
 @media (min-width: 992px) {
     .header-link-red { display: inline-block; }
     .mobile-only-tab { display: none !important; }
     
-    .itinerary-split-layout { flex-direction: row; align-items: flex-start; gap: 2rem; }
-    .itinerary-list-col { flex: 1.2; }
-    .itinerary-map-col { flex: 1; position: sticky; top: 2rem; z-index: 10; }
+    .itinerary-split-layout { 
+        display: flex; 
+        flex-direction: row; 
+        align-items: flex-start; 
+        gap: 2rem; 
+    }
+    
+    /* La colonne de gauche (les jours) scroll normalement */
+    .itinerary-list-col { 
+        flex: 1.2; 
+    }
+    
+    /* La colonne de droite (la carte + preview) devient un bloc fixe collé sous le header */
+    .itinerary-map-col { 
+        flex: 1; 
+        position: sticky; 
+        top: 90px; /* Ajuste selon la hauteur de ton header */
+        height: calc(100vh - 120px); /* Prend toute la hauteur de l'écran moins les marges */
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* La boîte de la carte s'étire pour remplir toute la hauteur disponible */
+    .sticky-map-box {
+        height: 100% !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* La carte Google Maps s'agrandit au maximum */
+    #map {
+        flex-grow: 1 !important;
+        height: auto !important; /* L'emprise prend toute la place libre */
+        min-height: 350px;
+    }
+
+    /* Le bloc de preview photo se cale proprement en bas du panneau fixe */
+    .activity-preview-box {
+        max-height: 240px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.03) !important;
+        border-radius: 6px;
+        margin-top: 0.8rem;
+    }
+
+    .activity-preview-img {
+        max-height: 180px !important; /* Pour que l'image reste bien proportionnée sans tout écraser */
+    }
 }
 
 /* --- VERSION MOBILE APP (Smartphones Portrait & Navigation en bas) --- */
