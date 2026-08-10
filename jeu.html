@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-Jeu : Drapeaux - Kaido</title>
+    <link rel="icon" type="image/png" href="image/kaido_7.3.png">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        .quiz-container {
+            max-width: 600px;
+            margin: 2rem auto 5rem auto;
+            text-align: center;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-family: var(--font-serif);
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 2rem;
+        }
+
+        .target-country {
+            color: var(--color-gold);
+            font-size: 2.2rem;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .flags-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .flag-option {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+        }
+
+        .flag-option img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .flag-option:hover {
+            border-color: var(--color-gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+        }
+
+        .flag-option:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Animations de réponse */
+        .flag-option.correct {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+        .flag-option.wrong {
+            border-color: var(--color-torii);
+            background: rgba(166, 58, 43, 0.1);
+            opacity: 0.6;
+        }
+
+        /* Bouton Rejouer / Suivant */
+        #next-btn {
+            display: none;
+            margin: 2rem auto 0 auto;
+            width: 100%;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- On réutilise ton Header unifié -->
+    <header class="kaido-header">
+        <div class="header-left">
+            <a href="index.html" class="header-btn-back">←</a>
+        </div>
+        <div class="header-center">
+            <span style="font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-gold); font-weight: bold;">Le Dojo de Kaido</span>
+        </div>
+        <div class="header-right"></div>
+    </header>
+
+    <main class="container">
+        <div class="quiz-container">
+            
+            <div class="score-board">
+                <span style="color: var(--text-muted);">Série actuelle : <span id="current-streak" style="color: var(--text-main);">0</span></span>
+                <span style="color: var(--text-muted);">Meilleur score : <span id="best-score" style="color: var(--color-gold);">0</span> 🏆</span>
+            </div>
+
+            <h2 class="question-text">
+                Sélectionnez le drapeau :
+                <span id="country-name" class="target-country">Chargement...</span>
+            </h2>
+
+            <div class="flags-grid" id="flags-container">
+                <!-- Les boutons seront générés ici en JavaScript -->
+            </div>
+
+            <button id="next-btn" class="kaido-submit-btn" style="padding: 1rem; border-radius: 8px;">Continuer ➔</button>
+
+        </div>
+    </main>
+
+    <script>
+        // Petite base de données ultra-légère des pays
+        const countries = [
+            { code: "fr", name: "France" }, { code: "de", name: "Allemagne" },
+            { code: "it", name: "Italie" }, { code: "es", name: "Espagne" },
+            { code: "pt", name: "Portugal" }, { code: "gb", name: "Royaume-Uni" },
+            { code: "jp", name: "Japon" }, { code: "cn", name: "Chine" },
+            { code: "br", name: "Brésil" }, { code: "ar", name: "Argentine" },
+            { code: "ca", name: "Canada" }, { code: "us", name: "États-Unis" },
+            { code: "kr", name: "Corée du Sud" }, { code: "au", name: "Australie" },
+            { code: "za", name: "Australie" }, { code: "in", name: "Inde" },
+            { code: "mx", name: "Mexique" }, { code: "ru", name: "Russie" },
+            { code: "nl", name: "Pays-Bas" }, { code: "be", name: "Belgique" },
+            { code: "ch", name: "Suisse" }, { code: "se", name: "Suède" },
+            { code: "no", name: "Norvège" }, { code: "fi", name: "Finlande" },
+            { code: "dk", name: "Danemark" }, { code: "gr", name: "Grèce" },
+            { code: "tr", name: "Turquie" }, { code: "eg", name: "Turquie" },
+            { code: "ma", name: "Maroc" }, { code: "dz", name: "Maroc" }
+        ];
+
+        let currentStreak = 0;
+        let bestScore = localStorage.getItem('kaido_quiz_best') || 0;
+        let correctCountry = null;
+        let hasAnswered = false;
+
+        const countryNameEl = document.getElementById('country-name');
+        const flagsContainer = document.getElementById('flags-container');
+        const nextBtn = document.getElementById('next-btn');
+        const streakEl = document.getElementById('current-streak');
+        const bestScoreEl = document.getElementById('best-score');
+
+        bestScoreEl.textContent = bestScore;
+
+        // Fonction pour mélanger un tableau
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadNewQuestion() {
+            hasAnswered = false;
+            nextBtn.style.display = 'none';
+            flagsContainer.innerHTML = '';
+
+            // Sélectionner 4 pays uniques au hasard
+            const shuffledCountries = shuffleArray([...countries]);
+            const options = shuffledCountries.slice(0, 4);
+            
+            // Choisir la bonne réponse parmi les 4
+            correctCountry = options[Math.floor(Math.random() * options.length)];
+            countryNameEl.textContent = correctCountry.name;
+
+            // Générer les 4 boutons
+            options.forEach(country => {
+                const btn = document.createElement('button');
+                btn.className = 'flag-option';
+                btn.innerHTML = `<img src="https://flagcdn.com/w160/${country.code}.png" alt="Drapeau caché">`;
+                
+                btn.addEventListener('click', () => handleAnswer(btn, country));
+                flagsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedBtn, selectedCountry) {
+            if (hasAnswered) return; // Empêche de cliquer plusieurs fois
+            hasAnswered = true;
+
+            const allButtons = document.querySelectorAll('.flag-option');
+
+            if (selectedCountry.code === correctCountry.code) {
+                // Bonne réponse
+                selectedBtn.classList.add('correct');
+                currentStreak++;
+                
+                if (currentStreak > bestScore) {
+                    bestScore = currentStreak;
+                    bestScoreEl.textContent = bestScore;
+                    localStorage.setItem('kaido_quiz_best', bestScore);
+                }
+            } else {
+                // Mauvaise réponse
+                selectedBtn.classList.add('wrong');
+                currentStreak = 0;
+                
+                // Mettre en surbrillance la bonne réponse
+                allButtons.forEach(btn => {
+                    const imgUrl = btn.querySelector('img').src;
+                    if (imgUrl.includes(`/${correctCountry.code}.png`)) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            streakEl.textContent = currentStreak;
+            nextBtn.style.display = 'block';
+        }
+
+        nextBtn.addEventListener('click', loadNewQuestion);
+
+        // Lancer la première question
+        loadNewQuestion();
+    </script>
+</body>
+</html>
