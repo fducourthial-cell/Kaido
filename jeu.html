@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini jeu</title>
+    <title>Mini jeux</title>
     <link rel="icon" type="image/png" href="image/kaido_7.3.png">
+    
+    <!-- Lien vers ton CSS global qui gère les thèmes -->
     <link rel="stylesheet" href="css/style.css">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
+        /* Styles spécifiques au jeu, utilisant TES variables globales */
         .quiz-container {
             max-width: 600px;
             margin: 2rem auto 5rem auto;
@@ -21,7 +24,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(212, 175, 55, 0.1);
+            background: rgba(212, 175, 55, 0.05);
             border: 1px solid var(--border-color);
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -88,14 +91,15 @@
             transform: scale(1.05);
         }
 
+        /* Couleurs de validation adaptées à ton thème */
         .flag-option.correct {
-            border-color: #2ecc71;
-            background: rgba(46, 204, 113, 0.1);
+            border-color: #2ecc71 !important;
+            background: rgba(46, 204, 113, 0.1) !important;
         }
         
         .flag-option.wrong {
-            border-color: var(--color-torii);
-            background: rgba(166, 58, 43, 0.1);
+            border-color: var(--color-torii) !important;
+            background: rgba(166, 58, 43, 0.1) !important;
             opacity: 0.6;
         }
 
@@ -125,14 +129,66 @@
 </head>
 <body>
 
+    <!-- SCRIPT DE CHARGEMENT DU THÈME (Exécuté tout de suite pour éviter le clignotement) -->
+    <script>
+        const savedTheme = localStorage.getItem('kaido_theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <!-- HEADER COMPLET KAIDO (Le même que sur le reste du site) -->
     <header class="kaido-header">
         <div class="header-left">
-            <a href="index.html" class="header-btn-back">←</a>
+            <a href="index.html" class="header-btn-back" title="Retour à l'accueil">←</a>
         </div>
+
         <div class="header-center">
-            <span style="font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-gold); font-weight: bold;">Mini jeu</span>
+            <span style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-gold); font-weight: bold; letter-spacing: 0.1em;">LE DOJO</span>
         </div>
-        <div class="header-right"></div>
+
+        <div class="header-right" style="display: flex; align-items: center; position: relative; gap: 12px;">
+            <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                ⚙️
+            </button>
+
+            <!-- Panneau déroulant -->
+            <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
+                <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
+                    <span>🌓</span> <span>Changer de thème</span>
+                </button>
+            </div>
+            
+            <button class="header-profile-btn" title="Mon Profil">
+                <img src="image/kaido_7.3.png" alt="Profil" class="header-profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=D4AF37&color=0D0B09'">
+            </button>
+        </div>
+
+        <script>
+            // Logique du menu déroulant et du bouton thème
+            const menuBtn = document.getElementById('options-menu-btn');
+            const dropdown = document.getElementById('options-dropdown');
+            const themeToggleBtn = document.getElementById('global-theme-toggle');
+
+            if (menuBtn && dropdown) {
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+                });
+                dropdown.addEventListener('click', (e) => e.stopPropagation());
+            }
+
+            window.addEventListener('click', () => {
+                if (dropdown) dropdown.style.display = 'none';
+            });
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+                    const newTheme = currentTheme === 'dark' ? 'papyrus' : 'dark';
+                    document.body.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('kaido_theme', newTheme);
+                });
+            }
+        </script>
     </header>
 
     <main class="container">
@@ -186,6 +242,7 @@
     </main>
 
     <script>
+        // Ta base de données
         const countries = [
             { code: "AF", name: "Afghanistan", capital: "Kaboul", currency: "AFN" },
             { code: "ZA", name: "Afrique du Sud", capital: "Pretoria", currency: "ZAR" },
@@ -464,10 +521,8 @@
                 const candidate = fullListShuffled[i];
                 let isUnique = true;
 
-                // Évite d'avoir la bonne réponse dans les mauvais choix
                 if (candidate.code === correctCountry.code) isUnique = false;
                 
-                // Évite les doublons de réponses à l'écran (ex: deux fois "EUR")
                 if (currentQuestionMode === 'capitals' && candidate.capital === correctCountry.capital) isUnique = false;
                 if (currentQuestionMode === 'currencies' && candidate.currency === correctCountry.currency) isUnique = false;
                 
