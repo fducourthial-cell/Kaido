@@ -1338,3 +1338,10 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     font-size: 0.8rem;
     padding: 20px;
 }
+
+/* 📱 Cache le bouton "Dicter mes envies" sur smartphone */
+@media (max-width: 768px) {
+    #btn-dictate {
+        display: none !important;
+    }
+}
