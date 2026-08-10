@@ -1025,8 +1025,8 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     .itinerary-map-col { 
         flex: 1; 
         position: sticky; 
-        top: 90px; /* Ajuste selon la hauteur de ton header */
-        height: calc(100vh - 120px); /* Prend toute la hauteur de l'écran moins les marges */
+        top: 80px; /* Ajuste selon la hauteur de ton header */
+        height: calc(100vh - 100px); /* Prend toute la hauteur de l'écran moins les marges */
         z-index: 10;
         display: flex;
         flex-direction: column;
@@ -1044,20 +1044,25 @@ body[data-theme="papyrus"] #btn-export-pdf:hover {
     #map {
         flex-grow: 1 !important;
         height: auto !important; /* L'emprise prend toute la place libre */
-        min-height: 350px;
+        min-height: 300px;
     }
 
     /* Le bloc de preview photo se cale proprement en bas du panneau fixe */
     .activity-preview-box {
-        max-height: 240px;
+        max-height: 200px !important;
         overflow: hidden;
         background: rgba(0, 0, 0, 0.03) !important;
         border-radius: 6px;
-        margin-top: 0.8rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem !important;
+        flex-shrink: 0; /* Empêche le bloc d'être écrasé */
     }
 
     .activity-preview-img {
-        max-height: 180px !important; /* Pour que l'image reste bien proportionnée sans tout écraser */
+        max-height: 130px !important; /* On réduit la hauteur maximale de l'image pour qu'elle loge toujours */
+        width: auto !important;
+        object-fit: contain !important;
+        margin: 0 auto !important;
     }
 }
 
