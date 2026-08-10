@@ -153,7 +153,7 @@
     <button id="btn-complete-trip" class="action-pill-btn" data-i18n>🏁 Clôturer</button>
 </div>
 
-        <!-- NAVIGATION PAR ONGLETS -->
+    <!-- NAVIGATION PAR ONGLETS ÉPURÉE (4 ONGLETS) -->
         <nav class="trip-nav-tabs">
             <button class="tab-btn active" data-tab="tab-itinerary">
                 <span class="tab-icon">✨</span>
@@ -163,67 +163,35 @@
                 <span class="tab-icon">💶</span>
                 <span class="tab-text" data-i18n>Budget</span>
             </button>
-            <button class="tab-btn" data-tab="tab-logistics">
-                <span class="tab-icon">🎒</span>
-                <span class="tab-text" data-i18n>Infos</span>
-            </button>
-            <button class="tab-btn mobile-only-tab" data-tab="tab-map">
-                <span class="tab-icon">📍</span>
-                <span class="tab-text" data-i18n>Carte</span>
-            </button>
-            <button class="tab-btn" data-tab="tab-reservations">
-                <span class="tab-icon">🛎️</span>
-                <span class="tab-text" data-i18n>Liens</span>
-            </button>
-            <button class="tab-btn" data-tab="tab-documents"> 
-                <span class="tab-icon">🗂️</span> 
-                <span class="tab-text" data-i18n>Documents</span>
-            </button>
-                
-            
             <button class="tab-btn" data-tab="tab-gallery">
                 <span class="tab-icon">📸</span>
                 <span class="tab-text" data-i18n>Galerie</span>
             </button>
+            <button class="tab-btn" data-tab="tab-logistics">
+                <span class="tab-icon">🎒</span>
+                <span class="tab-text" data-i18n>Logistique</span>
+            </button>
+            <button class="tab-btn mobile-only-tab" data-tab="tab-map" style="display:none;">
+                <span class="tab-icon">📍</span>
+                <span class="tab-text" data-i18n>Carte</span>
+            </button>
         </nav>
-        
 
         <!-- CONTENU DES ONGLETS -->
         <div class="trip-tab-wrapper">
-            <div id="tab-gallery" class="tab-content" style="display: none;">
-                <div class="map-card" style="margin-bottom: 2rem;">
-                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;" data-i18n>
-                        📸 Galerie Collaborative
-                    </h2>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n>
-                        Partagez vos meilleurs souvenirs de voyage.
-                    </p>
 
-                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 2rem; cursor: pointer; transition: all 0.3s;" id="gallery-dropzone">
-                        <input type="file" id="gallery-file-input" accept="image/*" multiple style="display: none;">
-                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">☁️</div>
-                        <div style="color: var(--color-gold); font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;" data-i18n>Cliquez pour ajouter des photos</div>
-                        <div style="color: var(--text-muted); font-size: 0.85rem;" data-i18n>Vous pouvez sélectionner plusieurs photos à la fois</div>
-                        <div id="gallery-upload-progress" style="display: none; color: var(--color-torii); font-weight: bold; margin-top: 1rem;" data-i18n>⏳ Envoi en cours...</div>
-                    </div>
-
-                    <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"></div>
-                </div>
-            </div>
-
+            <!-- 1. ONGLET ITINÉRAIRE -->
             <div id="tab-itinerary" class="tab-content active-content">
                 <div class="itinerary-split-layout">
                     <div class="itinerary-list-col">
                         <div id="itinerary-days-container"></div>
                     </div>
-
                     <div class="itinerary-map-col">
                         <div class="map-card sticky-map-box">
                             <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>📍 Maps
                             <span id="map-daily-distance" style="color: var(--color-gold); font-size: 0.95rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500;"></span></h3>
                             <p style="color: var(--text-muted); font-size: 0.78rem; margin: 0 0 0.8rem 0;" data-i18n>Cliquez sur une étape pour la localiser</p>
                             <div id="map"></div>
-                            
                             <div id="activity-preview" class="activity-preview-box">
                                 <img id="activity-img" class="activity-preview-img" src="" alt="Aperçu activité" style="display:none;">
                                 <div id="activity-loading" class="activity-preview-loading" data-i18n>Recherche de la photo...</div>
@@ -234,66 +202,99 @@
                 </div>
             </div>
 
+            <!-- 2. ONGLET BUDGET (AVEC RACCOURCIS PARTENAIRES EN FACE DES ESTIMATIONS) -->
             <div id="tab-budget" class="tab-content" style="display: none;">
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
                     
+                    <!-- Estimation & Liens Partenaires Directs -->
                     <div class="card-box budget-card" style="flex: 1; min-width: 300px; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-family: 'Playfair Display', serif; margin-top: 0; margin-bottom: 0.3rem;" data-i18n>Budget & Estimation</h3>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;" data-i18n>Estimation globale du séjour</p>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;" data-i18n>Estimation globale et réservations directes</p>
                         
                         <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1.2rem; text-align: center;">
                             <span id="trip-budget-total" style="color: var(--color-gold); font-size: 2rem; font-weight: bold; display: block;">0 €</span>
                             <span style="color: var(--text-muted); font-size: 0.8rem;" data-i18n>Budget Total Estimé</span>
                         </div>
 
-                        <div style="display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.2rem; font-size: 0.88rem; color: var(--text-main);">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span data-i18n>✈️ Transports & Vols</span>
-                                <span id="budget-flights" style="color: var(--color-gold); font-weight: 600;">0 €</span>
+                        <!-- Grille d'estimations alignées avec leurs raccourcis de réservation -->
+                        <div style="display: flex; flex-direction: column; gap: 0.9rem; font-size: 0.88rem; color: var(--text-main);">
+                            
+                            <!-- Item 1 : Vol & Transports -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                                <div>
+                                    <div style="font-weight: 600;" data-i18n>✈️ Transports & Vols</div>
+                                    <span id="budget-flights" style="color: var(--color-gold); font-weight: bold;">0 €</span>
+                                </div>
+                                <a id="res-btn-flights" href="#" target="_blank" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.3rem 0.7rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">
+                                    Google Flights ↗
+                                </a>
                             </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span data-i18n>🏨 Hébergement</span>
-                                <span id="budget-hotel" style="color: var(--color-gold); font-weight: 600;">0 €</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span data-i18n>🍽️ Repas & Activités</span>
-                                <span id="budget-rest" style="color: var(--color-gold); font-weight: 600;">0 €</span>
-                            </div>
-                        </div>
 
-                        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.2rem 0;">
+                            <!-- Item 2 : Hébergement -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                                <div>
+                                    <div style="font-weight: 600;" data-i18n>🏨 Hébergement</div>
+                                    <span id="budget-hotel" style="color: var(--color-gold); font-weight: bold;">0 €</span>
+                                </div>
+                                <div style="display: flex; gap: 5px;">
+                                    <a id="res-btn-booking" href="#" target="_blank" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.3rem 0.6rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">Booking ↗</a>
+                                    <a id="res-btn-airbnb" href="#" target="_blank" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.3rem 0.6rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">Airbnb ↗</a>
+                                </div>
+                            </div>
+
+                            <!-- Item 3 : Repas & Activités -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                                <div>
+                                    <div style="font-weight: 600;" data-i18n>🍽️ Repas & Activités</div>
+                                    <span id="budget-rest" style="color: var(--color-gold); font-weight: bold;">0 €</span>
+                                </div>
+                                <a id="res-btn-gyg" href="#" target="_blank" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.3rem 0.7rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">
+                                    GetYourGuide ↗
+                                </a>
+                            </div>
+
+                            <!-- 💡 4ème ITEM : Location de voiture / Déplacements sur place -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                                <div>
+                                    <div style="font-weight: 600;" data-i18n>🚗 Véhicule & Déplacements</div>
+                                    <span style="color: var(--text-muted); font-size: 0.75rem;">Optionnel</span>
+                                </div>
+                                <a id="res-btn-car" href="#" target="_blank" style="background: rgba(212,175,55,0.1); border: 1px solid var(--color-gold); color: var(--color-gold); padding: 0.3rem 0.7rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">
+                                    Kayak Auto ↗
+                                </a>
+                            </div>
+
+                        </div>
                     </div>
 
+                    <!-- Dépenses réelles individuelles -->
                     <div class="card-box expenses-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
-                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>💸 Budget & Dépenses Réelles</h3>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>Comparatif et suivi du coût du voyage</p>
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>💸 Dépenses Réelles</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>Suivi du budget consommé</p>
 
-                        <!-- Barre de progression comparative -->
                         <div style="margin-bottom: 1.2rem;">
                             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;">
                                 <span style="color: var(--text-muted);"><span data-i18n>Réel</span> : <strong id="expenses-total-spent" style="color: var(--color-gold);">0 €</strong></span>
                                 <span style="color: var(--text-muted);"><span data-i18n>Estimé</span> : <strong id="expenses-target-budget" style="color: var(--text-main);">0 €</strong></span>
                             </div>
-                            
                             <div style="width: 100%; height: 10px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 5px; overflow: hidden;">
-                                <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease, background-color 0.3s ease;"></div>
+                                <div id="expenses-progress-bar" style="width: 0%; height: 100%; background: var(--color-gold); transition: width 0.3s ease;"></div>
                             </div>
                             <div id="budget-status-text" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; text-align: right;" data-i18n>Dans les clous</div>
                         </div>
 
-                        <div id="expenses-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                            <span style="color: var(--text-muted); font-size: 0.8rem;" data-i18n>Aucune dépense enregistrée.</span>
-                        </div>
+                        <div id="expenses-list" style="max-height: 180px; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
 
                         <form id="add-expense-form" style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            <input type="text" id="expense-title-input" data-i18n placeholder="Ex: Restaurant..." style="flex: 2; min-width: 120px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
-                            <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; min-width: 70px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" required>
-                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 0.9rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">+</button>
+                            <input type="text" id="expense-title-input" data-i18n placeholder="Ex: Restaurant..." style="flex: 2; min-width: 120px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <input type="number" step="0.01" id="expense-amount-input" placeholder="€" style="flex: 1; min-width: 70px; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem; border-radius: 4px; font-size: 0.8rem;" required>
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 0.9rem; border-radius: 4px; font-weight: bold; cursor: pointer;">+</button>
                         </form>
                     </div>
 
                 </div>
 
+                <!-- Tricount / Dépenses Partagées -->
                 <div class="card-box shared-expenses-card" style="margin-top: 1.5rem; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                     <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>⚖️ Dépenses partagées</h3>
                     <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1.2rem 0;" data-i18n>Gérez les comptes du groupe et l'équilibre des remboursements</p>
@@ -315,35 +316,50 @@
                                 <option value="" data-i18n>Payé par...</option>
                             </select>
                         </div>
-                        
                         <div>
                             <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;" data-i18n>Partagé entre :</label>
                             <div id="shared-splits-checkboxes" style="display: flex; gap: 0.8rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-main);">
                                 <span style="color: var(--text-muted); font-style: italic;" data-i18n>Ajoutez des participants d'abord.</span>
                             </div>
                         </div>
-
                         <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; align-self: flex-end;" data-i18n>Ajouter la dépense</button>
                     </form>
 
-                    <div id="shared-expenses-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <span style="color: var(--text-muted); font-size: 0.8rem;" data-i18n>Aucune dépense partagée pour le moment.</span>
-                    </div>
+                    <div id="shared-expenses-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
 
                     <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px;">
                         <h4 style="margin: 0 0 0.6rem 0; color: var(--color-gold); font-size: 0.95rem; font-family: 'Playfair Display', serif;" data-i18n>🤝 Équilibre des comptes</h4>
-                        <div id="settlement-results" style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 0.3rem;">
-                            <span style="color: var(--text-muted);" data-i18n>Ajoutez des participants et des dépenses pour calculer les remboursements.</span>
-                        </div>
+                        <div id="settlement-results" style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 0.3rem;"></div>
                     </div>
                 </div>
             </div>
 
+            <!-- 3. ONGLET GALERIE COLLABORATIVE -->
+            <div id="tab-gallery" class="tab-content" style="display: none;">
+                <div class="map-card" style="margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;" data-i18n>📸 Galerie Collaborative</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n>Partagez vos meilleurs souvenirs de voyage.</p>
+                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 2rem; cursor: pointer;" id="gallery-dropzone">
+                        <input type="file" id="gallery-file-input" accept="image/*" multiple style="display: none;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">☁️</div>
+                        <div style="color: var(--color-gold); font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;" data-i18n>Cliquez pour ajouter des photos</div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem;" data-i18n>Sélection multiple autorisée</div>
+                        <div id="gallery-upload-progress" style="display: none; color: var(--color-torii); font-weight: bold; margin-top: 1rem;" data-i18n>⏳ Envoi en cours...</div>
+                    </div>
+                    <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"></div>
+                </div>
+            </div>
+
+            <!-- 4. GRAND ONGLET LOGISTIQUE (RETOURS DE CHECKLIST, MÉTÉO, TRANSFERTS, NOTES & DOCUMENTS) -->
             <div id="tab-logistics" class="tab-content" style="display: none;">
-                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                
+                <!-- Ligne 1 : Checklist & Météo -->
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    
+                    <!-- Checklist -->
                     <div class="checklist-card" style="flex: 1; min-width: 300px; margin-top: 0;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>🎒 Check-list de voyage</h3>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;" data-i18n>À ne pas oublier</p>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>À ne pas oublier</p>
                         <ul class="checklist-items" id="checklist-container"></ul>
                         <form class="checklist-form" id="add-task-form">
                             <input type="text" id="new-task-input" class="checklist-input" data-i18n placeholder="Ajouter un élément..." required>
@@ -351,6 +367,7 @@
                         </form>
                     </div>
 
+                    <!-- Météo -->
                     <div class="card-box weather-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>🌤️ Météo prévue</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" id="weather-subtitle" data-i18n>Prévisions sur place</p>
@@ -359,108 +376,62 @@
                         </div>
                     </div>
 
+                </div>
+
+                <!-- Ligne 2 : Transfert Aéroport & Notes Personnelles -->
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    
+                    <!-- Transfert Aéroport -->
                     <div class="card-box transfer-card" style="flex: 1; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
                         <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;">🚌 Transfert Aéroport</h3>
                         <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;">Recommandé pour rejoindre le centre</p>
-    
+                        
                         <div id="airport-transfer-container" style="display: flex; flex-direction: column; gap: 0.8rem; background: rgba(255, 255, 255, 0.02); padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color);">
-                           <span style="color: var(--text-muted); font-size: 0.85rem;">Aucune donnée de transfert disponible.</span>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Aucune donnée de transfert disponible.</span>
                         </div>
-                        <!-- Bouton de secours vers Google Maps Transit -->
                         <a id="btn-google-transit" href="#" target="_blank" style="display: block; text-align: center; margin-top: 1rem; padding: 0.6rem; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--color-gold); color: var(--color-gold); text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">
                             🗺️ Voir l'itinéraire en direct sur Maps
                         </a>
                     </div>
-                </div>
-            </div>
 
-            <div id="tab-reservations" class="tab-content" style="display: none;">
-                <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
-                    <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;" data-i18n>✈️ Liens de réservation & Partenaires</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n>
-                        Préparez votre voyage en un clic. Les dates et la destination de votre séjour sont automatiquement prises en compte.
-                    </p>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        <a id="res-btn-flights" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem;">✈️</span>
-                            <div>
-                                <div style="font-weight: 600; color: var(--color-gold);">Google Flights</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n>Trouver les meilleurs vols</div>
-                            </div>
-                        </a>
-
-                        <a id="res-btn-booking" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem;">🏨</span>
-                            <div>
-                                <div style="font-weight: 600; color: var(--color-gold);">Booking.com</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n>Hôtels & Hébergements</div>
-                            </div>
-                        </a>
-
-                        <a id="res-btn-airbnb" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem;">🏠</span>
-                            <div>
-                                <div style="font-weight: 600; color: var(--color-gold);">Airbnb</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n>Apparts & Logements insolites</div>
-                            </div>
-                        </a>
-
-                        <a id="res-btn-car" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem;">🚗</span>
-                            <div>
-                                <div style="font-weight: 600; color: var(--color-gold);" data-i18n>Location de voiture</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n>Comparer les loueurs (Kayak)</div>
-                            </div>
-                        </a>
+                    <!-- Notes de réservation personnelles & Liens -->
+                    <div class="card-box" style="flex: 1.5; min-width: 300px; padding: 1.2rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>📋 Notes & Liens personnels</h3>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 1rem 0;" data-i18n>Numéros de vol, codes de confirmation d'hôtel ou liens vers vos billets.</p>
                         
-                        <a id="res-btn-gyg" href="#" target="_blank" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem;">🎟️</span>
-                            <div>
-                                <div style="font-weight: 600; color: var(--color-gold);">GetYourGuide</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n>Activités & Excursions</div>
-                            </div>
-                        </a>
+                        <form id="add-booking-note-form" style="display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap;">
+                            <input type="text" id="booking-title-input" data-i18n placeholder="Ex: Vol AF1234, Code Hôtel..." style="flex: 2; min-width: 150px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 4px; color: var(--text-main); font-size: 0.85rem;" required>
+                            <input type="text" id="booking-link-input" data-i18n placeholder="Lien https://... (optionnel)" style="flex: 2; min-width: 150px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 4px; color: var(--text-main); font-size: 0.85rem;">
+                            <button type="submit" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;" data-i18n>Ajouter</button>
+                        </form>
+
+                        <div id="booking-notes-list" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 180px; overflow-y: auto;"></div>
                     </div>
 
-                    <h3 style="color: var(--color-gold); margin-bottom: 1rem; font-family: 'Playfair Display', serif;" data-i18n>📋 Mes notes de réservation personnelles</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;" data-i18n>Ajoutez ici vos numéros de vol, codes de réservation d'hôtel ou liens directs vers vos billets.</p>
-                    
-                    <form id="add-booking-note-form" style="display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
-                        <input type="text" id="booking-title-input" data-i18n placeholder="Ex : Vol AF1234 - Réservation Hôtel ABC..." style="flex: 2; min-width: 250px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
-                        <input type="text" id="booking-link-input" data-i18n placeholder="Lien (optionnel, ex: https://...)" style="flex: 2; min-width: 200px; background: var(--bg-dark); border: 1px solid var(--border-color); padding: 0.6rem; border-radius: 4px; color: var(--text-main);">
-                        <button type="submit" style="flex: 1; min-width: 100px; background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer;" data-i18n>Ajouter</button>
-                    </form>
-
-                    <div id="booking-notes-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
                 </div>
-            </div>
 
-            <div id="tab-map" class="tab-content" style="display: none;"></div>
-            
-            <div id="tab-documents" class="tab-content" style="display: none;">
-                <div class="map-card" style="margin-bottom: 2rem;">
-                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem;" data-i18n>
-                        🗂️ Portefeuille Documentaire
-                    </h2>
-                    
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n>
-                        Centralise tes billets, réservations et passeports. Ils seront accessibles ici même hors connexion (si déjà ouverts une fois).
-                    </p>
+                <!-- Ligne 3 : Portefeuille de Documents Locaux (PDF / Images) -->
+                <div class="card-box" style="padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <h3 style="color: var(--color-gold); margin: 0 0 0.3rem 0; font-family: 'Playfair Display', serif;" data-i18n>🗂️ Documents & Pass Fichiers</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem;" data-i18n>Stockez vos PDF de réservation et pièces d'identité localement.</p>
 
-                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 1.5rem; border-radius: 8px; text-align: center; margin-bottom: 2rem;">
-                        <form id="upload-doc-form" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                            <input type="file" id="doc-file-input" accept=".pdf, image/png, image/jpeg" required style="color: var(--text-main); font-size: 0.9rem;">
-                            <input type="text" id="doc-title-input" data-i18n placeholder="Nom du document (ex: Billets d'avion)" required style="width: 100%; max-width: 300px; padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px;">
-                            <button type="submit" id="btn-upload-doc" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.6rem 1.5rem; border-radius: 4px; font-weight: bold; cursor: pointer;" data-i18n>
-                                ⬆️ Uploader le document
+                    <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--color-gold); padding: 1.2rem; border-radius: 8px; text-align: center; margin-bottom: 1.5rem;">
+                        <form id="upload-doc-form" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px;">
+                            <input type="file" id="doc-file-input" accept=".pdf, image/png, image/jpeg" required style="color: var(--text-main); font-size: 0.85rem;">
+                            <input type="text" id="doc-title-input" data-i18n placeholder="Nom (ex: Carte d'embarquement)" required style="padding: 0.5rem; background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 4px; font-size: 0.85rem; min-width: 200px;">
+                            <button type="submit" id="btn-upload-doc" style="background: var(--color-gold); color: var(--bg-dark); border: none; padding: 0.5rem 1.2rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;" data-i18n>
+                                ⬆️ Ajouter
                             </button>
                         </form>
                     </div>
 
-                    <div id="documents-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;"></div>
+                    <div id="documents-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;"></div>
                 </div>
+
             </div>
+
+            <div id="tab-map" class="tab-content" style="display: none;"></div>
+
         </div>
     </main>
 
