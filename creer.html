@@ -63,8 +63,8 @@
                 <!-- Panneau déroulant -->
                 <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
                    <button id="btn-install-pwa" class="btn-primary" style="display: none;">
-    📱 Installer l'App
-</button>
+                        📱 Installer l'App
+                    </button>
                     <!-- Option : Thème -->
                     <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <span>🌓</span> <span data-i18n>Changer de thème</span>
@@ -85,14 +85,14 @@
                         <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
                     </button>
                     <button type="button" onclick="selectLanguage('it')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
-</button>
+                        <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
+                    </button>
                     <button type="button" onclick="selectLanguage('de')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
-</button>
+                        <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
+                    </button>
                     <button type="button" onclick="selectLanguage('ja')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
-</button>
+                        <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
+                    </button>
                 </div>
 
                 <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
@@ -257,14 +257,14 @@
     <div id="hidden-places-helper" style="display:none;"></div>
 
     <!-- À placer dans l'interface de chargement (quand on clique sur Créer) -->
-<div id="loading-ad-screen" style="margin-top: 2rem; display: flex; justify-content: center;">
-    <div class="kaido-ad-container" style="width: 300px; height: 250px;">
-        <span class="kaido-ad-badge">Annonce</span>
-        <div class="kaido-ad-placeholder">
-            [ AdMob : Medium Rectangle 300x250 ]
+    <div id="loading-ad-screen" style="margin-top: 2rem; display: flex; justify-content: center;">
+        <div class="kaido-ad-container" style="width: 300px; height: 250px;">
+            <span class="kaido-ad-badge">Annonce</span>
+            <div class="kaido-ad-placeholder">
+                [ AdMob : Medium Rectangle 300x250 ]
+            </div>
         </div>
     </div>
-</div>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtCPxmMm2O7dRTpSw2ZxrhfzggQv7LBU0&libraries=places&v=weekly&loading=async" defer></script>
 
@@ -286,12 +286,12 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            if (btnDictate) btnDictate.style.display = 'none'; // Masquer si non supporté par le navigateur
+            if (btnDictate) btnDictate.style.display = 'none'; 
         } else {
             const recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'fr-FR'; // Langue de dictée par défaut
+            recognition.lang = 'fr-FR'; 
 
             let isRecording = false;
 
@@ -349,7 +349,6 @@
             }
         }
 
-        // Gestion affichage input "Autre" pour le transport sur place
         const otherCheckbox = document.getElementById('transport-onsite-other-checkbox');
         const otherContainer = document.getElementById('transport-other-container');
         if (otherCheckbox && otherContainer) {
@@ -527,13 +526,20 @@
                         return;
                     }
 
+                    // ✨ NOUVEAU : Sécurité de 10 jours max
+                    let finalTotalDays = totalDays;
+                    if (totalDays > 10) {
+                        alert("⚠️ Pour garantir des performances optimales de l'IA, la durée du voyage a été ramenée à 10 jours maximum.");
+                        finalTotalDays = 10;
+                    }
+
                     const response = await fetch(NETLIFY_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             destination: cleanDestination,
                             departure: departure,
-                            totalDays: totalDays,
+                            totalDays: finalTotalDays, // <-- Variable sécurisée utilisée ici
                             descText: desc,
                             transportGetThere: transportGetThere,
                             transportOnSite: transportOnSite,
@@ -572,7 +578,9 @@
                     }));
 
                     const destInfo = await getDestinationInfo(cleanDestination);
-                    const calculatedBudget = calculateSmartBudget(cleanDestination, totalDays, desc, userBudget);
+                    
+                    // <-- Variable sécurisée utilisée ici pour le budget
+                    const calculatedBudget = calculateSmartBudget(cleanDestination, finalTotalDays, desc, userBudget); 
 
                     const newTrip = {
                         id: Date.now(),
