@@ -85,8 +85,85 @@
         .bottom-sheet input, .bottom-sheet select, .bottom-sheet button { 
             width: 100%; box-sizing: border-box; padding: 0.8rem !important; 
         }
+        /* =========================================
+           ANIMATION EN-TÊTE RÉTRACTABLE (COLLAPSING)
+           ========================================= */
+        .kaido-header { transition: background-color 0.3s ease; }
+        
+        #header-logo { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: inline-block;
+        }
+        
+        #header-compact-title { 
+            position: absolute; 
+            opacity: 0; 
+            transform: translateY(20px); 
+            font-family: 'Playfair Display', serif; 
+            color: var(--color-gold); 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            white-space: nowrap; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Classes ajoutées dynamiquement via JavaScript lors du scroll */
+        .header-scrolled #header-logo { 
+            opacity: 0; 
+            transform: translateY(-20px); 
+            pointer-events: none; 
+        }
+        
+        .header-scrolled #header-compact-title { 
+            opacity: 1; 
+            transform: translateY(0); 
+            pointer-events: auto; 
+        }
     </style>
 </head>
+    <!-- SCRIPT DE L'EN-TÊTE RÉTRACTABLE -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sentinel = document.getElementById('scroll-sentinel');
+            const header = document.querySelector('.kaido-header');
+            const compactTitle = document.getElementById('header-compact-title');
+            const mainTitle = document.getElementById('trip-main-title');
+
+            if (sentinel && header && compactTitle && mainTitle) {
+                // On crée le détective qui surveille notre sentinelle
+                const observer = new IntersectionObserver((entries) => {
+                    // Si la sentinelle sort de l'écran par le haut (on scrolle vers le bas)
+                    if (!entries[0].isIntersecting) {
+                        header.classList.add('header-scrolled');
+                        
+                        // On clone magiquement le gros titre (avec son emoji) dans le petit titre
+                        compactTitle.innerHTML = mainTitle.innerHTML;
+                        
+                        // Petite astuce CSS pour réduire la taille de l'emoji drapeau dans l'en-tête
+                        const flagSpan = compactTitle.querySelector('span');
+                        if (flagSpan) {
+                            flagSpan.style.fontSize = '1.2rem';
+                            flagSpan.style.marginRight = '8px';
+                        }
+                    } 
+                    // Si on remonte tout en haut
+                    else {
+                        header.classList.remove('header-scrolled');
+                    }
+                }, { 
+                    threshold: 0, 
+                    // On déclenche l'animation 50px avant que le titre principal ne disparaisse totalement
+                    rootMargin: "-50px 0px 0px 0px" 
+                });
+
+                // On lance la surveillance
+                observer.observe(sentinel);
+            }
+        });
+    </script>
 <body>
 
     <!-- HEADER UNIFIÉ KAIDO -->
@@ -96,11 +173,12 @@
                 <a href="index.html" class="header-brand-text">KAIDO</a>
             </div>
 
-            <!-- CENTRE : Logo -->
-            <div class="header-center">
-                <a href="index.html">
+            <!-- CENTRE : Logo & Titre Compact -->
+            <div class="header-center" style="position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; overflow: hidden;">
+                <a href="index.html" id="header-logo">
                     <img src="image/kaido_7.3.png" alt="Logo Kaido" style="height: 50px; width: auto;">
                 </a>
+                <span id="header-compact-title"></span>
             </div>
 
             <!-- DROITE : Menu Options & Profil -->
@@ -202,7 +280,9 @@
             </script>
         </header>
 
-    <main class="container" style="margin-top: 1.5rem;">
+    <main class="container" style="margin-top: 1.5rem; position: relative;">
+        <!-- SENTINELLE POUR LE SCROLL -->
+        <div id="scroll-sentinel" style="position: absolute; top: 0; height: 1px; width: 100%; pointer-events: none;"></div>
 
         <!-- EN-TÊTE ÉPURÉ DU VOYAGE -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem;">
