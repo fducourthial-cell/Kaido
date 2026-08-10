@@ -53,27 +53,23 @@
                 </a>
             </div>
 
-            <!-- DROITE : Menu Options & Profil (Aéré avec gap: 12px) -->
+            <!-- DROITE : Menu Options & Profil -->
             <div class="header-right" style="display: flex; align-items: center; position: relative; gap: 12px;">
                 
-                <!-- Bouton Principal du Menu (Burger / Options) -->
                 <button id="options-menu-btn" type="button" title="Paramètres" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--color-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
                     ⚙️
                 </button>
 
-                <!-- Panneau déroulant -->
                 <div id="options-dropdown" style="display: none; position: absolute; right: 0; top: 50px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; min-width: 160px; flex-direction: column; gap: 8px;">
                    <button id="btn-install-pwa" class="btn-primary" style="display: none;">
-    📱 Installer l'App
-</button>
-                    <!-- Option : Thème -->
+                        📱 Installer l'App
+                    </button>
                     <button id="global-theme-toggle" type="button" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
                         <span>🌓</span> <span data-i18n>Changer de thème</span>
                     </button>
 
                     <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2px 0;">
 
-                    <!-- Options : Langues avec drapeaux -->
                     <div style="font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;" data-i18n>Langue</div>
                     
                     <button type="button" onclick="selectLanguage('fr')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
@@ -86,14 +82,14 @@
                         <img src="https://flagcdn.com/20x15/es.png" width="16" alt="ES"> Español
                     </button>
                     <button type="button" onclick="selectLanguage('it')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
-</button>
+                        <img src="https://flagcdn.com/20x15/it.png" width="16" alt="IT"> Italiano
+                    </button>
                     <button type="button" onclick="selectLanguage('de')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
-</button>
+                        <img src="https://flagcdn.com/20x15/de.png" width="16" alt="DE"> Deutsch
+                    </button>
                     <button type="button" onclick="selectLanguage('ja')" style="background: none; border: none; color: var(--text-main); text-align: left; padding: 6px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; width: 100%;">
-    <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
-</button>
+                        <img src="https://flagcdn.com/20x15/jp.png" width="16" alt="JP"> 日本語
+                    </button>
                 </div>
 
                 <button id="user-profile-link" class="header-profile-btn" title="Mon Profil">
@@ -102,7 +98,6 @@
             </div>
 
             <script>
-                // Logique d'ouverture/fermeture du menu déroulant au clic
                 const menuBtn = document.getElementById('options-menu-btn');
                 const dropdown = document.getElementById('options-dropdown');
 
@@ -113,16 +108,14 @@
                     });
 
                     dropdown.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Empêche la fermeture si on clique à l'intérieur
+                        e.stopPropagation(); 
                     });
                 }
 
-                // Fermer le menu si on clique ailleurs sur la page
                 window.addEventListener('click', () => {
                     if (dropdown) dropdown.style.display = 'none';
                 });
 
-                // Fonction sécurisée pour changer la langue et fermer le menu
                 function selectLanguage(lang) {
                     if (typeof changeLanguage === 'function') {
                         changeLanguage(lang);
@@ -142,16 +135,18 @@
                 <span class="dashboard-subtitle-jp">旅 — Korekara no tabi</span>
             </h1>
         </div>
-        <!-- Carte Publicitaire Native (Index) -->
-<div class="card-box kaido-ad-container" style="min-height: 150px; margin-top: 1rem;">
-    <span class="kaido-ad-badge">Sponsorisé</span>
-    <div class="kaido-ad-placeholder">
-        [ AdMob : Annonce Native ]
-    </div>
-</div>
 
         <!-- GRILLE DE VOYAGES -->
         <section class="dashboard-grid" id="trips-grid">
+            
+            <!-- Carte Publicitaire Native Intégrée à la grille -->
+            <div class="trip-card kaido-ad-container" style="min-height: 280px; justify-content: center; align-items: center;">
+                <span class="kaido-ad-badge">Sponsorisé</span>
+                <div class="kaido-ad-placeholder">
+                    [ AdMob : Annonce Native ]
+                </div>
+            </div>
+
             <a href="creer.html" class="create-trip-zone">
                 <div class="plus-icon">+</div>
                 <h3 data-i18n>Tracer une nouvelle route</h3>
@@ -193,7 +188,6 @@
                     const cityName = trip.destination || trip.title || 'Destination';
                     const finalImage = trip.image || 'https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
-                    // --- AJOUT DU BADGE DE STATUT ---
                     const isCompleted = trip.status === 'completed' || (trip.dateEnd && new Date(trip.dateEnd) < new Date());
                     const statusBadge = isCompleted ? `<span style="background: rgba(46, 204, 113, 0.15); color: #2ecc71; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">✅ Aventure accomplie</span>` : `<span style="color: var(--color-gold); font-size: 0.75rem;">En cours</span>`;
 
@@ -211,7 +205,6 @@
                         displayBudget = (daysCount * 150) + 200;
                     }
 
-                    // ✨ CORRECTION ICI : On retire le onclick du lien de l'image
                     card.innerHTML = `
                        <a href="voyage.html" class="trip-banner-link" style="text-decoration: none; display: block;">
                         <div class="trip-banner" style="background-image: url('${finalImage}');">
@@ -237,7 +230,6 @@
                         </div>
                     `;
 
-                    // ✨ CORRECTION ICI : On gère le clic sur l'image ET sur le bouton de la même façon
                     const viewLink = card.querySelector('.btn-view');
                     const bannerLink = card.querySelector('.trip-banner-link');
                     
@@ -255,7 +247,6 @@
                         grid.appendChild(card);
                     }
 
-                    // Forcer la traduction du bouton ajouté dynamiquement
                     if (typeof applyGlobalLanguage === 'function') {
                         const savedLang = localStorage.getItem('kaido_global_lang') || 'fr';
                         applyGlobalLanguage(savedLang);
@@ -386,9 +377,6 @@
             await renderTrips();
         }
 
-        // ==========================================================================
-        // GESTION DU BOUTON PWA (SÉCURISÉ DANS LE DOMContentLoaded)
-        // ==========================================================================
         let deferredPrompt;
         const installBtn = document.getElementById('btn-install-pwa');
 
@@ -423,26 +411,22 @@
     });
     </script>
     <footer class="kaido-footer">
-    <!-- Citation inspirante -->
-    <div class="footer-quote">
-        « Fixe ton cœur sur le voyage, pas sur la destination. »
-    </div>
+        <div class="footer-quote">
+            « Fixe ton cœur sur le voyage, pas sur la destination. »
+        </div>
 
-    <!-- Liens utiles du Footer -->
-    <div class="footer-links">
-        <a href="kiroku.html" class="footer-link">
-            <span>🏆</span> <span data-i18n>Statistiques & Rang</span>
-        </a>
-        <a href="creer.html" class="footer-link">
-            <span>⛩️</span> <span data-i18n>Nouvelle route</span>
-        </a>
-        <!-- Tu pourras ajouter d'autres liens ici si besoin -->
-    </div>
+        <div class="footer-links">
+            <a href="kiroku.html" class="footer-link">
+                <span>🏆</span> <span data-i18n>Statistiques & Rang</span>
+            </a>
+            <a href="creer.html" class="footer-link">
+                <span>⛩️</span> <span data-i18n>Nouvelle route</span>
+            </a>
+        </div>
 
-    <!-- Copyright / Version -->
-    <div style="font-size: 0.8rem; opacity: 0.7;">
-        © 2026 Kaido — Tous droits réservés. Conçu pour les voyageurs.
-    </div>
-</footer>
+        <div style="font-size: 0.8rem; opacity: 0.7;">
+            © 2026 Kaido — Tous droits réservés. Conçu pour les voyageurs.
+        </div>
+    </footer>
 </body>
 </html>
